@@ -87,4 +87,165 @@ app.decorate("authenticate", async (request, reply) => {
 	}
 });
 
+// API: Register
+app.post('/api/register', async (req, reply) => {
+	const { username, password } = req.body;
+	const hashed = await bcrypt.hash(password, 10);
+
+	try {
+		const userId = await new Promise((resolve, reject) => {
+			db.run(
+				`INSERT INTO users (username, password) VALUES (?, ?)`,
+				[username, hashed],
+				function (err) {
+					if (err) return reject(err);
+					resolve(this.lastID); // grab new user ID
+				}
+			);
+		});
+
+		const user = { id: this.lastID, username };
+		const accessToken = generateAccessToken(user);
+		const refreshToken = generateRefreshToken(user);
+		const csrfToken = createCsrfToken();
+
+		return reply
+			.setCookie('token', accessToken, {
+				httpOnly: true,
+				secure: false, // set to true in production with HTTPS
+				sameSite: 'Strict',
+				path: '/',
+				maxAge: 60 * 15 // 15 min
+			})
+			.setCookie('refreshToken', refreshToken, {
+				httpOnly: true,
+				sameSite: 'Strict',
+				path: '/',
+				maxAge: 60 * 60 * 24 * 7 // 7 days
+			})
+			.setCookie('csrf_token', csrfToken, {
+				httpOnly: false,
+				sameSite: 'Strict',
+				path: '/',
+				maxAge: 60 * 15
+			})
+			.send({ success: true });
+		// return reply.send({ token });
+
+	} catch (err) {
+		console.error('Register error:', err);
+		return reply.code(400).send({ error: 'User already exists or error occurred' });
+	}
+});
+
+// API: Login
+app.post('/api/login', async (req, reply) => {
+	const { username, password } = req.body;
+
+	try {
+		const user = await new Promise((resolve, reject) => {
+			db.get(`SELECT * FROM users WHERE username = ?`, [username], (err, row) => {
+				if (err) return reject(err);
+				resolve(row);
+			});
+		});
+
+		if (!user) return reply.code(401).send({ error: 'Invalid credentials' });
+
+		const valid = await bcrypt.compare(password, user.password);
+		if (!valid) return reply.code(401).send({ error: 'Invalid credentials' });
+
+		const accessToken = generateAccessToken(user);
+		const refreshToken = generateRefreshToken(user);
+		const csrfToken = createCsrfToken();
+
+		return reply
+			.setCookie('token', accessToken, {
+				httpOnly: true,
+				secure: false, // set to true in production with HTTPS
+				sameSite: 'Strict',
+				path: '/',
+				maxAge: 60 * 15 // 15 min
+			})
+			.setCookie('refreshToken', refreshToken, {
+				httpOnly: true,
+				sameSite: 'Strict',
+				path: '/',
+				maxAge: 60 * 60 * 24 * 7 // 7 days
+			})
+			.setCookie('csrf_token', csrfToken, {
+				httpOnly: false,
+				sameSite: 'Strict',
+				path: '/',
+				maxAge: 60 * 15
+			})
+			.send({ success: true });
+		// return reply.send({ token });
+
+	} catch (err) {
+		console.error('Login error:', err);
+		return reply.code(500).send({ error: 'Internal server error' });
+	}
+});
+
+// API: Get current user info
+app.get('/api/user', { preHandler: [app.authenticate] }, (req, reply) => {
+	reply.send({ user: req.user });
+});
+
+// API: Get user profile
+app.get('/api/profile', { preHandler: [app.authenticate] }, (req, reply) => {
+	db.get(`SELECT username, bio FROM users WHERE id = ?`, [req.user.id], (err, user) => {
+		if (err || !user) return reply.code(404).send({ error: 'Not found' });
+		reply.send({ profile: user });
+	});
+});
+
+// SPA fallback
+app.setNotFoundHandler((req, reply) => {
+	if (req.raw.method === 'GET' && !req.raw.url.startsWith('/api')) {
+		return reply.type('text/html').send(fs.readFileSync(path.join(__dirname, 'public/index.html')));
+	}
+	reply.status(404).send({ error: 'Not found' });
+});
+
+app.post('/api/refresh', async (req, reply) => {
+	const refreshToken = req.cookies.refreshToken;
+	if (!refreshToken) return reply.code(401).send({ error: 'No refresh token' });
+
+	try {
+		const payload = jwt.verify(refreshToken, 'refreshsecret');
+		const accessToken = generateAccessToken(payload);
+		const csrfToken = createCsrfToken();
+
+		reply
+			.setCookie('token', accessToken, {
+				httpOnly: true,
+				sameSite: 'Strict',
+				path: '/',
+				maxAge: 60 * 15
+			})
+			.setCookie('csrf_token', csrfToken, {
+				httpOnly: false,
+				sameSite: 'Strict',
+				path: '/',
+				maxAge: 60 * 15
+			})
+			.send({ success: true });
+	} catch (err) {
+		return reply.code(401).send({ error: 'Invalid or expired refresh token' });
+	}
+});
+
+// API: Logout
+app.post('/api/logout', {
+	preHandler: [app.authenticate, checkCsrf]
+}, (req, reply) => {
+	reply
+		.clearCookie('token', { path: '/' })
+		.clearCookie('refreshToken', { path: '/' })
+		.clearCookie('csrf_token', { path: '/' })
+		.send({ success: true });
+});
+
 app.listen({ port: 4242 })
