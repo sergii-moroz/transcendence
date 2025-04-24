@@ -104,7 +104,7 @@ app.post('/api/register', async (req, reply) => {
 			);
 		});
 
-		const user = { id: this.lastID, username };
+		const user = { id: this.lastID, username }; //I think lastID is somehow wrong
 		const accessToken = generateAccessToken(user);
 		const refreshToken = generateRefreshToken(user);
 		const csrfToken = createCsrfToken();
@@ -190,7 +190,7 @@ app.post('/api/login', async (req, reply) => {
 
 // API: Get current user info
 app.get('/api/user', { preHandler: [app.authenticate] }, (req, reply) => {
-	reply.send({ user: req.user });
+	reply.send(req.user);
 });
 
 // API: Get user profile
