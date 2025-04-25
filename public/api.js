@@ -1,109 +1,109 @@
 export class Api {
 	constructor() {
-	  this.baseUrl = '/api';
-	  this.refreshInterval = 13 * 60 * 1000; // 13 minutes
-	  this.refreshIntervalId = null;
+		this.baseUrl = '/api';
+		this.refreshInterval = 13 * 60 * 1000; // 13 minutes
+		this.refreshIntervalId = null;
 	}
-  
+
 	async request(endpoint, options = {}) {
-	  const url = `${this.baseUrl}${endpoint}`;
-	  let res = await fetch(url, {
-		...options,
-		credentials: 'include',
-	  });
-  
-	  if (res.status === 401) {
-		await this.refreshToken();
-		res = await fetch(url, options);
-	  }
-  
-	  return res;
+		const url = `${this.baseUrl}${endpoint}`;
+		let res = await fetch(url, {
+			...options,
+			credentials: 'include',
+		});
+
+		if (res.status === 401) {
+			await this.refreshToken();
+			res = await fetch(url, options);
+		}
+
+		return res;
 	}
-  
+
 	async refreshToken() {
-	  const csrf = this.getCsrfToken();
-	  const res = await fetch(`${this.baseUrl}/refresh`, {
-		method: 'POST',
-		headers: {
-		  'X-CSRF-Token': csrf,
-		},
-		credentials: 'include',
-	  });
-  
-	  if (!res.ok) {
-		console.error('Auto-refresh failed');
-	  }
+		const res = await fetch(`${this.baseUrl}/refresh`, {
+			method: 'POST',
+			headers: {
+				'X-CSRF-Token': this.getCsrfToken(),
+			},
+			credentials: 'include',
+		});
+
+		if (!res.ok) {
+			console.error('Auto-refresh failed');
+		}
 	}
-  
+
 	getCsrfToken() {
-	  return document.cookie
+		return document.cookie
 		.split('; ')
 		.find(row => row.startsWith('csrf_token='))
 		?.split('=')[1];
 	}
-  
+
+
 	startAutoRefresh() {
-	  this.refreshIntervalId = setInterval(async () => {
-		try {
-			const res = await this.refreshToken();
-			if (!res.ok) {
-				console.warn('Failed to refresh token');
+		this.refreshIntervalId = setInterval(async () => {
+			try {
+				const res = await this.refreshToken();
+				if (!res.ok) {
+					console.warn('Failed to refresh token');
+				}
+			} catch (err) {
+				console.error('Auto-refresh failed:', err);
+				this.stopAutoRefresh();
 			}
-		} catch (err) {
-		  console.error('Auto-refresh failed:', err);
-		  this.stopAutoRefresh();
-		}
-	  }, this.refreshInterval);
+		}, this.refreshInterval);
 	}
-  
+
 	stopAutoRefresh() {
-	  if (this.refreshIntervalId) {
-		clearInterval(this.refreshIntervalId);
-	  }
+		if (this.refreshIntervalId) {
+			clearInterval(this.refreshIntervalId);
+		}
 	}
-  
+
 	async login(username, password) {
-	  const res = await this.request('/login', {
-		method: 'POST',
-		headers: {
-		  'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({ username, password }),
-	  });
-  
-	  if (res.ok) {
+		const res = await this.request('/login', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ username, password }),
+		});
+
+		if (res.ok) {
 		this.startAutoRefresh();
-	  }
-	  return res;
+		}
+		return res;
 	}
-  
+
 	async register(username, password) {
-	  return this.request('/register', {
-		method: 'POST',
-		headers: {
-		  'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({ username, password }),
-	  });
+		return this.request('/register', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ username, password }),
+		});
 	}
-  
+
 	async logout() {
-	  const res = await this.request('/logout', {
-		method: 'POST',
-		headers: {
-		  'X-CSRF-Token': this.getCsrfToken(),
-		},
-	  });
-	  this.stopAutoRefresh();
-	  return res;
+		const res = await this.request('/logout', {
+			method: 'POST',
+			headers: {
+				'X-CSRF-Token': this.getCsrfToken(),
+			},
+		});
+		this.stopAutoRefresh();
+		return res;
 	}
-  
+
 	async getUser() {
-	  return this.request('/user');
+		return this.request('/user');
 	}
-  
+
 	async getProfile() {
-	  return this.request('/profile');
+		return this.request('/profile');
 	}
 
 	async checkAuth() {
@@ -115,8 +115,7 @@ export class Api {
 		}
 		return null;
 	}
-  }
-
+}
 
 // TODO:
 // better error handling
