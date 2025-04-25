@@ -13,7 +13,3 @@ node server.js
 - basic JWT (JavaWebToken) authentication
 - access token expires after 15 min
 - CSRF protection
-
-## Known issues
-
-- try to refresh access token but finished with "Failed to refresh token"

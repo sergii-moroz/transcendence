@@ -104,7 +104,7 @@ app.post('/api/register', async (req, reply) => {
 			);
 		});
 
-		const user = { id: this.lastID, username }; //I think lastID is somehow wrong
+		const user = { id: userId, username };
 		const accessToken = generateAccessToken(user);
 		const refreshToken = generateRefreshToken(user);
 		const csrfToken = createCsrfToken();
