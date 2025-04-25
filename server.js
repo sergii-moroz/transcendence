@@ -10,6 +10,7 @@ import crypto from 'crypto'
 import path from 'path'
 import fs from 'fs'
 
+const REFRESH_SECRET = 'refresh-secret';
 const DB_FILE = './db.sqlite'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,7 +30,7 @@ function generateAccessToken(user) {
 }
 
 function generateRefreshToken(user) {
-	return jwt.sign({ id: user.id, username: user.username }, 'refresh-secret', { expiresIn: '7d' });
+	return jwt.sign({ id: user.id, username: user.username }, REFRESH_SECRET, { expiresIn: '7d' });
 }
 
 function createCsrfToken() {
@@ -150,7 +151,7 @@ app.post('/api/login', async (req, reply) => {
 			});
 		});
 
-		if (!user) return reply.code(401).send({ error: 'Invalid credentials' });
+		if (!user) return reply.code(401).send({ error: `User ${username} is not found` });
 
 		const valid = await bcrypt.compare(password, user.password);
 		if (!valid) return reply.code(401).send({ error: 'Invalid credentials' });
@@ -180,7 +181,6 @@ app.post('/api/login', async (req, reply) => {
 				maxAge: 60 * 15
 			})
 			.send({ success: true });
-		// return reply.send({ token });
 
 	} catch (err) {
 		console.error('Login error:', err);
@@ -214,7 +214,7 @@ app.post('/api/refresh', async (req, reply) => {
 	if (!refreshToken) return reply.code(401).send({ error: 'No refresh token' });
 
 	try {
-		const payload = jwt.verify(refreshToken, 'refreshsecret');
+		const payload = jwt.verify(refreshToken, REFRESH_SECRET);
 		const accessToken = generateAccessToken(payload);
 		const csrfToken = createCsrfToken();
 

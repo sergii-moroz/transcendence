@@ -21,7 +21,7 @@ export class Api {
 	}
 
 	async refreshToken() {
-		const res = await fetch(`${this.baseUrl}/refresh`, {
+		return await fetch(`${this.baseUrl}/refresh`, {
 			method: 'POST',
 			headers: {
 				'X-CSRF-Token': this.getCsrfToken(),
@@ -29,9 +29,9 @@ export class Api {
 			credentials: 'include',
 		});
 
-		if (!res.ok) {
-			console.error('Auto-refresh failed');
-		}
+		// if (!res.ok) {
+		// 	console.error('Auto-refresh failed');
+		// }
 	}
 
 	getCsrfToken() {
