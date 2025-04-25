@@ -1,4 +1,5 @@
 import fastifyStatic from '@fastify/static';
+import { Server as IOServer } from 'socket.io';
 import fastifyCookie from '@fastify/cookie';
 import fastifyJwt from '@fastify/jwt';
 import { fileURLToPath } from 'url';
@@ -22,6 +23,29 @@ app.register(fastifyCookie, {
 app.register(fastifyJwt, {
 	secret: 'supersecret-key-supersecret-key!'
 })
+
+
+const io = new IOServer(app.server, {
+	cors: {
+		origin: 'http://localhost:4242',
+		credentials: true
+	},
+});
+
+app.decorate('io', io);
+
+io.on('connection', socket => {
+	console.log('Socket connected:', socket.id);
+
+	socket.on('joinRoom', (roomName) => {
+		socket.join(roomName);
+		console.log(`${socket.id} joined room: ${roomName}`);
+	});
+
+	socket.emit('joinedRoom', `You have joined room: ${roomName}`);
+});
+
+app.get('/ping', async () => 'pong');
 
 // === HELPERS ===
 function generateAccessToken(user) {
@@ -60,7 +84,7 @@ if (!fs.existsSync(DB_FILE)) {
 		db.run(`
 			CREATE TABLE users (
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				username TEXT UNIQUE NOT NULL,
+				username TEXT NOT NULL,
 				password TEXT NOT NULL,
 				bio TEXT DEFAULT 'Hello, I am new here!'
 			)
@@ -104,7 +128,7 @@ app.post('/api/register', async (req, reply) => {
 			);
 		});
 
-		const user = { id: this.lastID, username };
+		const user = { id: userId, username };
 		const accessToken = generateAccessToken(user);
 		const refreshToken = generateRefreshToken(user);
 		const csrfToken = createCsrfToken();
@@ -248,4 +272,9 @@ app.post('/api/logout', {
 		.send({ success: true });
 });
 
-app.listen({ port: 4242 })
+app.ready().then(() => {
+	app.listen({ port: 4242 }, err => {
+		if (err) throw err;
+		console.log('HTTP + Socket.IO server listening on port 4242');
+	});
+});

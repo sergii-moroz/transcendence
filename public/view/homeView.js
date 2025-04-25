@@ -5,6 +5,7 @@ export const renderHome = (username) => (
 		<nav>
 			<a href="/about" id="about-link">About</a> |
 			<a href="/profile" id="profile-link">Profile</a> |
+			<button id="join">Join a Room</button>
 			<button id="logout">Logout</button>
 		</nav>
 	`

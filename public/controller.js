@@ -12,6 +12,7 @@ import { renderAbout } from "./view/aboutView.js"
 import { renderLogin } from "./view/loginView.js"
 import { renderProfile } from "./view/profileView.js"
 import { renderRegister } from "./view/registerView.js"
+import { renderWaitingRoom } from "./view/waitingRoomView.js"
 
 const REFRESH_INTERVAL = 13 * 60 * 1000; // 13 minutes
 let refreshIntervalId;
@@ -24,6 +25,7 @@ export const render = (path) => {
 	if (path === '/home') return showHome();
 	if (path === '/about') return showAbout();
 	if (path === '/profile') return showProfile();
+	if (path === '/waiting-room') return showWaitingRoom();
 	app.innerHTML = `<h2>404 Not Found</h2>`;
 }
 
@@ -131,11 +133,11 @@ function showRegister() {
 
 async function showHome() {
 	const user = await checkAuth();
-
+	
 	if (!user) return navigate('/login');
-
+	
 	app.innerHTML = renderHome(user.user.username) // why so much user???
-
+	
 	document.getElementById('about-link').onclick = (e) => {
 		e.preventDefault()
 		navigate('/about')
@@ -143,6 +145,10 @@ async function showHome() {
 	document.getElementById('profile-link').onclick = (e) => {
 		e.preventDefault()
 		navigate('/profile')
+	}
+	document.getElementById('join').onclick = (e) => {
+		e.preventDefault();
+		navigate('/waiting-room')
 	}
 	document.getElementById('logout').onclick = async () => {
 		const csrf = getCsrfToken()
@@ -155,6 +161,28 @@ async function showHome() {
 
 function showAbout() {
 	app.innerHTML = renderAbout()
+	document.getElementById('home-link').onclick = (e) => {
+		e.preventDefault()
+		navigate('/home')
+	}
+}
+
+function showWaitingRoom() {
+	
+	// Generate or define a custom room name (this can be dynamic, e.g., game ID, chat room ID, etc.)
+	const customRoomName = 'room-' + Math.floor(Math.random() * 1000); // Example of generating a room name dynamically
+	app.innerHTML = renderWaitingRoom(customRoomName);
+	const socket = io('http://localhost:4242');
+	
+		// Emit the custom room name to the server
+	socket.emit('joinRoom', customRoomName); 
+	
+		// Listen for confirmation that the user has joined the room
+	socket.on('joinedRoom', (message) => {
+		alert(message);
+		console.log(message);
+	});
+
 	document.getElementById('home-link').onclick = (e) => {
 		e.preventDefault()
 		navigate('/home')
