@@ -167,26 +167,34 @@ function showAbout() {
 	}
 }
 
-function showWaitingRoom() {
-	
-	// Generate or define a custom room name (this can be dynamic, e.g., game ID, chat room ID, etc.)
-	const customRoomName = 'room-' + Math.floor(Math.random() * 1000); // Example of generating a room name dynamically
-	app.innerHTML = renderWaitingRoom(customRoomName);
+async function showWaitingRoom() {
+	app.innerHTML = renderWaitingRoom();
+	const user = await checkAuth();
 	const socket = io('http://localhost:4242');
+
+	socket.emit('joinRoom', user.user.username);
 	
-		// Emit the custom room name to the server
-	socket.emit('joinRoom', customRoomName); 
-	
-		// Listen for confirmation that the user has joined the room
 	socket.on('joinedRoom', (message) => {
 		alert(message);
 		console.log(message);
 	});
 
+	socket.on('redirectingToGame', (gameRoomId) => {
+		// To be implemented
+		console.log(`Redirecting to game room: ${gameRoomId}`);
+	});
+
 	document.getElementById('home-link').onclick = (e) => {
-		e.preventDefault()
-		navigate('/home')
+		e.preventDefault();
+		socket.disconnect();
+		console.log('Disconnecting from socket...');
+		navigate('/home');
 	}
+	window.addEventListener('beforeunload', () => {
+		e.preventDefault();
+		socket.disconnect();
+		console.log('Disconnected from socket due to page unload');
+	});
 }
 
 async function showProfile() {

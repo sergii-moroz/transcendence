@@ -32,17 +32,39 @@ const io = new IOServer(app.server, {
 	},
 });
 
+let waitingRoomUsers = [];
+
 app.decorate('io', io);
 
 io.on('connection', socket => {
+	const roomName = 'waiting-room';
 	console.log('Socket connected:', socket.id);
 
-	socket.on('joinRoom', (roomName) => {
+	socket.on('joinRoom', (userName) => {
 		socket.join(roomName);
-		console.log(`${socket.id} joined room: ${roomName}`);
+		console.log(`${userName}, id:${socket.id} joined room: ${roomName}`);
+		const existingUserIndex = waitingRoomUsers.findIndex(user => user[0] === userName);
+		if(existingUserIndex !== -1) {
+			waitingRoomUsers[existingUserIndex][1] = socket.id;
+			console.log(`Updated user ${userName} with new socket ID: ${socket.id}`);
+		}
+		else {
+			waitingRoomUsers.push([userName, socket.id]);
+		}
+		console.log('Users in waiting room:', waitingRoomUsers);
+		socket.emit('joinedRoom', `You have joined room: ${roomName}`);
 	});
 
-	socket.emit('joinedRoom', `You have joined room: ${roomName}`);
+	if(waitingRoomUsers.length > 2) {
+		// shift first two users to the game room and create it's own socket for
+		// user instructions
+	}
+
+	socket.on('disconnect', () => {
+		console.log('Socket disconnected:', socket.id);
+		waitingRoomUsers = waitingRoomUsers.filter(user => user[1] !== socket.id);
+	});
+
 });
 
 app.get('/ping', async () => 'pong');

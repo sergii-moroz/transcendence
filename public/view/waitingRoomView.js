@@ -1,8 +1,7 @@
-export const renderWaitingRoom = (customRoomName) => (
+export const renderWaitingRoom = (usersWaiting) => (
 	`
 	<h2>Waiting for other players...</h2>
-	<p>Room ID: ${customRoomName}</p>
 	<p id="waiting-message">Waiting for other players to join...</p>
-	<a href="/home" id="home-link">Home</button>
+	<button id="home-link">Home</button>
 	`
 )
