@@ -9,10 +9,6 @@ export class WaitingView extends View {
 		`;
 	}
 
-	// async prehandler() {
-		// return (this.router.currentUser ? this.router.currentUser.username : null);
-	// }
-
 	mount = async (parent) => {
 		parent.innerHTML = '';
 
@@ -28,12 +24,12 @@ export class WaitingView extends View {
 	handleSocket = () => {
 		const socket = new WebSocket('ws://localhost:4242/matchmaking')
 	
-		socket.addEventListener('open', () => {
+		this.addEventListener(socket, 'open', () => {
 			const username = this.router.currentUser.username;
 			socket.send(JSON.stringify({ type: 'joinRoom', username }));
 		});
 
-		socket.addEventListener('message', (event) => {
+		this.addEventListener(socket, 'message', (event) => {
 			const data = JSON.parse(event.data);
 
 			if (data.type === 'joinedRoom') {
@@ -48,12 +44,11 @@ export class WaitingView extends View {
 			}
 		});
 		
-		
-		socket.addEventListener('close', () => {
+		this.addEventListener(socket, 'close', () => {
 			console.log('WebSocket connection closed.');
 		});
 
-		socket.addEventListener('error', (err) => {
+		this.addEventListener(socket, 'error', () => {
 			console.error('WebSocket error:', err);
 		});
 
@@ -74,7 +69,7 @@ export class WaitingView extends View {
 
 		this.addEventListener(window, 'beforeunload', (e) => {
 			e.preventDefault();
-			if (socket && socket.readyState === WebSocket.OPEN) {
+			if (socket && socket.readyState === WebSocket.OPEN) { //this condition doesnt get triggered
 				socket.close();
 				console.log('Disconnected from socket due to page unload');
 			}
