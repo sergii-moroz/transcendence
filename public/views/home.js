@@ -9,6 +9,7 @@ export class HomeView extends View {
 				<a href="/about" data-link>About</a> |
 				<a href="/login" data-link>login</a> |
 				<a href="/profile" data-link>Profile</a> |
+				<button id="join">JoinRoom</button>
 				<button id="logout">Logout</button>
 			</nav>
 		`;
@@ -21,10 +22,15 @@ export class HomeView extends View {
 	setupEventListeners() {
 		const form = document.getElementById('logout');
 		const logoutHandler = async () => {
-			await this.api.logout()
+			await this.api.logout();
 			this.router.currentUser = null;
 			return this.router.navigateTo('/login');
 		}
 		this.addEventListener(form, 'click', logoutHandler);
+
+		this.addEventListener(document.getElementById('join'), 'click', () => {
+			this.element.preventDefault();
+			this.router.navigateTo('/waiting-room');
+		});
 	};
 }

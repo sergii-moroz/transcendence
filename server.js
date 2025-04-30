@@ -1,5 +1,5 @@
 import fastifyStatic from '@fastify/static';
-import { Server as IOServer } from 'socket.io';
+import fastifyWebsocket from '@fastify/websocket'
 import fastifyCookie from '@fastify/cookie';
 import fastifyJwt from '@fastify/jwt';
 import { fileURLToPath } from 'url';
@@ -24,51 +24,40 @@ app.register(fastifyCookie, {
 app.register(fastifyJwt, {
 	secret: 'supersecret-key-supersecret-key!'
 })
+app.register(fastifyWebsocket)
 
+let waitingRoomConns = new Map();
+const waitingRoomName = 'waiting-room';
 
-const io = new IOServer(app.server, {
-	cors: {
-		origin: 'http://localhost:4242',
-		credentials: true
-	},
-});
+app.get('/ws', {websocket: true }, (connenction, req) => {
+	const socket = connenction.socket;
+	let userName = null;
 
-let waitingRoomUsers = [];
+	socket.on('message', (messageBuffer) => {
+		const message = JSON.parse(messageBuffer.toString());
 
-app.decorate('io', io);
+		if(message.type === 'joinRoom') {
+			userName = message.username;
 
-io.on('connection', socket => {
-	const roomName = 'waiting-room';
-	console.log('Socket connected:', socket.id);
+			console.log(`${userName} has joined the room ${waitingRoomName}`);
+			waitingRoomConns.set(userName, connenction);
 
-	socket.on('joinRoom', (userName) => {
-		socket.join(roomName);
-		console.log(`${userName}, id:${socket.id} joined room: ${roomName}`);
-		const existingUserIndex = waitingRoomUsers.findIndex(user => user[0] === userName);
-		if(existingUserIndex !== -1) {
-			waitingRoomUsers[existingUserIndex][1] = socket.id;
-			console.log(`Updated user ${userName} with new socket ID: ${socket.id}`);
+			const existingUserIndex = waitingRoomUsers.findIndex(user => user === userName);
+			if (existingUserIndex !== -1) {
+				console.log(`User ${userName} reconnected`);
+			} else {
+				waitingRoomUsers.push(userName);
+			}
+
+			console.log('Users in waiting room:', waitingRoomUsers);
+
+			socket.send(JSON.stringify({
+				type: 'joinedRoom',
+				message: `You have joined room: ${waitingRoomName}`
+			}));
 		}
-		else {
-			waitingRoomUsers.push([userName, socket.id]);
-		}
-		console.log('Users in waiting room:', waitingRoomUsers);
-		socket.emit('joinedRoom', `You have joined room: ${roomName}`);
 	});
-
-	if(waitingRoomUsers.length > 2) {
-		// shift first two users to the game room and create it's own socket for
-		// user instructions
-	}
-
-	socket.on('disconnect', () => {
-		console.log('Socket disconnected:', socket.id);
-		waitingRoomUsers = waitingRoomUsers.filter(user => user[1] !== socket.id);
-	});
-
-});
-
-app.get('/ping', async () => 'pong');
+})
 
 // === HELPERS ===
 function generateAccessToken(user) {
@@ -297,6 +286,6 @@ app.post('/api/logout', {
 app.ready().then(() => {
 	app.listen({ port: 4242 }, err => {
 		if (err) throw err;
-		console.log('HTTP + Socket.IO server listening on port 4242');
+		console.log('Fastify with WebSocket server listening on port 4242');
 	});
 });
