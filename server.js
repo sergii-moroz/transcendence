@@ -1,4 +1,5 @@
 import fastifyStatic from '@fastify/static';
+import { Server as IOServer } from 'socket.io';
 import fastifyCookie from '@fastify/cookie';
 import fastifyJwt from '@fastify/jwt';
 import { fileURLToPath } from 'url';
@@ -23,6 +24,51 @@ app.register(fastifyCookie, {
 app.register(fastifyJwt, {
 	secret: 'supersecret-key-supersecret-key!'
 })
+
+
+const io = new IOServer(app.server, {
+	cors: {
+		origin: 'http://localhost:4242',
+		credentials: true
+	},
+});
+
+let waitingRoomUsers = [];
+
+app.decorate('io', io);
+
+io.on('connection', socket => {
+	const roomName = 'waiting-room';
+	console.log('Socket connected:', socket.id);
+
+	socket.on('joinRoom', (userName) => {
+		socket.join(roomName);
+		console.log(`${userName}, id:${socket.id} joined room: ${roomName}`);
+		const existingUserIndex = waitingRoomUsers.findIndex(user => user[0] === userName);
+		if(existingUserIndex !== -1) {
+			waitingRoomUsers[existingUserIndex][1] = socket.id;
+			console.log(`Updated user ${userName} with new socket ID: ${socket.id}`);
+		}
+		else {
+			waitingRoomUsers.push([userName, socket.id]);
+		}
+		console.log('Users in waiting room:', waitingRoomUsers);
+		socket.emit('joinedRoom', `You have joined room: ${roomName}`);
+	});
+
+	if(waitingRoomUsers.length > 2) {
+		// shift first two users to the game room and create it's own socket for
+		// user instructions
+	}
+
+	socket.on('disconnect', () => {
+		console.log('Socket disconnected:', socket.id);
+		waitingRoomUsers = waitingRoomUsers.filter(user => user[1] !== socket.id);
+	});
+
+});
+
+app.get('/ping', async () => 'pong');
 
 // === HELPERS ===
 function generateAccessToken(user) {
@@ -61,7 +107,7 @@ if (!fs.existsSync(DB_FILE)) {
 		db.run(`
 			CREATE TABLE users (
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				username TEXT UNIQUE NOT NULL,
+				username TEXT NOT NULL,
 				password TEXT NOT NULL,
 				bio TEXT DEFAULT 'Hello, I am new here!'
 			)
@@ -248,4 +294,9 @@ app.post('/api/logout', {
 		.send({ success: true });
 });
 
-app.listen({ port: 4242 })
+app.ready().then(() => {
+	app.listen({ port: 4242 }, err => {
+		if (err) throw err;
+		console.log('HTTP + Socket.IO server listening on port 4242');
+	});
+});
