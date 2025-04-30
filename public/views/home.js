@@ -28,8 +28,8 @@ export class HomeView extends View {
 		}
 		this.addEventListener(form, 'click', logoutHandler);
 
-		this.addEventListener(document.getElementById('join'), 'click', () => {
-			this.element.preventDefault();
+		this.addEventListener(document.getElementById('join'), 'click', (e) => {
+			e.preventDefault();
 			this.router.navigateTo('/waiting-room');
 		});
 	};

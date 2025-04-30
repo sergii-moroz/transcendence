@@ -26,7 +26,7 @@ export class WaitingView extends View {
 	}
 
 	handleSocket = () => {
-		const socket = new WebSocket('ws://localhost:4242')
+		const socket = new WebSocket('ws://localhost:4242/matchmaking')
 	
 		socket.addEventListener('open', () => {
 			const username = this.router.currentUser.username;

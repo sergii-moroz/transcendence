@@ -29,8 +29,8 @@ app.register(fastifyWebsocket)
 let waitingRoomConns = new Map();
 const waitingRoomName = 'waiting-room';
 
-app.get('/ws', {websocket: true }, (connenction, req) => {
-	const socket = connenction.socket;
+app.get('/matchmaking', {websocket: true }, (connection, req) => {
+	const socket = connection.socket;
 	let userName = null;
 
 	socket.on('message', (messageBuffer) => {
@@ -40,7 +40,7 @@ app.get('/ws', {websocket: true }, (connenction, req) => {
 			userName = message.username;
 
 			console.log(`${userName} has joined the room ${waitingRoomName}`);
-			waitingRoomConns.set(userName, connenction);
+			waitingRoomConns.set(userName, connection);
 
 			const existingUserIndex = waitingRoomUsers.findIndex(user => user === userName);
 			if (existingUserIndex !== -1) {
