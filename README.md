@@ -7,6 +7,20 @@
 npm install
 ```
 
+### ⚙️ Setup environment variables
+
+Copy the sample file and set your secrets:
+```bash
+cd srcs/services/web/backend/
+cp .env.sample .env
+```
+Edit `.env` and set the following variables to a secure, 32-character long random string:
+
+```
+JWT_ACCESS_SECRET=your_32_char_access_secret_here
+JWT_REFRESH_SECRET=your_32_char_refresh_secret_here
+```
+
 ### 🔧 Build the project
 ```bash
 npm run build
