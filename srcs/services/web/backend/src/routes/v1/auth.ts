@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import bcrypt from 'bcrypt'
 import { createUser, findUserById, findUserByUsername, verifyPassword } from "../../services/userService.js";
-import { createCsrfToken, generateAccessToken, generateRefreshToken } from "../../services/tokenService.js";
+import { createCsrfToken, generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../services/tokenService.js";
 import { loginSchema, registerSchema } from "../../schemas/auth.js";
 import { JwtUserPayload } from "../../types/user.js";
 import { authenticate, checkCsrf } from "../../services/authService.js";
@@ -106,6 +106,34 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 		const user = req.user as JwtUserPayload;
 		const userInfo = await findUserById(user.id)
 		reply.send({ profile: userInfo })
+	});
+
+	app.post('/api/refresh', async (req, reply) => {
+		const refreshToken = req.cookies.refreshToken;
+		if (!refreshToken) return reply.code(401).send({ error: 'No refresh token' });
+
+		try {
+			const payload = verifyRefreshToken(refreshToken);
+			const accessToken = generateAccessToken(payload);
+			const csrfToken = createCsrfToken();
+
+			reply
+				.setCookie('token', accessToken, {
+					httpOnly: true,
+					sameSite: 'strict',
+					path: '/',
+					maxAge: 60 * 15
+				})
+				.setCookie('csrf_token', csrfToken, {
+					httpOnly: false,
+					sameSite: 'strict',
+					path: '/',
+					maxAge: 60 * 15
+				})
+				.send({ success: true });
+		} catch (err) {
+			return reply.code(401).send({ error: 'Invalid or expired refresh token' });
+		}
 	});
 
 }

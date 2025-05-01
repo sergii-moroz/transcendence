@@ -22,3 +22,7 @@ export function createCsrfToken() {
 export function verifyAccessToken(token: string): JwtUserPayload {
 	return jwt.verify(token, ACCESS_TOKEN_SECRET) as JwtUserPayload;
 }
+
+export function verifyRefreshToken(token: string): JwtUserPayload {
+	return jwt.verify(token, REFRESH_TOKEN_SECRET) as JwtUserPayload;
+}
