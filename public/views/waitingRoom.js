@@ -22,18 +22,19 @@ export class WaitingView extends View {
 	}
 
 	handleSocket = () => {
-		const socket = new WebSocket('ws://localhost:4242/matchmaking')
-	
-		this.addEventListener(socket, 'open', () => {
+		const socket = new WebSocket('ws://localhost:4242/waiting-room');
+		
+		socket.onopen = () => {
+			console.log('WebSocket connection established.');
 			const username = this.router.currentUser.username;
-			socket.send(JSON.stringify({ type: 'joinRoom', username }));
-		});
+			socket.send(JSON.stringify({ type: 'joinRoom', username: username }));
+		}
 
-		this.addEventListener(socket, 'message', (event) => {
+		socket.onmessage = (event) => {
+			console.log('Message from server:', event.data);
 			const data = JSON.parse(event.data);
 
 			if (data.type === 'joinedRoom') {
-				alert(data.message);
 				console.log(data.message);
 			}
 
@@ -42,15 +43,15 @@ export class WaitingView extends View {
 				socket.close();
 				this.router.navigateTo('/about');
 			}
-		});
+		};
 		
-		this.addEventListener(socket, 'close', () => {
+		socket.onclose = () => {
 			console.log('WebSocket connection closed.');
-		});
+		};
 
-		this.addEventListener(socket, 'error', () => {
+		socket.onerror = (err) => {
 			console.error('WebSocket error:', err);
-		});
+		};
 
 		return (socket);
 	}

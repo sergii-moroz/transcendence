@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken'
 import Fastify from 'fastify'
 import sqlite3 from 'sqlite3'
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import path from 'path'
 import fs from 'fs'
@@ -29,12 +29,16 @@ app.register(fastifyWebsocket)
 let waitingRoomConns = new Map();
 const waitingRoomName = 'waiting-room';
 
-app.get('/matchmaking', {websocket: true }, (connection, req) => {
+app.get('/waiting-room', {websocket: true }, (connection, req) => {
 	const socket = connection.socket;
 	let userName = null;
 
+	console.log('New WebSocket connection established');
+
 	socket.on('message', (messageBuffer) => {
 		const message = JSON.parse(messageBuffer.toString());
+
+		console.log('Received message:', message);
 
 		if(message.type === 'joinRoom') {
 			userName = message.username;
@@ -57,7 +61,23 @@ app.get('/matchmaking', {websocket: true }, (connection, req) => {
 			}));
 		}
 	});
-})
+
+	socket.on('close', () => {
+		if (userName) {
+			waitingRoomConns.delete(userName);
+			const userIndex = waitingRoomUsers.findIndex(user => user === userName);
+			if (userIndex !== -1) {
+				waitingRoomUsers.splice(userIndex, 1);
+			}
+			console.log(`${userName} has left the room ${waitingRoomName}`);
+		}
+		console.log(`${userName} disconnected`);
+	});
+
+	socket.on('error', (err) => {
+		console.error('WebSocket error:', err);
+	});
+});
 
 // === HELPERS ===
 function generateAccessToken(user) {
