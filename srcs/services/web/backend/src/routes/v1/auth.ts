@@ -108,7 +108,7 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 		reply.send({ profile: userInfo })
 	});
 
-	app.post('/api/refresh', async (req, reply) => {
+	app.post('/refresh', async (req, reply) => {
 		const refreshToken = req.cookies.refreshToken;
 		if (!refreshToken) return reply.code(401).send({ error: 'No refresh token' });
 
