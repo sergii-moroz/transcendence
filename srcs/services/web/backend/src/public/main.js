@@ -5,11 +5,12 @@ import { AboutView } from "./views/about.js"
 import { LoginView } from "./views/login.js"
 import { LobbyView } from "./views/lobby.js"
 import { HomeView } from "./views/home.js"
+import { RootView } from "./views/root.js"
 
 import { Router } from "./router.js"
 
 const routes = {
-	'/': LoginView,
+	'/': RootView,
 	'/login': LoginView,
 	'/register': RegisterView,
 	'/home': HomeView,
