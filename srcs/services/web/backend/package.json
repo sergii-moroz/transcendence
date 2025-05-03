@@ -4,10 +4,15 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.json && cpx \"src/public/**/*\" dist/public",
-    "watch": "tsc -w",
+    "build:ts": "tsc -p tsconfig.json",
+    "build:css2": "postcss src/public/style.css -o dist/public/style.css",
+    "build:css": "npx @tailwindcss/cli -i src/public/style.css -o dist/public/style.css",
+    "build:assets": "cpx \"src/public/**/*\" dist/public",
+    "build": "npm run build:ts && npm run build:assets && npm run build:css",
+    "watch:tsc": "tsc -w",
+    "watch:css": "postcss src/public/style.css -o dist/public/style.css --watch",
     "start": "node --env-file=.env dist/index.js",
-    "dev": "nodemon --watch src --ext ts --exec \"npx tsc && node --env-file=.env dist/index.js\""
+    "dev": "nodemon --watch src --ext ts,html,js --exec \"npm run build && npm run start\""
   },
   "keywords": [],
   "author": "",
@@ -25,11 +30,15 @@
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.5",
     "@types/bcrypt": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.15.3",
     "cpx": "^1.5.0",
     "nodemon": "^3.1.10",
+    "postcss": "^8.5.3",
+    "postcss-cli": "^11.0.1",
+    "tailwindcss": "^4.1.5",
     "typescript": "^5.8.3"
   }
 }

@@ -1,18 +1,53 @@
-body {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  background: #f9f9f9;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
+@import url("https://fonts.googleapis.com/css2?family=Inter&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+	--color-mrz: #ff00ff;
+	--color-background: #1e1e2f;
+	--color-text: #f8f9ff;
+	--color-primary: #7c3aed;
+	--color-accent: #c084fc;
+
+	--font-inter: "Inter", "sans-serif";
+	--font-roboto: "Roboto", "sans-serif";
 }
-input, button {
-  margin: 5px 0;
-  padding: 8px;
+
+@layer base {
+  .light {
+    --color-mrz: hsl(207 97% 12%);
+		--color-primary: #7c3aed;
+  }
+
+  .dark {
+		--color-mrz: hsl(0 0% 96%);
+		--color-primary: #7c3aed;
+  }
 }
-a {
-  color: #0077cc;
-  text-decoration: none;
+
+@layer components {
+	.tw-input {
+		@apply bg-gray-50 border border-gray-300 text-gray-900 rounded-md focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500;
+	}
+
+	.tw-card {
+		@apply bg-white rounded-lg shadow dark:border dark:bg-gray-800 dark:border-gray-700
+	}
+
+	.tw-btn {
+		@apply bg-primary text-white text-sm hover:bg-primary/70
+			font-bold rounded-md px-5 py-2.5 text-center
+			focus:ring-2 focus:outline-none focus:ring-primary
+			dark:bg-primary dark:focus:ring-primary/50
+	}
+
+	.tw-btn-outline {
+		@apply text-primary bg-transparent border border-primary text-sm
+			font-bold rounded-md px-5 py-2.5 text-center
+			hover:bg-primary/10
+			focus:ring-1 focus:outline-none
+			dark:text-primary dark:hover:bg-primary/30 dark:hover:text-white
+	}
 }

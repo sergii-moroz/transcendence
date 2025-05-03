@@ -1,12 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SPA Example</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏓</text></svg>"/>
 </head>
-<body>
+<body class="bg-gray-100 dark:bg-gray-900 min-h-screen font-inter">
   <div id="app"></div>
+
+  <button
+    id="theme-toggle"
+    class="fixed top-40 right-4 z-50 p-2 bg-white rounded-full shadow dark:border md:mt-0 sm:max-w-md dark:bg-gray-800 dark:border-gray-700 cursor-pointer"
+    aria-label="Toggle Dark Mode"
+    >
+  </button>
+
   <script type="module" src="main.js"></script>
+  <script type="module">
+    const html = document.documentElement;
+    const toggleBtn = document.getElementById('theme-toggle');
+
+    if (localStorage.theme === 'dark') {
+      html.classList.add('dark');
+    } else {
+      html.classList.contains('dark') ?? html.classList.remove('dark')
+    }
+
+    toggleBtn.textContent = html.classList.contains('dark') ? '☀️' : '🌙';
+
+    toggleBtn.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      // Save preference
+      localStorage.theme = html.classList.contains('dark') ? 'dark' : 'light';
+      // Optional: switch icon
+      toggleBtn.textContent = html.classList.contains('dark') ? '☀️' : '🌙';
+    });
+  </script>
 </body>
 </html>
