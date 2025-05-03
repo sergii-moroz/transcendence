@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken'
 import Fastify from 'fastify'
 import sqlite3 from 'sqlite3'
-import bcrypt from 'bcryptjs'
+import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import path from 'path'
 import fs from 'fs'
@@ -29,53 +29,45 @@ app.register(fastifyWebsocket)
 let waitingRoomConns = new Map();
 const waitingRoomName = 'waiting-room';
 
-app.get('/waiting-room', {websocket: true }, (connection, req) => {
-	const socket = connection.socket;
-	let userName = null;
+app.register( async (app) => {
+	app.get('/waiting-room', {websocket: true }, (connection, req) => {
+		let userName = null;
+		const socket = connection;
 
-	console.log('New WebSocket connection established');
+		socket.on('message', (messageBuffer) => {
+			const message = JSON.parse(messageBuffer.toString());
 
-	socket.on('message', (messageBuffer) => {
-		const message = JSON.parse(messageBuffer.toString());
+			if(message.type === 'joinRoom') {
+				userName = message.username;
 
-		console.log('Received message:', message);
+				console.log(`${userName} has joined the room ${waitingRoomName}`);
+				
+				if(!waitingRoomConns.has(userName)) {
+					waitingRoomConns.set(userName, connection);
+				}
+				else {
+					console.log(`${userName} is already in the room ${waitingRoomName}`);
+				}
 
-		if(message.type === 'joinRoom') {
-			userName = message.username;
+				console.log('Users in waiting room:', Array.from(waitingRoomConns.keys()));
 
-			console.log(`${userName} has joined the room ${waitingRoomName}`);
-			waitingRoomConns.set(userName, connection);
-
-			const existingUserIndex = waitingRoomUsers.findIndex(user => user === userName);
-			if (existingUserIndex !== -1) {
-				console.log(`User ${userName} reconnected`);
-			} else {
-				waitingRoomUsers.push(userName);
+				socket.send(JSON.stringify({
+					type: 'joinedRoom',
+					message: `You have joined room: ${waitingRoomName}`
+				}));
 			}
+		});
 
-			console.log('Users in waiting room:', waitingRoomUsers);
-
-			socket.send(JSON.stringify({
-				type: 'joinedRoom',
-				message: `You have joined room: ${waitingRoomName}`
-			}));
-		}
-	});
-
-	socket.on('close', () => {
-		if (userName) {
-			waitingRoomConns.delete(userName);
-			const userIndex = waitingRoomUsers.findIndex(user => user === userName);
-			if (userIndex !== -1) {
-				waitingRoomUsers.splice(userIndex, 1);
+		socket.on('close', () => {
+			if (userName && waitingRoomConns.has(userName)) {
+				waitingRoomConns.delete(userName);
+				console.log(`${userName} has left the room ${waitingRoomName}`);
 			}
-			console.log(`${userName} has left the room ${waitingRoomName}`);
-		}
-		console.log(`${userName} disconnected`);
-	});
+		});
 
-	socket.on('error', (err) => {
-		console.error('WebSocket error:', err);
+		socket.on('error', (err) => {
+			console.error('WebSocket error:', err);
+		});
 	});
 });
 

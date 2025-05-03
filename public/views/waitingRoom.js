@@ -31,7 +31,6 @@ export class WaitingView extends View {
 		}
 
 		socket.onmessage = (event) => {
-			console.log('Message from server:', event.data);
 			const data = JSON.parse(event.data);
 
 			if (data.type === 'joinedRoom') {
@@ -64,7 +63,6 @@ export class WaitingView extends View {
 				socket.close();
 				console.log('Disconnecting from socket...');
 			}
-			console.log('Disconnecting from socket...');
 			return this.router.navigateTo('/home');
 		});
 
@@ -72,7 +70,7 @@ export class WaitingView extends View {
 			e.preventDefault();
 			if (socket && socket.readyState === WebSocket.OPEN) { //this condition doesnt get triggered
 				socket.close();
-				console.log('Disconnected from socket due to page unload');
+				console.log('Disconnecting from socket, page unload...');
 			}
 		});
 	};
