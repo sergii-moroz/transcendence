@@ -68,7 +68,7 @@ export class WaitingView extends View {
 
 		this.addEventListener(window, 'beforeunload', (e) => {
 			e.preventDefault();
-			if (socket && socket.readyState === WebSocket.OPEN) { //this condition doesnt get triggered
+			if (socket && socket.readyState === WebSocket.OPEN) {
 				socket.close();
 				console.log('Disconnecting from socket, page unload...');
 			}

@@ -26,7 +26,7 @@ app.register(fastifyJwt, {
 })
 app.register(fastifyWebsocket)
 
-let waitingRoomConns = new Map();
+let waitingRoomConns = [];
 const waitingRoomName = 'waiting-room';
 
 app.register( async (app) => {
@@ -42,26 +42,47 @@ app.register( async (app) => {
 
 				console.log(`${userName} has joined the room ${waitingRoomName}`);
 				
-				if(!waitingRoomConns.has(userName)) {
-					waitingRoomConns.set(userName, connection);
+				if(!waitingRoomConns.includes(userName)) {
+					waitingRoomConns.push([userName, connection]);
 				}
 				else {
 					console.log(`${userName} is already in the room ${waitingRoomName}`);
 				}
 
-				console.log('Users in waiting room:', Array.from(waitingRoomConns.keys()));
+				console.log('Users in waiting room:', waitingRoomConns.map(([username]) => username));
 
 				socket.send(JSON.stringify({
 					type: 'joinedRoom',
 					message: `You have joined room: ${waitingRoomName}`
 				}));
+
+				if (waitingRoomConns.length >= 2) { // still need to implement the game rooms
+					console.log('Two users are in the waiting room, redirecting to game room...');
+					const user1 = waitingRoomConns.shift();
+					const user2 = waitingRoomConns.shift();
+					const gameRoomId = crypto.randomBytes(16).toString('hex');
+
+					user1[1].send(JSON.stringify({
+						type: 'redirectingToGame',
+						gameRoomId: gameRoomId,
+						message: `Redirecting to game room: ${gameRoomId}`
+					}));
+					user2[1].send(JSON.stringify({
+						type: 'redirectingToGame',
+						gameRoomId: gameRoomId,
+						message: `Redirecting to game room: ${gameRoomId}`
+					}));
+					console.log(`Redirecting ${user1[0]} and ${user2[0]} to game room: ${gameRoomId}`);
+				}
 			}
 		});
 
 		socket.on('close', () => {
-			if (userName && waitingRoomConns.has(userName)) {
-				waitingRoomConns.delete(userName);
-				console.log(`${userName} has left the room ${waitingRoomName}`);
+			if (userName && waitingRoomConns.includes(userName)) {
+				const index = waitingRoomConns.findIndex(([name]) => name === username);
+				if (index !== -1) {
+					waitingRoomConns.splice(index, 1);
+				}
 			}
 		});
 
