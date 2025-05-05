@@ -23,6 +23,7 @@ export class RegisterView extends View {
 
 				if (!res) {
 					alert('registration failed');
+					e.target.reset();
 					return;
 				}
 
@@ -32,6 +33,7 @@ export class RegisterView extends View {
 						return this.router.navigateTo('/login');
 				} else {
 						alert(data.error);
+						e.target.reset();
 						return;
 				}
 		}

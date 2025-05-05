@@ -30,16 +30,15 @@ let waitingRoomConns = [];
 const waitingRoomName = 'waiting-room';
 
 app.register( async (app) => {
-	app.get('/waiting-room', {websocket: true }, (connection, req) => {
-		let userName = null;
+	app.get('/waiting-room', {websocket: true }, async (connection, req) => {
+		await app.authenticate(req);
+		let userName = req.user.username;
 		const socket = connection;
-
+		
 		socket.on('message', (messageBuffer) => {
 			const message = JSON.parse(messageBuffer.toString());
-
+			
 			if(message.type === 'joinRoom') {
-				userName = message.username;
-
 				console.log(`${userName} has joined the room ${waitingRoomName}`);
 				
 				if(!waitingRoomConns.includes(userName)) {
@@ -129,7 +128,7 @@ if (!fs.existsSync(DB_FILE)) {
 		db.run(`
 			CREATE TABLE users (
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
-				username TEXT NOT NULL,
+				username TEXT NOT NULL UNIQUE,
 				password TEXT NOT NULL,
 				bio TEXT DEFAULT 'Hello, I am new here!'
 			)

@@ -29,6 +29,8 @@ export class LoginView extends View {
 				return this.router.navigateTo('/home');
 			} else {
 				alert(data.error);
+				e.target.reset();
+				return ;
 			}
 		};
 

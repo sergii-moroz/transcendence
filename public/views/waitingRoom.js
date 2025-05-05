@@ -27,7 +27,7 @@ export class WaitingView extends View {
 		socket.onopen = () => {
 			console.log('WebSocket connection established.');
 			const username = this.router.currentUser.username;
-			socket.send(JSON.stringify({ type: 'joinRoom', username: username }));
+			socket.send(JSON.stringify({ type: 'joinRoom' }));
 		}
 
 		socket.onmessage = (event) => {
