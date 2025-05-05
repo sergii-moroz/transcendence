@@ -1,8 +1,16 @@
 import { Api } from "./api.js"
+import { View } from "./view.js"
+import { User } from "./types.js"
 
 export class Router {
+	routes: Record<string, typeof View>;
+	rootElement: HTMLElement | null;
+	currentView: View | null;
+	api: Api;
+	publicRoutes: string[];
+	currentUser: User | null;
 
-	constructor(routes) {
+	constructor(routes: Record<string, typeof View> ) {
 		this.routes = routes;
 		this.rootElement = document.getElementById('app');
 		this.currentView = null;
@@ -11,10 +19,13 @@ export class Router {
 		this.currentUser = null;
 
 		window.addEventListener('popstate', this.handleRouteChange);
-		document.addEventListener("click", (e) => {
-			if (e.target.matches("[data-link]")) {
+		document.addEventListener("click", (e: Event) => {
+			const target = e.target as HTMLElement;
+			if (target.matches("[data-link]")) {
 				e.preventDefault()
-				this.navigateTo(e.target.getAttribute('href'))
+				const href = target.getAttribute('href');
+				if (href)
+					this.navigateTo(href);
 				return ;
 			}
 		})
@@ -23,7 +34,7 @@ export class Router {
 	}
 
 	handleRouteChange = async () => {
-		const path = window.location.pathname;
+		const path: string = window.location.pathname;
 
 		if (this.currentView) {
 			this.currentView.unmount();
@@ -50,17 +61,17 @@ export class Router {
 			// console.log(`path: ${path}`);
 
 
-			const ViewClass = this.routes[path] || this.routes["404"];
+			const ViewClass: typeof View = this.routes[path] || this.routes["404"];
 			this.currentView = new ViewClass(this.api, this);
-			await this.currentView.mount(this.rootElement);
+			await this.currentView.mount(this.rootElement!);
 		} catch (error) {
 			console.error('Route handling failed:', error);
 			this.navigateTo('/login');
 		}
 	}
 
-	navigateTo = (url) => {
-		window.history.pushState(null, null, url);
+	navigateTo = (url: string) => {
+		window.history.pushState(null, '', url);
 		this.handleRouteChange();
 	}
 }

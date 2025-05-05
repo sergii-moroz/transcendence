@@ -7,8 +7,9 @@ import { HomeView } from "./views/home.js"
 import { WaitingView } from "./views/waitingRoom.js"
 
 import { Router } from "./router.js"
+import { View } from "./view.js"
 
-const routes = {
+const routes: Record<string, typeof View> = {
 	'/': LoginView,
 	'/login': LoginView,
 	'/register': RegisterView,

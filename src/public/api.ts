@@ -1,11 +1,16 @@
+import { User } from "./types.js";
+
 export class Api {
+	baseUrl: string;
+	refreshInterval: number;
+	refreshIntervalId: ReturnType<typeof setInterval> | null
 	constructor() {
 		this.baseUrl = '/api';
 		this.refreshInterval = 13 * 60 * 1000; // 13 minutes
 		this.refreshIntervalId = null;
 	}
 
-	async request(endpoint, options = {}) {
+	async request(endpoint: string, options = {}) {
 		const url = `${this.baseUrl}${endpoint}`;
 		let res = await fetch(url, {
 			...options,
@@ -24,7 +29,7 @@ export class Api {
 		return await fetch(`${this.baseUrl}/refresh`, {
 			method: 'POST',
 			headers: {
-				'X-CSRF-Token': this.getCsrfToken(),
+				'X-CSRF-Token': this.getCsrfToken() || '',
 			},
 			credentials: 'include',
 		});
@@ -62,7 +67,7 @@ export class Api {
 		}
 	}
 
-	async login(username, password) {
+	async login(username: string, password: string) {
 		const res = await this.request('/login', {
 			method: 'POST',
 			headers: {
@@ -77,7 +82,7 @@ export class Api {
 		return res;
 	}
 
-	async register(username, password) {
+	async register(username: string, password: string) {
 		return this.request('/register', {
 			method: 'POST',
 			headers: {
@@ -106,7 +111,7 @@ export class Api {
 		return this.request('/profile');
 	}
 
-	async checkAuth() {
+	async checkAuth(): Promise<User | null> {
 		try {
 			const res = await this.getUser();
 			if (res.ok) return await res.json();
