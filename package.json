@@ -1,4 +1,9 @@
 {
+  "scripts": {
+    "build:ts": "tsc -p tsconfig.json",
+    "build:assets": "cpy src/public/*.{html,css} --flat dist/public && cpy src/server.js --flat dist",
+    "build": "npm run build:ts && npm run build:assets"
+  },
   "type": "module",
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
@@ -10,5 +15,8 @@
     "jsonwebtoken": "^9.0.2",
     "socket.io": "^4.7.2",
     "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "cpy-cli": "^5.0.0"
   }
 }
