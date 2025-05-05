@@ -1,10 +1,10 @@
 import { View } from "../view.js"
 
 export class HomeView extends View {
-	setContent = (username) => {
+	override setContent(input: Record<string, any>) {
 		this.element.innerHTML = `
 			<h2>Home</h2>
-			<p>Welcome, ${username}</p>
+			<p>Welcome, ${input.username}</p>
 			<nav>
 				<a href="/about" data-link>About</a> |
 				<a href="/login" data-link>login</a> |
@@ -15,20 +15,20 @@ export class HomeView extends View {
 		`;
 	}
 
-	async prehandler() {
-		return (this.router.currentUser ? this.router.currentUser.username : null);
+	override async prehandler(): Promise<Record<string, any>> {
+		if (this.router.currentUser)
+			return { username: this.router.currentUser.username};
+		return { username: 'error'};
 	}
 
 	setupEventListeners() {
-		const form = document.getElementById('logout');
-		const logoutHandler = async () => {
+		this.addEventListener(document.getElementById('logout')!, 'click', async () => {
 			await this.api.logout();
 			this.router.currentUser = null;
 			return this.router.navigateTo('/login');
-		}
-		this.addEventListener(form, 'click', logoutHandler);
+		});
 
-		this.addEventListener(document.getElementById('join'), 'click', (e) => {
+		this.addEventListener(document.getElementById('join')!, 'click', (e) => {
 			e.preventDefault();
 			this.router.navigateTo('/waiting-room');
 		});

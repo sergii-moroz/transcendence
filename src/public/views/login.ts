@@ -14,26 +14,28 @@ export class LoginView extends View {
 	}
 
 	setupEventListeners() {
-		const form = document.getElementById('loginForm');
 
-		const submitHandler = async e => {
+		this.addEventListener(document.getElementById('loginForm')!, 'submit', async (e: Event) => {
 			e.preventDefault();
-			const { username, password } = e.target;
-			const res = await this.api.login(username.value, password.value);
+			const form = e.target as HTMLFormElement;
+			const formData = new FormData(form);
+			const data = Object.fromEntries(formData) as {
+				username: string;
+				password: string;
+			};
+			const res = await this.api.login(data.username, data.password);
 
 			if (!res) return
 
-			const data = await res.json();
+			const jsonRes = await res.json();
 
 			if (res.ok) {
 				return this.router.navigateTo('/home');
 			} else {
-				alert(data.error);
-				e.target.reset();
+				alert(jsonRes.error);
+				form.reset();
 				return ;
 			}
-		};
-
-		this.addEventListener(form, 'submit', submitHandler);
+		});
 	}
 }

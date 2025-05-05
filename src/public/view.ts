@@ -1,6 +1,15 @@
-export class View {
+import { Api } from "./api.js";
+import { Router } from "./router.js";
 
-	constructor(api, router) {
+import { eventListenerObject } from "./types.js";
+
+export class View {
+	element: HTMLElement;
+	eventListeners: eventListenerObject[];
+	api: Api;
+	router: Router;
+
+	constructor(api: Api, router: Router) {
 		this.element = document.createElement('div');
 		this.eventListeners = [];
 
@@ -8,20 +17,21 @@ export class View {
 		this.router = router;
 	}
 
-	setContent = (input) => {
+	setContent(input: Record<string, any>) {
 		this.element.innerHTML = '<h1>Base View. SHOULD BE OVERWRITTEN</h1>';
 	}
 
-	mount = async (parent) => {
+	mount = async (parent: HTMLElement) => {
 		parent.innerHTML = '';
 
 		const input = await this.prehandler();
+		// console.log(`input: ${input}`);
 		this.setContent(input);
 		parent.append(this.element);
 		this.setupEventListeners();
 	}
 
-	async prehandler()
+	async prehandler(): Promise<Record<string, any>> 
 	{
 		// Should be overridden by subclasses if needed
 		return {};
@@ -31,7 +41,7 @@ export class View {
 		// Should be overridden by subclasses if needed
 	}
 
-	addEventListener(element, type, handler)
+	addEventListener(element: HTMLElement | Window, type: string, handler: (e: Event) => void)
 	{
 		element.addEventListener(type, handler);
 		this.eventListeners.push({element, type, handler});

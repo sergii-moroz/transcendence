@@ -1,5 +1,7 @@
 import { View } from "../view.js"
 
+import { WsMatchMakingMessage } from "../types.js";
+
 export class WaitingView extends View {
 	setContent = () => {
 		this.element.innerHTML = `
@@ -8,35 +10,23 @@ export class WaitingView extends View {
 		<button id="home-link">Home</button>
 		`;
 	}
-
-	mount = async (parent) => {
-		parent.innerHTML = '';
-
-		const input = await this.prehandler();
-		this.setContent(input);
-		parent.append(this.element);
-
-
-		const socket = this.handleSocket();
-		this.setupEventListeners(socket);
-	}
-
-	handleSocket = () => {
+	
+	setupEventListeners() {
 		const socket = new WebSocket('ws://localhost:4242/waiting-room');
 		
+		//socketEventListeners
 		socket.onopen = () => {
 			console.log('WebSocket connection established.');
-			const username = this.router.currentUser.username;
 			socket.send(JSON.stringify({ type: 'joinRoom' }));
 		}
-
+	
 		socket.onmessage = (event) => {
-			const data = JSON.parse(event.data);
-
+			const data = JSON.parse(event.data) as WsMatchMakingMessage;
+	
 			if (data.type === 'joinedRoom') {
 				console.log(data.message);
 			}
-
+	
 			if (data.type === 'redirectingToGame') {
 				console.log(`Redirecting to game room: ${data.gameRoomId}`);
 				socket.close();
@@ -47,17 +37,14 @@ export class WaitingView extends View {
 		socket.onclose = () => {
 			console.log('WebSocket connection closed.');
 		};
-
+	
 		socket.onerror = (err) => {
 			console.error('WebSocket error:', err);
 		};
+	
 
-		return (socket);
-	}
-
-	setupEventListeners(socket) {
-		const form = document.getElementById('home-link');
-		this.addEventListener(form, 'click', (e) => {
+		//normal eventListeners
+		this.addEventListener(document.getElementById('home-link')!, 'click', (e) => {
 			e.preventDefault();
 			if (socket && socket.readyState === WebSocket.OPEN) {
 				socket.close();

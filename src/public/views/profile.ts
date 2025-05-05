@@ -1,7 +1,7 @@
 import { View } from "../view.js"
 
 export class ProfileView extends View {
-	setContent = (profile) => {
+	setContent = (profile: Record<string, any>) => {
 		this.element.innerHTML = `
 			<h2>Profile</h2>
 			<p><strong>Username:</strong> ${profile.username}</p>
