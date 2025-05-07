@@ -1,7 +1,18 @@
 import crypto from 'crypto'
-import fastifyWebsocket from '@fastify/websocket';
 
 export class Game {
+	players: Map< string, WebSocket >;
+	state: {
+		ball: { x: number; y: number; dx: number, dy: number},
+		paddles: {
+			player1: {y: number},
+			player2: {y: number}
+		},
+		scores: { player1: number, player2: number}
+	};
+	gameRoomId: number;
+	gameRunning: boolean;
+
 	constructor() {
 		this.players = new Map();
 		this.state = {
@@ -13,33 +24,28 @@ export class Game {
 			scores: { player1: 0, player2: 0 }
 		};
 		this.gameRoomId = crypto.randomBytes(16).toString('hex');
-		this.gameStarted = false;
+		this.gameRunning = false;
 	}
 
-	addPlayer(player) {
-		//if(player instanceof fastifyWebsocket) {
-			if (this.players.size === 0) {
-				this.players.set('player1', player);
-				console.log('Player 1 joined');
-			}
-			else if (this.players.size === 1) {
-				this.players.set('player2', player);
-				this.startLoop();
-				console.log('Player 2 joined');
-			}
-			else {
-				player.send(JSON.stringify({
-					type: 'Error',
-					message: 'Game is full.'
-				}));
-			}
-		//}
-		//else {
-		//	throw new Error('Invalid player type');
-		//}
+	addPlayer(player: WebSocket) {
+		if (this.players.size === 0) {
+			this.players.set('player1', player);
+			console.log('Player 1 joined');
+		}
+		else if (this.players.size === 1) {
+			this.players.set('player2', player);
+			this.startLoop();
+			console.log('Player 2 joined');
+		}
+		else {
+			player.send(JSON.stringify({
+				type: 'Error',
+				message: 'Game is full.'
+			}));
+		}
 	}
 
-	removePlayer(player) {
+	removePlayer(player: WebSocket) {
 		for (const [role, conn] of this.players.entries()) {
 			if (conn === player) {
 				this.players.delete(role);
@@ -53,9 +59,9 @@ export class Game {
 	}
 
 	startLoop() {
-		this.gameStarted = true;
+		this.gameRunning = true;
 		setInterval(() => {
-			// Update ball position
+			if(!this.gameRunning) return;
 			this.state.ball.x += this.state.ball.dx;
 			this.state.ball.y += this.state.ball.dy;
 		
@@ -91,8 +97,8 @@ export class Game {
 		}, 16);
 	}
 
-	registerPlayerInput(input, connection) {
-		if(!this.gameStarted) return;
+	registerPlayerInput(input: string, connection: WebSocket) {
+		if(!this.gameRunning) return;
 		let player = '';
 		for (const [role, conn] of this.players.entries()) {
 			if (conn === connection) {
