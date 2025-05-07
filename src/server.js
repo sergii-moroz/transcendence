@@ -10,6 +10,7 @@ import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import path from 'path'
 import fs from 'fs'
+import { Game } from './game.js';
 
 const REFRESH_SECRET = 'refresh-secret';
 const DB_FILE = './db.sqlite'
@@ -28,17 +29,20 @@ app.register(fastifyWebsocket)
 
 let waitingRoomConns = [];
 const waitingRoomName = 'waiting-room';
+const gameInstances = new Map();
 
 app.register( async (app) => {
 	app.get('/waiting-room', {websocket: true }, async (connection, req) => {
 		await app.authenticate(req);
 		let userName = req.user.username;
 		const socket = connection;
-		
+
 		socket.on('message', (messageBuffer) => {
 			const message = JSON.parse(messageBuffer.toString());
-			
+
 			if(message.type === 'joinRoom') {
+				userName = message.username;
+
 				console.log(`${userName} has joined the room ${waitingRoomName}`);
 				
 				if(!waitingRoomConns.includes(userName)) {
@@ -48,7 +52,7 @@ app.register( async (app) => {
 					console.log(`${userName} is already in the room ${waitingRoomName}`);
 				}
 
-				console.log('Users in waiting room:', waitingRoomConns.map(([userName]) => userName));
+				console.log('Users in waiting room:', waitingRoomConns.map(([username]) => username));
 
 				socket.send(JSON.stringify({
 					type: 'joinedRoom',
@@ -56,29 +60,17 @@ app.register( async (app) => {
 				}));
 
 				if (waitingRoomConns.length >= 2) { // still need to implement the game rooms
-					console.log('Two users are in the waiting room, redirecting to game room...');
-					const user1 = waitingRoomConns.shift();
-					const user2 = waitingRoomConns.shift();
-					const gameRoomId = crypto.randomBytes(16).toString('hex');
-
-					user1[1].send(JSON.stringify({
-						type: 'redirectingToGame',
-						gameRoomId: gameRoomId,
-						message: `Redirecting to game room: ${gameRoomId}`
-					}));
-					user2[1].send(JSON.stringify({
-						type: 'redirectingToGame',
-						gameRoomId: gameRoomId,
-						message: `Redirecting to game room: ${gameRoomId}`
-					}));
-					console.log(`Redirecting ${user1[0]} and ${user2[0]} to game room: ${gameRoomId}`);
+					const game = new Game();
+					gameInstances.set(game.gameRoomId, game);
+					redirectToGameRoom(game.gameRoomId);
+					console.log('Game started:', game.gameRoomId);
 				}
 			}
 		});
 
 		socket.on('close', () => {
 			if (userName && waitingRoomConns.includes(userName)) {
-				const index = waitingRoomConns.findIndex(([name]) => name === userName);
+				const index = waitingRoomConns.findIndex(([name]) => name === username);
 				if (index !== -1) {
 					waitingRoomConns.splice(index, 1);
 				}
@@ -89,7 +81,63 @@ app.register( async (app) => {
 			console.error('WebSocket error:', err);
 		});
 	});
+
+	app.get('/game/:gameRoomId', { websocket: true }, (connection, req) => {
+		const gameRoomId = req.params.gameRoomId;
+		console.log(`User connected to game room: ${gameRoomId}`);
+		const game = gameInstances.get(gameRoomId);
+
+		if (!game) {
+			connection.close();
+			return;
+		}
+		game.addPlayer(connection);
+
+		connection.on('message', (messageBuffer) => {
+			const message = JSON.parse(messageBuffer.toString());
+				if(message.type === 'input') {
+					game.registerPlayerInput(message.input, connection);
+				}
+		});
+
+		connection.on('close', () => {
+			game.removePlayer(connection);
+			if (game.players.length != 2) {
+				gameInstances.delete(gameRoomId);
+				connection.send(JSON.stringify({
+					type: 'Error',
+					message: `The other player has left the game.`
+				}));
+			}
+		});
+
+		connection.on('error', (err) => {
+			console.error('WebSocket error:', err);
+		});
+	});
 });
+
+function redirectToGameRoom(gameRoomId) {
+	console.log('Two users are in the waiting room, redirecting to game room...');
+	const user1 = waitingRoomConns.shift();
+	const user2 = waitingRoomConns.shift();
+
+	user1[1].send(JSON.stringify({
+		type: 'redirectingToGame',
+		gameRoomId: gameRoomId,
+		message: `Redirecting to game room: ${gameRoomId}`
+	}));
+	user2[1].send(JSON.stringify({
+		type: 'redirectingToGame',
+		gameRoomId: gameRoomId,
+		message: `Redirecting to game room: ${gameRoomId}`
+	}));
+
+	console.log(`Redirecting ${user1[0]} and ${user2[0]} to game room: ${gameRoomId}`);
+	gameInstances.get(gameRoomId).startLoop();
+	console.log('Game started:', gameRoomId);
+}
+
 
 // === HELPERS ===
 function generateAccessToken(user) {
