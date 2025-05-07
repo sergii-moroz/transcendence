@@ -1,11 +1,17 @@
 import {
 	FastifyInstance,
 	FastifyPluginOptions,
+	FastifyRequest
 } from "fastify"
+import { GameRoomRequest } from "../../types/game.js";
+
+import fastifyWebsocket from '@fastify/websocket';
+import { Game } from "../../services/game.js";
+
 
 export const gameRoomSock = async (app: FastifyInstance) => {
 
-    app.get('/game/:gameRoomId', { websocket: true }, (connection: WebSocket, req: FastifyRequest<{ Params: { gameRoomId: string } }>) => {
+    app.get('/game/:gameRoomId', { websocket: true }, (connection: WebSocket, req: GameRoomRequest) => {
 		const gameRoomId = req.params.gameRoomId;
 		console.log(`User connected to game room: ${gameRoomId}`);
 		const game = app.gameInstances.get(gameRoomId);

@@ -10,12 +10,13 @@ import { gameRoomSock } from "./routes/v1/gameRoom.js";
 import { waitingRoomSock } from "./routes/v1/waitingRoom.js";
 import { initializeDB } from "./db/init.js";
 import { db } from "./db/connections.js"
+import { Game } from "./services/game.js";
 
 export const build = async (opts: FastifyServerOptions) => {
 	const app = fastify(opts)
 
-	const gameInstances = new Map();
-	let waitingRoomConns: [string, WebSocket][] = [];
+	const gameInstances = new Map<string, Game>(); //gameID, Game Instance
+	let waitingRoomConns = new Map<string, WebSocket>(); //username, Connection
 
 	app.decorate("gameInstances", gameInstances);
 	app.decorate("waitingRoomConns", waitingRoomConns);
