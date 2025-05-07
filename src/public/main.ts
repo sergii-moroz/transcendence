@@ -5,6 +5,7 @@ import { AboutView } from "./views/about.js"
 import { LoginView } from "./views/login.js"
 import { HomeView } from "./views/home.js"
 import { WaitingView } from "./views/waitingRoom.js"
+import { GameView } from "./views/game.js"
 
 import { Router } from "./router.js"
 import { View } from "./view.js"
@@ -17,6 +18,7 @@ const routes: Record<string, typeof View> = {
 	'/about': AboutView,
 	'/profile': ProfileView,
 	'/waiting-room': WaitingView,
+	'/game/:gameRoomId': GameView,
 	'404': NotFoundView
 };
 

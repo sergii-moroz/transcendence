@@ -59,10 +59,15 @@ export class Router {
 			//--debug
 			// this.currentUser ? console.log(`user: ${this.currentUser.username}`) : console.log(`user: ${this.currentUser}`);
 			// console.log(`path: ${path}`);
+			let ViewClass: typeof View;
 
-
-			const ViewClass: typeof View = this.routes[path] || this.routes["404"];
-			this.currentView = new ViewClass(this.api, this);
+			if (path.startsWith('/game/')) {
+				ViewClass = this.routes['/game/:gameRoomId'];
+				this.currentView = new ViewClass(this.api, this);
+			} else {
+				ViewClass = this.routes[path] || this.routes["404"];
+				this.currentView = new ViewClass(this.api, this);
+			}
 			await this.currentView.mount(this.rootElement!);
 		} catch (error) {
 			console.error('Route handling failed:', error);
