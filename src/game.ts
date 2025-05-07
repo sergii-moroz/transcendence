@@ -10,7 +10,7 @@ export class Game {
 		},
 		scores: { player1: number, player2: number}
 	};
-	gameRoomId: number;
+	gameRoomId: string;
 	gameRunning: boolean;
 
 	constructor() {

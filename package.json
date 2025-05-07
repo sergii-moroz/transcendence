@@ -1,7 +1,7 @@
 {
   "scripts": {
     "build:ts": "tsc -p tsconfig.json",
-    "build:assets": "cpy src/public/*.{html,css} --flat dist/public && cpy src/*.js --flat dist",
+    "build:assets": "cpy src/public/*.{html,css} --flat dist/public && cpy src/server.js --flat dist",
     "build": "npm run build:ts && npm run build:assets"
   },
   "type": "module",
