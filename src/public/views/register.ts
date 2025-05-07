@@ -18,7 +18,12 @@ export class RegisterView extends View {
 		this.addEventListener(document.getElementById('registerForm')!, 'submit', async (e) => {
 			e.preventDefault();
 			const form = e.target as HTMLFormElement;
-			const res = await this.api.register(form.username, form.password)
+			const formData = new FormData(form);
+			const data = Object.fromEntries(formData) as {
+				username: string;
+				password: string;
+			};
+			const res = await this.api.register(data.username, data.password)
 
 			if (!res) {
 				alert('registration failed');

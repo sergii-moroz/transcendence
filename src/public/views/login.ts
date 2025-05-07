@@ -18,8 +18,12 @@ export class LoginView extends View {
 		this.addEventListener(document.getElementById('loginForm')!, 'submit', async (e: Event) => {
 			e.preventDefault();
 			const form = e.target as HTMLFormElement;
-			
-			const res = await this.api.login(form.username, form.password);
+			const formData = new FormData(form);
+			const data = Object.fromEntries(formData) as {
+				username: string;
+				password: string;
+			};
+			const res = await this.api.login(data.username, data.password)
 
 			if (!res) return
 
