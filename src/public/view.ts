@@ -41,7 +41,7 @@ export class View {
 		// Should be overridden by subclasses if needed
 	}
 
-	addEventListener(element: HTMLElement | Window, type: string, handler: (e: Event) => void)
+	addEventListener(element: HTMLElement | Window | Document, type: string, handler: (e: Event | KeyboardEvent) => void)
 	{
 		element.addEventListener(type, handler);
 		this.eventListeners.push({element, type, handler});

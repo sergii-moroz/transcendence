@@ -30,7 +30,7 @@ export class WaitingView extends View {
 			if (data.type === 'redirectingToGame') {
 				console.log(`Redirecting to game room: ${data.gameRoomId}`);
 				socket.close();
-				this.router.navigateTo('/about');
+				this.router.navigateTo('/game/' + data.gameRoomId);
 			}
 		};
 		
