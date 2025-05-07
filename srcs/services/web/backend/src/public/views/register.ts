@@ -87,31 +87,36 @@ export class RegisterView extends View {
 				<div class="bg-primary hidden xl:block"></div>
 
 			</div>
-		`
+		`;
 	}
 
 	setupEventListeners() {
-		const form = document.getElementById('registerForm');
+		const submitHandler = 
+		this.addEventListener(document.getElementById('registerForm')!, 'submit', async (e) => {
+			e.preventDefault();
+			const form = e.target as HTMLFormElement;
+			const formData = new FormData(form);
+			const data = Object.fromEntries(formData) as {
+				username: string;
+				password: string;
+			};
+			const res = await this.api.register(data.username, data.password)
 
-		const submitHandler = async (e) => {
-				e.preventDefault();
-				const { username, password } = e.target;
-				const res = await this.api.register(username.value, password.value)
+			if (!res) {
+				alert('registration failed');
+				form.reset();
+				return;
+			}
 
-				if (!res) {
-					alert('registration failed');
+			const jsonRes = await res.json();
+
+			if (res.ok) {
+					return this.router.navigateTo('/login');
+			} else {
+					alert(jsonRes.error);
+					form.reset();
 					return;
-				}
-
-				const data = await res.json();
-
-				if (res.ok) {
-						return this.router.navigateTo('/login');
-				} else {
-						alert(data.error);
-						return;
-				}
-		}
-		this.addEventListener(form, 'submit', submitHandler);
+			}
+		});
 	}
 }

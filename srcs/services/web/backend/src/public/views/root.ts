@@ -86,16 +86,16 @@ export class RootView extends View {
 		const menu = document.getElementById('mobile-menu');
 
 		const toggleBtnHandler = () => {
-			menu.classList.remove('hidden');
+			menu!.classList.remove('hidden');
 			// menu.classList.add('flex');
 		};
 
 		const closeBtnHandler = () => {
-			menu.classList.add('hidden');
+			menu!.classList.add('hidden');
 			// menu.classList.remove('flex');
 		};
 
-		this.addEventListener(toggleBtn, 'click', toggleBtnHandler);
-		this.addEventListener(closeBtn, 'click', closeBtnHandler);
+		this.addEventListener(toggleBtn!, 'click', toggleBtnHandler);
+		this.addEventListener(closeBtn!, 'click', closeBtnHandler);
 	}
 }

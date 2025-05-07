@@ -6,12 +6,19 @@ import path from "path";
 
 import { authRoutes } from "./routes/v1/auth.js";
 import { routes } from "./routes/v1/routes.js"
+import { gameRoomSock } from "./routes/v1/gameRoom.js";
+import { waitingRoomSock } from "./routes/v1/waitingRoom.js";
 import { initializeDB } from "./db/init.js";
 import { db } from "./db/connections.js"
 
 export const build = async (opts: FastifyServerOptions) => {
 	const app = fastify(opts)
 
+	const gameInstances = new Map();
+	let waitingRoomConns: [string, WebSocket][] = [];
+
+	app.decorate("gameInstances", gameInstances);
+	app.decorate("waitingRoomConns", waitingRoomConns);
 	app.decorate("db", db)
 
 	app.register(fastifyCookie, {
@@ -33,6 +40,8 @@ export const build = async (opts: FastifyServerOptions) => {
 	})
 
 	app.register(routes)
+	app.register(waitingRoomSock)
+	app.register(gameRoomSock)
 	app.register(authRoutes, {prefix: "api"})
 
 	return app

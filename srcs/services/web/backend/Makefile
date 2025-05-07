@@ -26,7 +26,7 @@
 SRC = ./src
 DIST = ./dist
 
-SERVER_MAIN = server.js
+SERVER_MAIN = index.js
 
 all:	compile
 	node $(DIST)/$(SERVER_MAIN)
