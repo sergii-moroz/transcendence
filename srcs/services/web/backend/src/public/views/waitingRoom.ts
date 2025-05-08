@@ -12,7 +12,7 @@ export class WaitingView extends View {
 	}
 	
 	setupEventListeners() {
-		const socket = new WebSocket('ws://localhost:4242/waiting-room');
+		const socket = new WebSocket('ws://localhost:4242/ws/waiting-room');
 		
 		//socketEventListeners
 		socket.onopen = () => {

@@ -41,8 +41,8 @@ export const build = async (opts: FastifyServerOptions) => {
 	})
 
 	app.register(routes)
-	app.register(waitingRoomSock)
-	app.register(gameRoomSock)
+	app.register(waitingRoomSock, {prefix: "ws"})
+	app.register(gameRoomSock, {prefix: "ws"})
 	app.register(authRoutes, {prefix: "api"})
 
 	return app
