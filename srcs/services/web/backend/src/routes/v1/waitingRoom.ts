@@ -11,25 +11,25 @@ import { Game } from "../../services/game.js";
 
 export const waitingRoomSock = async (app: FastifyInstance) => {
     
-    app.get('/waiting-room', {websocket: true }, async (connection: WebSocket, req: FastifyRequest) => {
-		let userName: string | null = null;
-		const socket = connection;
+    app.get('/waiting-room', {websocket: true }, async (socket, req) => {
+		let userName: string = req.user.username;
 
-		socket.onmessage = (messageBuffer) => {
-			const message = JSON.parse(messageBuffer.toString());
+		socket.on('message', (message: Buffer) => {
+			const messagee: {
+				type: string;
+			} = JSON.parse(message.toString());
 
-			if(message.type === 'joinRoom') {
-				userName = message.username;
-				console.log(`${userName} has joined the waiting room`);
+			if(messagee.type === 'joinRoom') {
+				console.custom('INFO', `${userName} has joined the waiting room`);
 				
 				if(!app.waitingRoomConns.has(userName!)) {
-					app.waitingRoomConns.set(userName!, connection);
+					app.waitingRoomConns.set(userName!, socket);
 				}
 				else {
-					console.log(`${userName} is already in the waiting room`);
+					console.custom('INFO', `${userName} is already in the waiting room`);
 				}
 
-				console.log('Users in waiting room:', [...app.waitingRoomConns.keys()]);
+				console.custom('INFO', 'Users in waiting room:', [...app.waitingRoomConns.keys()]);
 
 				socket.send(JSON.stringify({
 					type: 'joinedRoom',
@@ -41,25 +41,25 @@ export const waitingRoomSock = async (app: FastifyInstance) => {
 					app.gameInstances.set(game.gameRoomId, game);
 					redirectToGameRoom(game.gameRoomId, app);
 					app.gameInstances.get(game.gameRoomId).startLoop();
-					console.log('Game started:', game.gameRoomId);
-				}
+					console.custom('INFO', 'Game started:', game.gameRoomId);
 			}
-		}
+			}
+		})
 
-		socket.onclose = () => {
+		socket.on('close', () => {
 			if (userName && app.waitingRoomConns.has(userName)) {
 				app.waitingRoomConns.delete(userName);
 			}
-		}
+		})
 
-		socket.onerror = (err) => {
-			console.error('WebSocket error:', err);
-		}
+		socket.on('error', (err: Error) => {
+			console.custom('error', err);
+		})
 	});
 }
 
 function redirectToGameRoom(gameRoomId: string, app: FastifyInstance) {
-	console.log('Two users are in the waiting room, redirecting to game room...');
+	console.custom('INFO', 'Two users are in the waiting room, redirecting to game room...')
 
 	const users = Array.from(app.waitingRoomConns).slice(0, 2);
 	users.forEach((user) => app.waitingRoomConns.delete(user[0]));
@@ -74,5 +74,5 @@ function redirectToGameRoom(gameRoomId: string, app: FastifyInstance) {
 		user[1].send(message);
 	})
 	
-	console.log(`Redirecting ${users[0][0]} and ${users[1][0]} to game room: ${gameRoomId}`);
+	console.custom('INFO', `Redirecting ${users[0][0]} and ${users[1][0]} to game room: ${gameRoomId}`);
 }

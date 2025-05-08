@@ -90,7 +90,7 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 		}
 	});
 
-	app.post('/logout', { preHandler: [authenticate, checkCsrf] }, (req, reply) => {
+	app.post('/logout', { preHandler: [checkCsrf] }, (req, reply) => {
 		reply
 			.clearCookie('token', { path: '/' })
 			.clearCookie('refreshToken', { path: '/' })
@@ -98,11 +98,11 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 			.send({ success: true });
 	});
 
-	app.get('/user', { preHandler: [authenticate] }, (req, reply) => {
+	app.get('/user', (req, reply) => {
 		reply.send(req.user);
 	});
 
-	app.get('/profile', { preHandler: [authenticate] }, async (req, reply) => {
+	app.get('/profile', async (req, reply) => {
 		const user = req.user as JwtUserPayload;
 		const userInfo = await findUserById(user.id)
 		reply.send({ profile: userInfo })

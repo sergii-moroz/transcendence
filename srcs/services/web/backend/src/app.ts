@@ -1,6 +1,7 @@
-import fastify, { FastifyServerOptions } from "fastify"
+import fastify, { FastifyReply, FastifyRequest, FastifyServerOptions } from "fastify"
 import fastifyStatic from "@fastify/static";
 import fastifyCookie from "@fastify/cookie";
+import fastifyWebsocket from '@fastify/websocket';
 import { fileURLToPath } from "url";
 import path from "path";
 
@@ -11,6 +12,7 @@ import { waitingRoomSock } from "./routes/v1/waitingRoom.js";
 import { initializeDB } from "./db/init.js";
 import { db } from "./db/connections.js"
 import { Game } from "./services/game.js";
+import { verifyAccessToken } from "./services/tokenService.js";
 
 export const build = async (opts: FastifyServerOptions) => {
 	const app = fastify(opts)
@@ -25,13 +27,32 @@ export const build = async (opts: FastifyServerOptions) => {
 	app.register(fastifyCookie, {
 		secret: 'cookiesecret-key-cookiesecret-key',
 	});
-
+	app.register(fastifyWebsocket);
 	app.ready(async (err) => {
 
-		console.log("SQLite plugin is loaded successfully.");
+		console.custom('INFO', "SQLite plugin is loaded successfully.");
 		initializeDB()
 	})
 
+	app.addHook('preValidation', async (request: FastifyRequest, reply: FastifyReply) => {
+		const requestURL = request.url;
+		const publicRoutes = ['/api/login', '/api/register'];
+		if ((!requestURL.startsWith('/api/') && !requestURL.startsWith('/ws/')) || publicRoutes.includes(requestURL)) {
+			console.custom('DEBUG', "no authentication");
+			return;
+		}
+		console.custom('DEBUG', 'go through authentication');
+		const token = request.cookies.token;
+		if (!token) {
+			return reply.code(401).send({ type: 'error', message: 'Unauthorized: No token provided' });
+		}
+
+		try {
+			request.user = verifyAccessToken(token);
+		} catch (err) {
+			return reply.code(401).send({ type: 'error', message: 'Invalid or expired token' });
+		}
+	})
 	const __filename = fileURLToPath(import.meta.url);
 	const __dirname = path.dirname(__filename);
 

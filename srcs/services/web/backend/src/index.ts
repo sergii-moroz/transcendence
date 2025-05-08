@@ -1,4 +1,5 @@
 import { FastifyServerOptions } from "fastify";
+import "./services/utils.js";
 import { build } from "./app.js";
 
 const opts: FastifyServerOptions = { logger: true }
