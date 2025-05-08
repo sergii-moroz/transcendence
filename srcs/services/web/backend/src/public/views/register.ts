@@ -37,6 +37,7 @@ export class RegisterView extends View {
 												class="tw-input"
 												placeholder="Nickname"
 												required
+												autofocus
 												>
 										</div>
 

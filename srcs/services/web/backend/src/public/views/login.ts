@@ -36,6 +36,7 @@ export class LoginView extends View {
 										class="tw-input"
 										placeholder="Nickname"
 										required
+										autofocus
 										>
 								</div>
 
