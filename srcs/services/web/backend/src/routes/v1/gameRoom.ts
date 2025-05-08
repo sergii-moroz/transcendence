@@ -5,43 +5,39 @@ import {
 } from "fastify"
 import { GameRoomRequest } from "../../types/game.js";
 
-import fastifyWebsocket from '@fastify/websocket';
-import { Game } from "../../services/game.js";
-
-
 export const gameRoomSock = async (app: FastifyInstance) => {
 
-    app.get('/game/:gameRoomId', { websocket: true }, (connection: WebSocket, req: GameRoomRequest) => {
+    app.get('/game/:gameRoomId', { websocket: true }, (socket, req: GameRoomRequest) => {
 		const gameRoomId = req.params.gameRoomId;
-		console.log(`User connected to game room: ${gameRoomId}`);
+		console.custom('INFO', `User connected to game room: ${gameRoomId}`);
 		const game = app.gameInstances.get(gameRoomId);
 
 		if (!game) {
-			connection.close();
+			socket.close();
 			return;
 		}
-		game.addPlayer(connection);
+		game.addPlayer(socket);
 
-		connection.onmessage = (messageBuffer: Event) => {
+		socket.on('message', (messageBuffer: Buffer) => {
 			const message = JSON.parse(messageBuffer.toString());
 				if(message.type === 'input') {
-					game.registerPlayerInput(message.input, connection);
+					game.registerPlayerInput(message.input, socket);
 				}
-		}
+		})
 
-		connection.onclose = () => {
-			game.removePlayer(connection);
+		socket.on('close', () => {
+			game.removePlayer(socket);
 			if (game.players.length != 2) {
 				app.gameInstances.delete(gameRoomId);
-				connection.send(JSON.stringify({
+				socket.send(JSON.stringify({
 					type: 'Error',
 					message: `The other player has left the game.`
 				}));
 			}
-		}
+		})
 
-		connection.onerror = (err: Event) => {
-			console.error('WebSocket error:', err);
-		}
+		socket.on('error', (err: Event) => {
+			console.custom('ERROR', 'WebSocket error:', err);
+		})
 	});
 }

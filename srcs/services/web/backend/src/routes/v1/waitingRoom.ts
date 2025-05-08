@@ -4,9 +4,6 @@ import {
 	FastifyRequest
 } from "fastify"
 
-import { authenticate} from "../../services/authService.js";
-
-
 import { Game } from "../../services/game.js";
 
 export const waitingRoomSock = async (app: FastifyInstance) => {
@@ -14,12 +11,12 @@ export const waitingRoomSock = async (app: FastifyInstance) => {
     app.get('/waiting-room', {websocket: true }, async (socket, req) => {
 		let userName: string = req.user.username;
 
-		socket.on('message', (message: Buffer) => {
-			const messagee: {
+		socket.on('message', (messageBuffer: Buffer) => {
+			const message: {
 				type: string;
-			} = JSON.parse(message.toString());
+			} = JSON.parse(messageBuffer.toString());
 
-			if(messagee.type === 'joinRoom') {
+			if(message.type === 'joinRoom') {
 				console.custom('INFO', `${userName} has joined the waiting room`);
 				
 				if(!app.waitingRoomConns.has(userName!)) {
