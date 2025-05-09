@@ -18,7 +18,7 @@ export const gameRoomSock = async (app: FastifyInstance) => {
 		}
 		game.addPlayer(socket);
 
-		socket.on('message', (messageBuffer: Buffer) => {
+		socket.on('message', (messageBuffer: Event) => {
 			const message = JSON.parse(messageBuffer.toString());
 				if(message.type === 'input') {
 					game.registerPlayerInput(message.input, socket);
@@ -27,12 +27,11 @@ export const gameRoomSock = async (app: FastifyInstance) => {
 
 		socket.on('close', () => {
 			game.removePlayer(socket);
-			if (game.players.length != 2) {
-				app.gameInstances.delete(gameRoomId);
-				socket.send(JSON.stringify({
-					type: 'Error',
-					message: `The other player has left the game.`
-				}));
+			if (game.players.length !== 2) {
+				if(app.gameInstances.has(gameRoomId)) {
+					app.gameInstances.delete(gameRoomId);
+					console.custom('INFO', `Game room ${gameRoomId} closed`);
+				}
 			}
 		})
 

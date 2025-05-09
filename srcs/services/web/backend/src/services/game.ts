@@ -30,18 +30,20 @@ export class Game {
 	addPlayer(player: WebSocket) {
 		if (this.players.size === 0) {
 			this.players.set('player1', player);
-			console.log('Player 1 joined');
+			console.custom('INFO', `${this.gameRoomId}: Player 1 joined`);
 		}
 		else if (this.players.size === 1) {
 			this.players.set('player2', player);
 			this.startLoop();
-			console.log('Player 2 joined');
+			console.custom('INFO', `${this.gameRoomId}: Player 2 joined`);
 		}
 		else {
 			player.send(JSON.stringify({
 				type: 'Error',
 				message: 'Game is full.'
 			}));
+			console.custom('ERROR', `${this.gameRoomId}: User tried to join a full game`);
+			player.close();
 		}
 	}
 
@@ -51,9 +53,12 @@ export class Game {
 				this.players.delete(role);
 			} else {
 				conn.send(JSON.stringify({
-					type: 'Error',
-					message: 'Game ended, other player left'
+					type: 'gameOver',
+					message: 'Game ended, other player left, you win!',
+					winner: role,
 				}));
+				conn.close();
+				this.players.delete(role);
 			}
 		}
 	}
@@ -88,6 +93,22 @@ export class Game {
 				this.state.ball.y = this.state.paddles.player1.y
 				// this.state.ball.dx *= -1;
 			}
+
+			if(this.state.scores.player1 >= 7 || this.state.scores.player2 >= 7) {
+				this.gameRunning = false;
+				if(this.state.scores.player1 >= 7) {
+					this.players.forEach(player => {
+						player.send(JSON.stringify({
+							type: 'gameOver',
+							message: 'Player 1 wins!',
+							winner: 'player1',
+						}));
+						player.close();
+					});
+					this.players.clear();
+				}
+			}
+
 			this.players.forEach(player => {
 				player.send(JSON.stringify({
 					type: 'gameState',

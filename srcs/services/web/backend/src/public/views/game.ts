@@ -54,6 +54,15 @@ export class GameView extends View {
 				}
 				this.router.navigateTo('/home');
 			}
+
+			if (data.type === 'gameOver') {
+				alert(data.message);
+				if (socket && socket.readyState === WebSocket.OPEN) {
+					socket.close();
+					console.log('Disconnecting from socket...');
+				}
+				this.router.navigateTo('/home');
+			}
 		};
 
 		socket.onclose = () => {
