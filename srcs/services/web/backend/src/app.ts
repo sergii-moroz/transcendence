@@ -4,6 +4,7 @@ import fastifyCookie from "@fastify/cookie";
 import fastifyWebsocket from '@fastify/websocket';
 import { fileURLToPath } from "url";
 import path from "path";
+import fs from 'fs';
 
 import { authRoutes } from "./routes/v1/auth.js";
 import { routes } from "./routes/v1/routes.js"
@@ -34,6 +35,9 @@ export const build = async (opts: FastifyServerOptions) => {
 		initializeDB()
 	})
 
+	const __filename = fileURLToPath(import.meta.url);
+	const __dirname = path.dirname(__filename);
+
 	app.addHook('preValidation', async (request: FastifyRequest, reply: FastifyReply) => {
 		const requestURL = request.url;
 		const publicRoutes = ['/api/login', '/api/register'];
@@ -53,15 +57,21 @@ export const build = async (opts: FastifyServerOptions) => {
 			return reply.code(401).send({ type: 'error', message: 'Invalid or expired token' });
 		}
 	})
-	const __filename = fileURLToPath(import.meta.url);
-	const __dirname = path.dirname(__filename);
+
+	app.setNotFoundHandler((request, reply) => {
+		const requestURL = request.url;
+		if (request.raw.method === 'GET' && (!requestURL.startsWith('/api/') && !requestURL.startsWith('/ws/'))) {
+			return reply.type('text/html').send(fs.readFileSync(path.join(__dirname, 'public/index.html')));
+		}
+		reply.status(404).send({ error: 'Not found' });
+	});
 
 	app.register(fastifyStatic, {
 		root: path.join(__dirname, 'public'),
 		prefix: '/'
 	})
 
-	app.register(routes)
+	// app.register(routes)
 	app.register(waitingRoomSock, {prefix: "ws"})
 	app.register(gameRoomSock, {prefix: "ws"})
 	app.register(authRoutes, {prefix: "api"})
