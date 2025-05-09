@@ -11,10 +11,8 @@ export const waitingRoomSock = async (app: FastifyInstance) => {
     app.get('/waiting-room', {websocket: true }, async (socket, req) => {
 		let userName: string = req.user.username;
 
-		socket.on('message', (messageBuffer: Buffer) => {
-			const message: {
-				type: string;
-			} = JSON.parse(messageBuffer.toString());
+		socket.on('message', (messageBuffer: Event) => {
+			const message = JSON.parse(messageBuffer.toString());
 
 			if(message.type === 'joinRoom') {
 				console.custom('INFO', `${userName} has joined the waiting room`);
@@ -39,7 +37,7 @@ export const waitingRoomSock = async (app: FastifyInstance) => {
 					redirectToGameRoom(game.gameRoomId, app);
 					app.gameInstances.get(game.gameRoomId).startLoop();
 					console.custom('INFO', 'Game started:', game.gameRoomId);
-			}
+				}
 			}
 		})
 
@@ -49,7 +47,7 @@ export const waitingRoomSock = async (app: FastifyInstance) => {
 			}
 		})
 
-		socket.on('error', (err: Error) => {
+		socket.on('error', (err: Event) => {
 			console.custom('error', err);
 		})
 	});
