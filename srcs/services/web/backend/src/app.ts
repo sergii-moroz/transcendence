@@ -7,7 +7,6 @@ import path from "path";
 import fs from 'fs';
 
 import { authRoutes } from "./routes/v1/auth.js";
-import { routes } from "./routes/v1/routes.js"
 import { gameRoomSock } from "./routes/v1/gameRoom.js";
 import { waitingRoomSock } from "./routes/v1/waitingRoom.js";
 import { initializeDB } from "./db/init.js";
@@ -15,6 +14,7 @@ import { db } from "./db/connections.js"
 import { Game } from "./services/game.js";
 import { verifyAccessToken } from "./services/tokenService.js";
 import { twoFARoutes } from "./routes/v1/2fa.js";
+import { normalizeError } from "./errors/error.js";
 
 export const build = async (opts: FastifyServerOptions) => {
 	const app = fastify(opts)
@@ -77,6 +77,17 @@ export const build = async (opts: FastifyServerOptions) => {
 	app.register(gameRoomSock, {prefix: "ws"})
 	app.register(authRoutes, {prefix: "api"})
 	app.register(twoFARoutes, {prefix: 'api/2fa'})
+
+	// GLOBAL ERROR HANDLING
+	app.setErrorHandler( async (error, request, reply) => {
+		const normalizedError = normalizeError(error);
+
+		app.log.error(error);
+
+		return reply
+			.code(normalizedError.statusCode)
+			.send(normalizedError);
+	})
 
 	return app
 }
