@@ -160,6 +160,50 @@ export class SettingsView extends View {
 	}
 
 	setupEventListeners() {
+		const items = document.querySelectorAll<HTMLElement>('[data-menu-item]')
+		const contents = document.querySelectorAll<HTMLElement>('[data-content-block]')
 
+		const updateSelectedItem = (selectedIndex: number) => {
+			items.forEach((item, index) => {
+				const method = index === selectedIndex ? 'setAttribute' : 'removeAttribute'
+				item[method]('data-selected', '')
+			})
+		}
+
+		const updateContentVisibility = (selectedIndex: number) => {
+			contents.forEach((content, index) => {
+				content.classList.toggle('hidden', index !== selectedIndex)
+			})
+		}
+
+		items.forEach((item, index) => {
+			this.addEventListener(item, 'click', () => {
+				updateSelectedItem(index)
+				updateContentVisibility(index)
+			})
+		})
+
+		const showAllContents = () => {
+			contents.forEach(content => content.classList.remove('hidden'))
+		}
+
+		const showSelectedContentOnly = () => {
+			items.forEach((item, index) => {
+				const isSelected = item.hasAttribute('data-selected')
+				contents[index]?.classList.toggle('hidden', !isSelected)
+			})
+		}
+
+		const handleWindowSize = () => {
+			const isMobileView = window.innerWidth < 640;
+
+			isMobileView ? showAllContents() : showSelectedContentOnly()
+		}
+
+		// show all setting on small device
+		this.addEventListener(window, 'resize', handleWindowSize)
+
+		// initialize menu
+		handleWindowSize()
 	}
 }
