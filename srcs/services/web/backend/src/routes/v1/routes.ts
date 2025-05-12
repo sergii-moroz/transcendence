@@ -13,4 +13,8 @@ export const routes = async (app: FastifyInstance, opts: FastifyPluginOptions) =
 		return { login: 'page'}
 	})
 
+	app.get('/game/:gameRoomId', (req, reply) => {
+		return reply.type('text/html').sendFile('../public/index.html');
+	});
+
 }
