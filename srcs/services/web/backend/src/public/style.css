@@ -16,15 +16,15 @@
 }
 
 @layer base {
-  .light {
-    --color-mrz: hsl(207 97% 12%);
+	.light {
+		--color-mrz: hsl(207 97% 12%);
 		--color-primary: #7c3aed;
-  }
+	}
 
-  .dark {
+	.dark {
 		--color-mrz: hsl(0 0% 96%);
 		--color-primary: #7c3aed;
-  }
+	}
 }
 
 @layer components {
@@ -37,17 +37,24 @@
 	}
 
 	.tw-btn {
-		@apply bg-primary text-white text-sm hover:bg-primary/70
-			font-bold rounded-md px-5 py-2.5 text-center
-			focus:ring-2 focus:outline-none focus:ring-primary
-			dark:bg-primary dark:focus:ring-primary/50
+		@apply bg-primary text-gray-200 text-sm
+			font-bold rounded-md px-5 py-2.5 text-center border border-transparent
+			focus:ring-2 focus:outline-none focus:ring-primary cursor-pointer
+			hover:bg-primary/20 hover:text-primary hover:border-primary
+			dark:hover:bg-primary/10
 	}
 
 	.tw-btn-outline {
-		@apply text-primary bg-transparent border border-primary text-sm
-			font-bold rounded-md px-5 py-2.5 text-center
-			hover:bg-primary/10
+		@apply text-primary bg-transparent border border-transparent text-sm
+			rounded-md px-5 py-2.5 text-center cursor-pointer
 			focus:ring-1 focus:outline-none
-			dark:text-primary dark:hover:bg-primary/30 dark:hover:text-white
+			hover:bg-primary/10 hover:text-primary hover:border-primary
+			dark:hover:bg-primary/10
+	}
+
+	.tw-btn-disabled {
+		@apply text-gray-500 bg-gray-100 border border-gray-200 text-sm
+			rounded-md px-5 py-2.5 text-center
+			dark:bg-primary/10 dark:border-gray-700
 	}
 }
