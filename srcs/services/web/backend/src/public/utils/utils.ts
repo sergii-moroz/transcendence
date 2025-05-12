@@ -30,8 +30,6 @@ export const generateBackupCodesImage = (codes: string[]) => {
 	const maxNumberedCodeWidth = Math.max(...codes.map((code, i) =>
 		ctx.measureText(`${i+1}. ${code}`).width
 	));
-	console.log("titleWidth:", titleWidth)
-	console.log("maxNumberedCodeWidth:", maxNumberedCodeWidth)
 	const canvasWidth = Math.max(titleWidth, maxNumberedCodeWidth) + (margin * 2);
 	const canvasHeight = (codes.length * lineHeight) + (margin * 2) + 40; // +40 for title
 
