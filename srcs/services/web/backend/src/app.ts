@@ -14,6 +14,7 @@ import { initializeDB } from "./db/init.js";
 import { db } from "./db/connections.js"
 import { Game } from "./services/game.js";
 import { verifyAccessToken } from "./services/tokenService.js";
+import { twoFARoutes } from "./routes/v1/2fa.js";
 
 export const build = async (opts: FastifyServerOptions) => {
 	const app = fastify(opts)
@@ -75,6 +76,7 @@ export const build = async (opts: FastifyServerOptions) => {
 	app.register(waitingRoomSock, {prefix: "ws"})
 	app.register(gameRoomSock, {prefix: "ws"})
 	app.register(authRoutes, {prefix: "api"})
+	app.register(twoFARoutes, {prefix: 'api/2fa'})
 
 	return app
 }
