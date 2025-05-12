@@ -128,7 +128,7 @@ export class Backup2FAView extends View {
 		const codesContainer = document.getElementById('codes') as HTMLElement
 
 		const loadBackupCodes = async () => {
-			const res = await this.api.request2FABackupCodes()
+			const res = await this.api.create2FABackupCodes()
 			const data = await res.json()
 			backupCodes = data.codes
 			codesContainer.innerHTML = backupCodes.map(code => `<p>${code}</p>`).join('')

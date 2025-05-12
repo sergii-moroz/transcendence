@@ -191,6 +191,33 @@ export class Api {
 		})
 		return res
 	}
+
+	/**
+	 * Requests new 2FA backup codes from the server.
+	 *
+	 * Makes an authenticated POST request to the '/2fa/backup-codes' endpoint to generate
+	 * new backup codes for two-factor authentication. The request includes CSRF protection
+	 * and requires valid credentials.
+	 *
+	 * @returns {Promise<Response>} A promise that resolves with the server response containing:
+	 *	- `codes`: string[] (Array of backup codes)
+	 * @example
+	 * const response = await instanceApi.request2FABackupCodes();
+	 *	if (response.ok) {
+	 *		const data = await response.json()
+	 *		console.log('Backup codes:', data.codes);
+	 *	}
+	 **/
+	async create2FABackupCodes() {
+		const res = await this.request('/2fa/backup-codes', {
+			method: 'POST',
+			headers: {
+				'X-CSRF-Token': this.getCsrfToken(),
+			},
+			credentials: 'include'
+		})
+		return res
+	}
 }
 
 // TODO:
