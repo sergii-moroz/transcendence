@@ -1,3 +1,4 @@
+import { ErrorResponse } from "../types/errors.js";
 import { User } from "./types.js";
 
 export class Api {
@@ -10,17 +11,38 @@ export class Api {
 		this.refreshIntervalId = null;
 	}
 
-	async request(endpoint: string, options = {}) {
+	async request(endpoint: string,
+		// options: = {}
+		options: RequestInit & { headers?: Record<string, string> } = {}
+	) {
 		const url = `${this.baseUrl}${endpoint}`;
 		let res = await fetch(url, {
 			...options,
 			credentials: 'include',
 		});
 
-		if (res.status === 401) {
-			await this.refreshToken();
-			res = await fetch(url, options);
+		if (!res.ok) {
+			const errorRes = res.clone();
+			const errorData: ErrorResponse = await errorRes.json();
+			console.log("error data:", errorData);
+			if (errorData.code !== 'FST_2FA_INVALID_CODE') {
+				await this.refreshToken()
+
+				if (options.headers && options.headers['X-CSRF-Token']) {
+					options.headers['X-CSRF-Token'] = this.getCsrfToken();
+				}
+
+				res = await fetch(url, {
+					...options,
+					credentials: 'include'
+				});
+			}
 		}
+
+		// if (res.status === 401) {
+		// 	await this.refreshToken();
+		// 	res = await fetch(url, options);
+		// }
 
 		return res;
 	}
@@ -43,9 +65,8 @@ export class Api {
 		return document.cookie
 		.split('; ')
 		.find(row => row.startsWith('csrf_token='))
-		?.split('=')[1];
+		?.split('=')[1] || '';
 	}
-
 
 	startAutoRefresh() {
 		this.refreshIntervalId = setInterval(async () => {
