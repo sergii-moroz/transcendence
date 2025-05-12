@@ -10,18 +10,15 @@ export class WaitingView extends View {
 		<button id="home-link">Home</button>
 		`;
 	}
-	
-	setupEventListeners() {
-		const socket = new WebSocket('ws://localhost:4242/ws/waiting-room');
+	handleSocket = () => {
+		this.socket = new WebSocket('ws://localhost:4242/ws/waiting-room');
 		
-		//socketEventListeners
-		socket.onopen = () => {
+		this.socket.onopen = () => {
 			console.log('WebSocket connection established.');
-			const username = this.router.currentUser!.username;
-			socket.send(JSON.stringify({ type: 'joinRoom' }));
+			this.socket!.send(JSON.stringify({ type: 'joinRoom' }));
 		}
 	
-		socket.onmessage = (event) => {
+		this.socket.onmessage = (event) => {
 			const data = JSON.parse(event.data) as WsMatchMakingMessage;
 	
 			if (data.type === 'joinedRoom') {
@@ -30,34 +27,32 @@ export class WaitingView extends View {
 	
 			if (data.type === 'redirectingToGame') {
 				console.log(`Redirecting to game room: ${data.gameRoomId}`);
-				socket.close();
 				this.router.navigateTo('/game/' + data.gameRoomId);
 			}
 		};
 		
-		socket.onclose = () => {
-			console.log('WebSocket connection closed.');
+		this.socket.onclose = () => {
+			// console.log('WebSocket connection closed.');
 		};
 	
-		socket.onerror = (err) => {
+		this.socket.onerror = (err) => {
+			alert(`WebSocket error: ${err}`);
 			console.error('WebSocket error:', err);
+			this.router.navigateTo('/home');
 		};
+	}
 	
-
-		//normal eventListeners
+	setupEventListeners() {
+		this.handleSocket();
 		this.addEventListener(document.getElementById('home-link')!, 'click', (e) => {
 			e.preventDefault();
-			if (socket && socket.readyState === WebSocket.OPEN) {
-				socket.close();
-				console.log('Disconnecting from socket...');
-			}
 			return this.router.navigateTo('/home');
 		});
 
 		this.addEventListener(window, 'beforeunload', (e) => {
 			e.preventDefault();
-			if (socket && socket.readyState === WebSocket.OPEN) {
-				socket.close();
+			if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+				this.socket.close();
 				console.log('Disconnecting from socket, page unload...');
 			}
 		});

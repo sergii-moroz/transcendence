@@ -31,14 +31,14 @@ export class GameView extends View {
 		this.setupEventListeners();
 	}
 
-	handleSocket = (gameRoomId: string): WebSocket => {
-		const socket = new WebSocket(`ws://localhost:4242/ws/game/${gameRoomId}`);
+	handleSocket = () => {
+		this.socket = new WebSocket(`ws://localhost:4242/ws/game/${this.gameRoomId}`);
 
-		socket.onopen = () => {
+		this.socket.onopen = () => {
 			console.log('WebSocket connection established.');
 		}
 
-		socket.onmessage = (event) => {
+		this.socket.onmessage = (event) => {
 			const data = JSON.parse(event.data) as gameJson;
 
 			if (data.type === 'gameState') {
@@ -48,73 +48,49 @@ export class GameView extends View {
 			if (data.type === 'Error') {
 				alert(data.message);
 				console.error('WebSocket error:', data.message);
-				if (socket && socket.readyState === WebSocket.OPEN) {
-					socket.close();
-					console.log('Disconnecting from socket...');
-				}
 				this.router.navigateTo('/home');
 			}
 
 			if (data.type === 'gameOver') {
 				alert(data.message);
-				if (socket && socket.readyState === WebSocket.OPEN) {
-					socket.close();
-					console.log('Disconnecting from socket...');
-				}
 				this.router.navigateTo('/home');
 			}
 		};
 
-		socket.onclose = () => {
-			if (socket && socket.readyState === WebSocket.OPEN) {
-				socket.close();
-				console.log('Disconnecting from socket...');
-			}
-			console.log('WebSocket connection closed.');
-		};
-
-		socket.onerror = (err: Event) => {
-			alert(`WebSocket error: ${err}`);
-			console.error('WebSocket error:', err);
-			if (socket && socket.readyState === WebSocket.OPEN) {
-				socket.close();
-				console.log('Disconnecting from socket...');
-			}
+		this.socket.onclose = () => {
 			this.router.navigateTo('/home');
 		};
 
-		return (socket);
+		this.socket.onerror = (err: Event) => {
+			alert(`WebSocket error: ${err}`);
+			console.error('WebSocket error:', err);
+			this.router.navigateTo('/home');
+		};
 	}
 
 	setupEventListeners() {
-		const socket: WebSocket = this.handleSocket(this.gameRoomId);
+		this.handleSocket();
 		this.addEventListener(document.getElementById('home-link')!, 'click', (e) => {
 			e.preventDefault();
-			if (socket && socket.readyState === WebSocket.OPEN) {
-				socket.close();
-				console.log('Disconnecting from socket...');
-			}
 			this.router.navigateTo('/home');
 		});
 
-		this.addEventListener(window, 'beforeunload', (e) => {
+		this.addEventListener(window, 'beforeunload', (e) => { //this doesnt work. it wont redirect...
+			console.log('page unload...');
 			e.preventDefault();
-			if (socket && socket.readyState === WebSocket.OPEN) {
-				socket.close();
-				console.log('Disconnecting from socket, page unload...');
-			}
+			this.router.navigateTo('/home');
 		});
 
 		this.addEventListener(document, 'keydown', (e: Event) => {
 			if (e instanceof KeyboardEvent) {
-				if (socket && socket.readyState === WebSocket.OPEN) {
+				if (this.socket && this.socket.readyState === WebSocket.OPEN) {
 					if (e.key === 'ArrowUp') {
 						e.preventDefault();
-						socket.send(JSON.stringify({ type: 'input', input: 'up' }));
+						this.socket.send(JSON.stringify({ type: 'input', input: 'up' }));
 					}
 					if (e.key === 'ArrowDown') {
 						e.preventDefault();
-						socket.send(JSON.stringify({ type: 'input', input: 'down' }));
+						this.socket.send(JSON.stringify({ type: 'input', input: 'down' }));
 					}
 				}
 			}
