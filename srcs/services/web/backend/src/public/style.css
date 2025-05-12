@@ -13,6 +13,13 @@
 
 	--font-inter: "Inter", "sans-serif";
 	--font-roboto: "Roboto", "sans-serif";
+
+	@keyframes errorBar {
+		from { width: 100%; }
+		to { width: 0%; }
+	}
+
+	--animate-error-bar: errorBar 5s linear forwards;
 }
 
 @layer base {
