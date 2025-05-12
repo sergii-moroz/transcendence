@@ -69,7 +69,7 @@ export const twoFARoutes = async (app: FastifyInstance, opts: FastifyPluginOptio
 		}
 	})
 
-	app.post('/2fa/backup-codes', {preHandler: [authenticate, checkCsrf]}, async (req, reply) => {
+	app.post('/backup-codes', {preHandler: [authenticate, checkCsrf]}, async (req, reply) => {
 		const user = req.user as JwtUserPayload
 		const codes = generateBackupCodes()
 		const codesStr = JSON.stringify(codes)
