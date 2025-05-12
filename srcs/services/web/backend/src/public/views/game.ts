@@ -58,6 +58,7 @@ export class GameView extends View {
 		};
 
 		this.socket.onclose = () => {
+			console.log("connection got closed by server");
 			this.router.navigateTo('/home');
 		};
 
@@ -75,10 +76,12 @@ export class GameView extends View {
 			this.router.navigateTo('/home');
 		});
 
-		this.addEventListener(window, 'beforeunload', (e) => { //this doesnt work. it wont redirect...
-			console.log('page unload...');
+		this.addEventListener(window, 'beforeunload', (e) => {
 			e.preventDefault();
-			this.router.navigateTo('/home');
+			if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+				this.socket.close();
+				console.log('Disconnecting from socket, page unload...');
+			}
 		});
 
 		this.addEventListener(document, 'keydown', (e: Event) => {
