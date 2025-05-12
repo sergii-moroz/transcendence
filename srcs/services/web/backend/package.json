@@ -38,6 +38,7 @@
     "@types/bcrypt": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.15.3",
+    "@types/qrcode": "^1.5.5",
     "cpy-cli": "^5.0.0",
     "nodemon": "^3.1.10",
     "postcss": "^8.5.3",
