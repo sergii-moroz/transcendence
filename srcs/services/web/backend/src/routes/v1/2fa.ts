@@ -9,8 +9,11 @@ import {
 } from "../../services/authService.js";
 
 import {
+	generateBackupCodes,
 	load2FASecret,
 	mark2FAVerified,
+	markTwoFactorEnabled,
+	setBackupCodes,
 	update2FASecret
 } from "../../services/2faService.js";
 
@@ -64,5 +67,15 @@ export const twoFARoutes = async (app: FastifyInstance, opts: FastifyPluginOptio
 		} catch (err) {
 			throw err
 		}
+	})
+
+	app.post('/2fa/backup-codes', {preHandler: [authenticate, checkCsrf]}, async (req, reply) => {
+		const user = req.user as JwtUserPayload
+		const codes = generateBackupCodes()
+		const codesStr = JSON.stringify(codes)
+
+		await setBackupCodes(codesStr, user.id)
+		await markTwoFactorEnabled(user.id)
+		reply.send({codes})
 	})
 }
