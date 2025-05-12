@@ -39,3 +39,35 @@ export const mark2FAVerified = async (id: number): Promise<void> => {
 		);
 	});
 };
+
+export const generateBackupCodes = (count = 10): string[] => {
+	return Array.from({ length: count }, () =>
+		Math.random().toString(36).slice(-10).toUpperCase()
+	)
+}
+
+export const setBackupCodes = async (codesStr: string, id:number):Promise<void> => {
+	return new Promise ((resolve, reject) => {
+		db.run(
+			'UPDATE users SET two_factor_backup_codes = ?, two_factor_backup_at = ? WHERE id = ?',
+			[codesStr, new Date().toISOString(), id],
+			(err) => {
+				if (err) return reject(err)
+				resolve()
+			}
+		)
+	})
+}
+
+export const markTwoFactorEnabled = async (id: number): Promise<void> => {
+	return new Promise((resolve, reject) => {
+		db.run(
+			'UPDATE users SET two_factor_enabled = ? WHERE id = ?',
+			[true, id],
+			(err) => {
+				if (err) return reject(err);
+				resolve();
+			}
+		);
+	});
+};
