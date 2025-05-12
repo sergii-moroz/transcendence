@@ -120,6 +120,35 @@ export class Api {
 		}
 		return null;
 	}
+
+	// Two Factor Authentification
+
+	/**
+	 * Retrieves a QR code and secret for 2FA registration.
+	 * Makes an authenticated POST request to the '/2fa/register' endpoint.
+	 *
+	 * @returns {Promise<{qr: string, secret: string}>} A promise that resolves with an object containing:
+	 *									- qr: Base64 encoded QR code image data (as a data URL)
+	 *									- secret: The 2FA secret key in plain text
+	 * @throws Error when request fails or CSRF token is unavailable
+	 * @example
+	 * try {
+	 *	const { qr, secret } = await instance.getQR();
+	 *	console.log('QR data URL:', qr);
+	 *	console.log('Secret key:', secret);
+	 * } catch (error) {
+	 *	console.error('Failed to get QR code:', error);
+	 * }
+	 **/
+	async getQR() {
+		const res = await this.request('/2fa/register', {
+			method: 'POST',
+			headers: {
+				'X-CSRF-Token': this.getCsrfToken(),
+			},
+		});
+		return res;
+	}
 }
 
 // TODO:
