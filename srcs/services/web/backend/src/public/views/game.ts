@@ -58,7 +58,7 @@ export class GameView extends View {
 		};
 
 		this.socket.onclose = () => {
-			console.log("connection got closed by server");
+			console.log("WebSocket connection got closed by server");
 			this.router.navigateTo('/home');
 		};
 
