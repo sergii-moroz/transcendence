@@ -1,5 +1,6 @@
 import { VerificationMethodView } from "./views/2fa-verification-method.js"
 import { Register2FAView } from "./views/2fa-register.js"
+import { Verify2FAView } from "./views/2fa-verify.js"
 
 import { WaitingView } from "./views/waitingRoom.js"
 import { NotFoundView } from "./views/notFound.js"
@@ -27,6 +28,7 @@ const routes: Record<string, typeof View> = {
 	'/settings': SettingsView,
 	'/settings/2fa/verification-method': VerificationMethodView,
 	'/settings/2fa/register': Register2FAView,
+	'/settings/2fa/verify': Verify2FAView,
 	'404': NotFoundView
 };
 
