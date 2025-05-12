@@ -149,6 +149,27 @@ export class Api {
 		});
 		return res;
 	}
+
+	/**
+	 * Verifies a 2FA (Two-Factor Authentication) code with the server.
+	 *
+	 * Makes an authenticated POST request to the '/2fa/verify' endpoint with the provided code.
+	 * The request includes CSRF protection and sends the code as JSON payload.
+	 *
+	 * @param {string} code - The 2FA verification code to validate (typically a 6-digit TOTP code)
+	 **/
+	async verify2FA(code: string) {
+		const res = await this.request('/2fa/verify', {
+			method: 'POST',
+			headers: {
+				'X-CSRF-Token': this.getCsrfToken(),
+				'Content-Type': 'application/json',
+			},
+			credentials: 'include',
+			body: JSON.stringify({ code })
+		})
+		return res
+	}
 }
 
 // TODO:
