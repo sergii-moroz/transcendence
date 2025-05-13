@@ -9,11 +9,16 @@ export const gameRoomSock = async (app: FastifyInstance) => {
 
     app.get('/game/:gameRoomId', { websocket: true }, (socket, req: GameRoomRequest) => {
 		const gameRoomId = req.params.gameRoomId;
-		console.custom('INFO', `User connected to game room: ${gameRoomId}`);
+		console.custom('INFO', `User: ${req.user.username} connected to game room: ${gameRoomId}`);
 		const game = app.gameInstances.get(gameRoomId);
 
 		if (!game) {
-			socket.close();
+			console.custom("WARN", 'aaaa');
+			// socket.send(JSON.stringify({
+			// 	type: 'Error',
+			// 	message: 'Game doesnt exist'
+			// }))
+			socket.close(4001, 'Game not found');
 			return;
 		}
 		game.addPlayer(socket);

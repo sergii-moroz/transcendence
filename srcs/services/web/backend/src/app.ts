@@ -43,10 +43,10 @@ export const build = async (opts: FastifyServerOptions) => {
 		const requestURL = request.url;
 		const publicRoutes = ['/api/login', '/api/register'];
 		if ((!requestURL.startsWith('/api/') && !requestURL.startsWith('/ws/')) || publicRoutes.includes(requestURL)) {
-			console.custom('DEBUG', "no authentication");
+			console.custom('DEBUG', "No authentification required for this route");
 			return;
 		}
-		console.custom('DEBUG', 'go through authentication');
+		console.custom('DEBUG', 'Authentifying user...');
 		const token = request.cookies.token;
 		if (!token) {
 			return reply.code(401).send({ type: 'error', message: 'Unauthorized: No token provided' });

@@ -106,6 +106,16 @@ export class Game {
 						player.close();
 					});
 					this.players.clear();
+				} else {
+					this.players.forEach(player => {
+						player.send(JSON.stringify({
+							type: 'gameOver',
+							message: 'Player 2 wins!',
+							winner: 'player2',
+						}));
+						player.close();
+					});
+					this.players.clear();
 				}
 			}
 

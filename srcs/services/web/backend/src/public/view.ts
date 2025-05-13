@@ -8,6 +8,7 @@ export class View {
 	eventListeners: eventListenerObject[];
 	api: Api;
 	router: Router;
+	socket: WebSocket | null;
 
 	constructor(api: Api, router: Router) {
 		this.element = document.createElement('div');
@@ -15,6 +16,7 @@ export class View {
 
 		this.api = api;
 		this.router = router;
+		this.socket = null;
 	}
 
 	setContent(input: Record<string, any>) {
@@ -49,6 +51,10 @@ export class View {
 
 	unmount = () => {
 		this.cleanupEventListeners();
+		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+			this.socket.close();
+			console.log('Disconnected from WebSocket...');
+		}
 
 		if (this.element.parentElement) {
 			this.element.remove();
