@@ -1,0 +1,67 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+	--color-mrz: #ff00ff;
+	--color-background: #1e1e2f;
+	--color-text: #f8f9ff;
+	--color-primary: #7c3aed;
+	--color-accent: #c084fc;
+
+	--font-inter: "Inter", "sans-serif";
+	--font-roboto: "Roboto", "sans-serif";
+
+	@keyframes errorBar {
+		from { width: 100%; }
+		to { width: 0%; }
+	}
+
+	--animate-error-bar: errorBar 5s linear forwards;
+}
+
+@layer base {
+	.light {
+		--color-mrz: hsl(207 97% 12%);
+		--color-primary: #7c3aed;
+	}
+
+	.dark {
+		--color-mrz: hsl(0 0% 96%);
+		--color-primary: #7c3aed;
+	}
+}
+
+@layer components {
+	.tw-input {
+		@apply bg-gray-50 border border-gray-300 text-gray-900 rounded-md focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500;
+	}
+
+	.tw-card {
+		@apply bg-white rounded-lg shadow dark:border dark:bg-gray-800 dark:border-gray-700
+	}
+
+	.tw-btn {
+		@apply bg-primary text-gray-200 text-sm
+			font-bold rounded-md px-5 py-2.5 text-center border border-transparent
+			focus:ring-2 focus:outline-none focus:ring-primary cursor-pointer
+			hover:bg-primary/20 hover:text-primary hover:border-primary
+			dark:hover:bg-primary/10
+	}
+
+	.tw-btn-outline {
+		@apply text-primary bg-transparent border border-transparent text-sm
+			rounded-md px-5 py-2.5 text-center cursor-pointer
+			focus:ring-1 focus:outline-none
+			hover:bg-primary/10 hover:text-primary hover:border-primary
+			dark:hover:bg-primary/10
+	}
+
+	.tw-btn-disabled {
+		@apply text-gray-500 bg-gray-100 border border-gray-200 text-sm
+			rounded-md px-5 py-2.5 text-center
+			dark:bg-primary/10 dark:border-gray-700
+	}
+}
