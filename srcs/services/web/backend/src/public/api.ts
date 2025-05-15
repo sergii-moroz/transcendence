@@ -12,23 +12,25 @@ export class Api {
 	}
 
 	async request(endpoint: string,
-		// options: = {}
 		options: RequestInit & { headers?: Record<string, string> } = {}
 	) {
 		const url = `${this.baseUrl}${endpoint}`;
+
 		let res = await fetch(url, {
 			...options,
 			credentials: 'include',
 		});
 
 		if (!res.ok) {
+
 			const errorRes = res.clone();
 			const errorData: ErrorResponse = await errorRes.json();
-			console.log("error data:", errorData);
+
 			if (errorData.code !== 'FST_2FA_INVALID_CODE') {
+
 				await this.refreshToken()
 
-				if (options.headers && options.headers['X-CSRF-Token']) {
+				if (options.headers) {
 					options.headers['X-CSRF-Token'] = this.getCsrfToken();
 				}
 
@@ -36,19 +38,16 @@ export class Api {
 					...options,
 					credentials: 'include'
 				});
+
 			}
 		}
-
-		// if (res.status === 401) {
-		// 	await this.refreshToken();
-		// 	res = await fetch(url, options);
-		// }
 
 		return res;
 	}
 
 	async refreshToken() {
-		return await fetch(`${this.baseUrl}/refresh`, {
+		// return await fetch(`${this.baseUrl}/refresh`, {
+		const res = await fetch(`${this.baseUrl}/refresh`, {
 			method: 'POST',
 			headers: {
 				'X-CSRF-Token': this.getCsrfToken() || '',
@@ -56,9 +55,11 @@ export class Api {
 			credentials: 'include',
 		});
 
-		// if (!res.ok) {
-		// 	console.error('Auto-refresh failed');
-		// }
+		if (res.ok && !this.refreshIntervalId) {
+			this.startAutoRefresh()
+		}
+
+		return res
 	}
 
 	getCsrfToken() {
@@ -98,7 +99,7 @@ export class Api {
 		});
 
 		if (res.ok) {
-		this.startAutoRefresh();
+			this.startAutoRefresh();
 		}
 		return res;
 	}
@@ -210,6 +211,17 @@ export class Api {
 	 **/
 	async create2FABackupCodes() {
 		const res = await this.request('/2fa/backup-codes', {
+			method: 'POST',
+			headers: {
+				'X-CSRF-Token': this.getCsrfToken(),
+			},
+			credentials: 'include'
+		})
+		return res
+	}
+
+	async enable2FA() {
+		const res = await this.request('/2fa/enable', {
 			method: 'POST',
 			headers: {
 				'X-CSRF-Token': this.getCsrfToken(),
