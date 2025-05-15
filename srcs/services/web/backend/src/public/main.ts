@@ -1,4 +1,5 @@
 import { VerificationMethodView } from "./views/2fa-verification-method.js"
+import { isAlreadyEnabled2FAView } from "./views/2fa-is-already-enabled.js"
 import { Register2FAView } from "./views/2fa-register.js"
 import { Verify2FAView } from "./views/2fa-verify.js"
 import { Backup2FAView } from "./views/2fa-backup.js"
@@ -33,6 +34,7 @@ const routes: Record<string, typeof View> = {
 	'/settings/2fa/verify': Verify2FAView,
 	'/settings/2fa/backup': Backup2FAView,
 	'/settings/2fa/completed': Completed2FAView,
+	'/settings/2fa/is-already-enabled': isAlreadyEnabled2FAView,
 	'404': NotFoundView
 };
 
