@@ -1,7 +1,6 @@
 import {
-	iconExit,
-	iconMail,
-	iconSettings
+	iconHomeProfile,
+	iconHomeLeaderboard
 } from "../components/icons.js";
 
 import { View } from "../view.js"
@@ -9,88 +8,65 @@ import { View } from "../view.js"
 export class HomeView extends View {
 	override setContent(input: Record<string, any>) {
 		this.element.innerHTML = `
-			<header
-				class="flex items-center justify-between px-10 py-4
-					bg-white shadow relative
-					dark:border dark:bg-gray-800 dark:border-gray-700"
-			>
-				<p>Welcome, ${input.username}</p>
-				<div class="text-gray-500">${iconMail}</div>
-				<div
-					id="avatar"
-					class="flex items-center justify-center size-12 rounded-full bg-primary shadow
-						text-white uppercase text-bold cursor-pointer
-						dark:border-b dark:border-gray-700"
-				>
-					${input.username.slice(0, 2)}
-				</div>
+			<!-- total page -->
+			<div class="min-h-screen flex overflow-hidden">
+				<!-- content Part + background modules -->
+				<div class="flex-1 relative overflow-y-auto">
+					
+					<!-- background modules -->
+					<div class="absolute inset-0 overflow-hidden z-0">
+						<div class="absolute top-5 left-1/8 w-94 h-110 dark:bg-purple-600 bg-green-400 opacity-20 rounded-full blur-3xl"></div>
+						<div class="absolute bottom-0 right-1/6 w-80 h-80 dark:bg-purple-500 bg-green-400 opacity-15 rounded-full blur-3xl"></div>
+					</div>
 
-				<!-- MENU: PROFILE -->
-				<div
-					id="profile-menu"
-					class="hidden absolute right-5 top-20 space-y-2"
-				>
-					<div
-						class="h-2 m-2 rounded-sm bg-white shadow dark:border dark:bg-gray-800 dark:border-gray-700"
-					></div>
-					<ul class="tw-card p-4 space-y-1">
-						<li class="pl-3 pr-6 py-1 rounded-sm cursor-pointer hover:underline hover:decoration-2 hover:decoration-primary hover:underline-offset-4">
-							<a
-								href="/settings"
-								class="flex items-center gap-2 hover:[&_div]:bg-primary hover:[&_div]:text-gray-200"
-								data-link
-							>
-								<div class="size-8 flex items-center justify-center rounded-full pointer-events-none">${iconSettings}</div>
-								Settings
-							</a>
-						</li>
-						<li id="logout" class="pl-3 pr-6 py-1 rounded-sm cursor-pointer hover:underline hover:decoration-2 hover:decoration-primary hover:underline-offset-4" >
-							<div class="flex items-center gap-2 hover:[&_div]:bg-primary hover:[&_div]:text-gray-200">
-								<div class="size-8 flex items-center justify-center rounded-full">${iconExit}</div>
-								Logout
-							<div>
-						</li>
-					</ul>
-				</div>
-			</header>
+					<!-- content part -->
+					<div class="relative z-10 p-8 max-w-6xl mx-auto">
 
-			<nav>
-				<a href="/about" data-link>About</a> |
-				<a href="/login" data-link>login</a> |
-				<a href="/profile" data-link>Profile</a> |
-				<button id="join">JoinRoom</button>
-			</nav>
+						<!-- header -->
+						<header class="flex justify-between items-center mb-10">
+							<h1 class="text-3xl font-bold">TRANSCENDENCE</h1>
+							<div class="flex items-center gap-3">
+								<button id="profile-btn" class="p-2 dark:hover:bg-gray-800 hover:bg-gray-200 rounded-full transition-colors">
+									${iconHomeProfile}
+								</button>
+								<button id="leaderboard-btn" class="p-2 dark:hover:bg-gray-800 hover:bg-gray-200 rounded-full transition-colors">
+									${iconHomeLeaderboard}
+								</button>
+								<button id="logout-btn" class="ml-2 px-4 py-2 bg-red-500 hover:bg-red-600 rounded-full transition-colors">
+									<span class="text-white">Logout</span>
+								</button>
+							</div>
+						</header>
+
+					</div>
+				</div>
+			</div>
 		`;
 	}
 
-	override async prehandler(): Promise<Record<string, any>> {
-		if (this.router.currentUser)
-			return { username: this.router.currentUser.username};
-		return { username: 'error'};
-	}
+	// override async prehandler(): Promise<Record<string, any>> {
+	// 	if (this.router.currentUser)
+	// 		return { username: this.router.currentUser.username};
+	// 	return { username: 'error'};
+	// }
 
 	setupEventListeners() {
-		const avatar = document.getElementById('avatar');
-		const profileMenu = document.getElementById('profile-menu')
+		const profileBTN = document.getElementById('profile-btn');
+		const leaderboardBTN = document.getElementById('leaderboard-btn');
+		const logoutBTN = document.getElementById('logout-btn');
 
-		const toggleProfileMenu = () => {
-			if (!profileMenu) return
-			profileMenu.classList.toggle('hidden')
-		}
+		this.addEventListener(profileBTN!, 'click', () => {
+			return this.router.navigateTo('/profile');
+		});
 
-		if (avatar) {
-			this.addEventListener(avatar, 'click', toggleProfileMenu);
-		}
+		this.addEventListener(leaderboardBTN!, 'click', () => {
+			return this.router.navigateTo('/about');
+		});
 
-		this.addEventListener(document.getElementById('logout')!, 'click', async () => {
+		this.addEventListener(logoutBTN!, 'click', async () => {
 			await this.api.logout();
 			this.router.currentUser = null;
 			return this.router.navigateTo('/login');
-		});
-
-		this.addEventListener(document.getElementById('join')!, 'click', (e) => {
-			e.preventDefault();
-			this.router.navigateTo('/waiting-room');
 		});
 	};
 }
