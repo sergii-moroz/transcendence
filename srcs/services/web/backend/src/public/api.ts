@@ -230,6 +230,10 @@ export class Api {
 		})
 		return res
 	}
+
+	async is2FAEnabled() {
+		return this.request('/2fa/enable')
+	}
 }
 
 // TODO:

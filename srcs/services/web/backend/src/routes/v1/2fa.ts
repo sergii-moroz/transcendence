@@ -10,9 +10,10 @@ import {
 
 import {
 	generateBackupCodes,
-	load2FASecret,
+	get2FASecret,
+	is2FAEnabled,
+	mark2FAEnabled,
 	mark2FAVerified,
-	markTwoFactorEnabled,
 	setBackupCodes,
 	update2FASecret
 } from "../../services/2faService.js";
@@ -32,15 +33,20 @@ export const twoFARoutes = async (app: FastifyInstance, opts: FastifyPluginOptio
 	app.post('/register', {preHandler: [authenticate, checkCsrf]}, async (req, reply) => {
 		try {
 			const user = req.user as JwtUserPayload;
-			const secret = authenticator.generateSecret();
+
+			let secret = await get2FASecret(user.id)
+
+			if (!secret) {
+				secret = authenticator.generateSecret();
+				await update2FASecret(user.username, secret)
+			}
+
 			const otpauth = authenticator.keyuri(user.username, 'ft_transcendence', secret);
 			const qr = await QRCode.toDataURL(otpauth);
 
-			await update2FASecret(user.username, secret)
-
 			reply.send({ qr, secret });
 		} catch (err) {
-			reply.code(500).send({ error: 'Failed to register 2FA' });
+			throw err
 		}
 	});
 
@@ -53,7 +59,7 @@ export const twoFARoutes = async (app: FastifyInstance, opts: FastifyPluginOptio
 				throw new Missing2FACodeError()
 			}
 
-			const secret = await load2FASecret(user.id)
+			const secret = await get2FASecret(user.id)
 
 			if (!secret) throw new SecretNotFoundError()
 
@@ -70,12 +76,39 @@ export const twoFARoutes = async (app: FastifyInstance, opts: FastifyPluginOptio
 	})
 
 	app.post('/backup-codes', {preHandler: [authenticate, checkCsrf]}, async (req, reply) => {
-		const user = req.user as JwtUserPayload
-		const codes = generateBackupCodes()
-		const codesStr = JSON.stringify(codes)
 
-		await setBackupCodes(codesStr, user.id)
-		await markTwoFactorEnabled(user.id)
-		reply.send({codes})
+		try {
+
+			const user = req.user as JwtUserPayload
+			const codes = generateBackupCodes()
+			const codesStr = JSON.stringify(codes)
+
+			await setBackupCodes(codesStr, user.id)
+			reply.send({codes})
+
+		} catch (err) {
+			throw err
+		}
+
 	})
+
+	app.post('/enable', {preHandler: [authenticate, checkCsrf]}, async (req, reply) => {
+		try {
+
+			const user = req.user as JwtUserPayload
+
+			await mark2FAEnabled(user.id)
+			reply.send({ success: true })
+
+		} catch (err) {
+			throw err
+		}
+	})
+
+	app.get('/enable', async (req, reply) => {
+		const user = req.user as JwtUserPayload;
+		const isEnabled = await is2FAEnabled(user.id)
+		app.log.info(isEnabled, "Enabled!!!")
+		reply.send({ enabled: isEnabled })
+	});
 }
