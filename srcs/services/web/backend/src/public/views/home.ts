@@ -3,7 +3,10 @@ import {
 	iconHomeLeaderboard,
 	iconHomeSingleplayer,
 	iconHomeTournament,
-	iconHomeMultiplayer
+	iconHomeMultiplayer,
+	iconHomeStats,
+	iconHomeTrophy,
+	iconHomeRocket
 } from "../components/icons.js";
 
 import { View } from "../view.js"
@@ -89,10 +92,84 @@ export class HomeView extends View {
 									</div>
 								</div>							
 							</div>
+
+							<!-- Stats and Leaderboard Section -->
+							<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+								<!-- Your Stats container -->
+								<div class="dark:bg-gray-800 bg-white rounded-2xl overflow-hidden border dark:border-gray-700 border-gray-200 flex flex-col h-full transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
+									<div class="p-6 flex-1">
+										<div class="flex items-center mb-6">
+											<div class="size-12 rounded-lg bg-blue-500/10 flex items-center justify-center mr-4">
+												${iconHomeStats}
+											</div>
+											<h3 class="text-xl font-bold text-white">Your Stats</h3>
+										</div>
+										
+										<div class="grid grid-cols-3 gap-4 mb-6">
+											<div class="dark:bg-gray-700/50 bg-gray-100 rounded-lg p-3 text-center dark:hover:bg-gray-700/60 hover:bg-gray-100/60 transition-colors">
+												<div class="text-2xl font-bold mb-1">42</div>
+												<div class="text-xs dark:text-gray-400 text-gray-500">Matches</div>
+											</div>
+											<div class="dark:bg-gray-700/50 bg-gray-100 rounded-lg p-3 text-center dark:hover:bg-gray-700/60 hover:bg-gray-100/60 transition-colors">
+												<div class="text-2xl font-bold mb-1">42</div>
+												<div class="text-xs dark:text-gray-400 text-gray-500">Wins</div>
+											</div>
+											<div class="dark:bg-gray-700/50 bg-gray-100 rounded-lg p-3 text-center dark:hover:bg-gray-700/60 hover:bg-gray-100/60 transition-colors">
+												<div class="text-2xl font-bold text-green-400 mb-1">42%</div>
+												<div class="text-xs dark:text-gray-400 text-gray-500">Win Rate</div>
+											</div>
+										</div>
+									</div>
+									
+									<div class="p-6 pt-0">
+										<button id="viewProfile-btn" class="w-full px-4 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-medium rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
+											View Profile →
+										</button>
+									</div>
+								</div>
+
+								<!-- Leadernoard Container -->
+								<div class="dark:bg-gray-800 bg-white rounded-2xl overflow-hidden border dark:border-gray-700 border-gray-200 flex flex-col h-full transition-all duration-300 hover:scale-[1.01] hover:shadow-lg">
+									<div class="p-6 flex-1">
+										<div class="flex items-center mb-6">
+										<div class="size-12 rounded-lg bg-yellow-500/10 flex items-center justify-center mr-4">
+											${iconHomeRocket}
+										</div>
+										<h3 class="text-xl font-bold">Top Player</h3>
+										</div>
+										
+										<div class="space-y-4 mb-6">
+											<div class="flex items-center p-3 dark:bg-gray-700/50 bg-gray-100 rounded-lg transition-colors dark:hover:bg-gray-700/70 hover:bg-gray-100/60">
+												<div class="pr-3">
+													${iconHomeTrophy}
+												</div>
+												<div class="flex-1">
+													<div class="font-medium">Pro Gamer</div>
+													<div class="text-xs dark:text-gray-400 text-gray-500">
+														42 wins • 42 matches
+													</div>
+												</div>
+												<div class="flex flex-col items-end">
+													<div class="text-lg font-bold text-yellow-400">42%</div>
+													<div class="text-xs dark:text-gray-400 text-gray-500">win rate</div>
+												</div>
+											</div>
+										</div>
+									</div>
+									
+									<div class="p-6 pt-0">
+										<button id="viewLeaderboard-btn" class="w-full px-4 py-2.5 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 font-medium rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
+											View Leaderboard →
+										</button>
+									</div>
+								</div>
+							</div>
 						</div>
-						
 					</div>
 				</div>
+
+
 			</div>
 		`;
 	}
@@ -110,6 +187,8 @@ export class HomeView extends View {
 		const singleplayerBTN = document.getElementById('singleplayer-btn');
 		const multiplayerBTN = document.getElementById('multiplayer-btn');
 		const tournamentBTN = document.getElementById('tournament-btn');
+		const viewProfileBTN = document.getElementById('viewProfile-btn');
+		const viewLeaderboardBTN = document.getElementById('viewLeaderboard-btn');
 
 		this.addEventListener(profileBTN!, 'click', () => {
 			return this.router.navigateTo('/profile');
@@ -135,6 +214,14 @@ export class HomeView extends View {
 
 		this.addEventListener(tournamentBTN!, 'click', () => {
 			alert('not available');
+		});
+
+		this.addEventListener(viewProfileBTN!, 'click', () => {
+			return this.router.navigateTo('/profile');
+		});
+
+		this.addEventListener(viewLeaderboardBTN!, 'click', () => {
+			return this.router.navigateTo('/about');
 		});
 	};
 }
