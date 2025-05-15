@@ -117,10 +117,24 @@ export class Backup2FAView extends View {
 		`;
 	}
 
-	setupEventListeners() {
+	async setupEventListeners() {
+		const Enabledguard = async () => {
+			const res = await this.api.is2FAEnabled();
+
+			const data = await res.json()
+			console.log("DATA:", data)
+			if (res.ok && data.enabled) {
+				this.router.navigateTo('/settings/2fa/is-already-enabled')
+				return true
+			}
+			return false
+		}
+
+		if (await Enabledguard()){
+			return
+		}
+
 		let backupCodes: string[];
-
-
 
 		const btnNext = document.getElementById('btn-next') as HTMLButtonElement
 		const btnPrint = document.getElementById('btn-print') as HTMLButtonElement
@@ -145,7 +159,8 @@ export class Backup2FAView extends View {
 			enableNext()
 		}
 
-		const nextHandler = () => {
+		const nextHandler = async () => {
+			const res = await this.api.enable2FA()
 			this.router.navigateTo('/settings/2fa/completed')
 		}
 
@@ -160,6 +175,7 @@ export class Backup2FAView extends View {
 			generateBackupCodesImage(backupCodes)
 			enableNext()
 		})
+
 		loadBackupCodes()
 	}
 }
