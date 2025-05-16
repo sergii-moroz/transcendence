@@ -198,7 +198,7 @@ export class HomeView extends View {
 					</div>
 
 				<!-- Social Sidebar - Friends List -->
-				<div id="sidebar-friends" class="hidden w-80 dark:bg-gray-800 bg-white border-l dark:border-gray-700 border-gray-200 flex flex-col">
+				<div id="sidebar-friends" class="w-80 dark:bg-gray-800 bg-white border-l dark:border-gray-700 border-gray-200 flex flex-col">
 					<div class="p-4 flex justify-between items-center">
 						<h2 class="text-lg font-bold flex items-center">
 							<span class="mr-2">${iconHomeFriends}</span>
@@ -291,17 +291,27 @@ export class HomeView extends View {
 			return this.router.navigateTo('/about');
 		});
 
+		function show(el: HTMLElement) {
+			el.classList.remove('hidden');
+			el.classList.add('flex', 'flex-col');
+		}
+		
+		function hide(el: HTMLElement) {
+			el.classList.remove('flex', 'flex-col');
+			el.classList.add('hidden');
+		}
 
+		hide(sideBar_friends!);
 
 		// sidebar
 		this.addEventListener(sideBar_collapsed!, 'click', () => {
-			sideBar_friends!.classList.remove('hidden');
-    		sideBar_collapsed!.classList.add('hidden');
+			hide(sideBar_collapsed!);
+			show(sideBar_friends!);
 		})
 
 		this.addEventListener(sideBar_close_BTN!, 'click', () => {
-			sideBar_collapsed!.classList.remove('hidden');
-    		sideBar_friends!.classList.add('hidden');
+			hide(sideBar_friends!);
+			show(sideBar_collapsed!);
 		})
 
 		this.addEventListener(sideBar_refreshBTN!, 'click', () => {
