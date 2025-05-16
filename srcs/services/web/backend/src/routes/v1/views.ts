@@ -21,7 +21,8 @@ export const views = async (app: FastifyInstance, opts: FastifyPluginOptions) =>
 				matches: 42,
 				wins: 42,
 				percentage: 42
-			}
+			},
+			friendAmount: 2
 		};
 		return reply.send(answer);
 	});

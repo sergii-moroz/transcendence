@@ -21,7 +21,18 @@ interface TopPlayer extends PlayerStats {
 	name: string;
 }
 
+// interface Friends {
+// 	amountTotal: number;
+// 	online: {
+// 		amount: number;
+// 	}
+// 	offline: {
+// 		amount: number;
+// 	}
+// }
+
 export interface HomeResponse {
 	stats: PlayerStats;
 	topPlayer: TopPlayer;
+	friendAmount: number;
 }

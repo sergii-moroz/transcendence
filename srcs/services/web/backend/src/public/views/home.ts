@@ -6,7 +6,11 @@ import {
 	iconHomeMultiplayer,
 	iconHomeStats,
 	iconHomeTrophy,
-	iconHomeRocket
+	iconHomeRocket,
+	iconHomeFriends,
+	iconHomeRefresh,
+	iconHomeX,
+	iconHomePlus
 } from "../components/icons.js";
 
 import { View } from "../view.js"
@@ -169,6 +173,63 @@ export class HomeView extends View {
 					</div>
 				</div>
 
+				<!-- SideBar collapsed -->
+				    <div id="sideBar-collapsed" class="w-16 h-dvh fixed right-0 dark:bg-gray-800 bg-white border-l dark:border-gray-700 border-gray-200 flex flex-col items-center py-6 cursor-pointer dark:hover:bg-gray-700/50 hover:bg-white/70 transition-colors">
+						<div class="mb-6">
+							${iconHomeFriends}
+						</div>
+						<div class="w-10 h-10 dark:bg-gray-700 bg-gray-100 rounded-full mb-3 relative">
+							<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
+						</div>
+						<div class="w-10 h-10 dark:bg-gray-700 bg-gray-100 rounded-full mb-3 relative">
+							<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
+						</div>
+						<div class="w-10 h-10 dark:bg-gray-700 bg-gray-100 rounded-full mb-3 relative">
+							<div class="absolute bottom-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
+						</div>
+						<div class="mt-auto">
+							<div class="bg-blue-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+								${input.friendAmount}
+							</div>
+						</div>
+						<div class="mt-3 text-xs text-gray-400 [writing-mode:vertical-rl] [text-orientation:mixed] rotate-180">
+							FRIENDS
+						</div>
+					</div>
+
+				<!-- Social Sidebar - Friends List -->
+				<div id="sidebar-friends" class="hidden w-80 dark:bg-gray-800 bg-white border-l dark:border-gray-700 border-gray-200 flex flex-col">
+					<div class="p-4 flex justify-between items-center">
+						<h2 class="text-lg font-bold flex items-center">
+							<span class="mr-2">${iconHomeFriends}</span>
+							Friends
+						</h2>
+						<div class="flex items-center gap-2">
+							<button id="refresh-friends-btn" class="text-gray-400 dark:hover:text-white hover:text-gray-500  p-1" title="Refresh Friends">
+								${iconHomeRefresh}
+							</button>
+							<button id="close-social-btn" class="text-gray-400 dark:hover:text-white hover:text-gray-500 p-1">
+								${iconHomeX}
+							</button>
+						</div>
+					</div>
+					
+					<!-- Add friend -->
+					<div class="p-4 border-b border-t dark:border-gray-700 border-gray-100">
+						<div class="relative">
+						<input id="addFriendInput" type="text" placeholder="Add friend..." class="w-full dark:bg-gray-700 bg-gray-100 border-none rounded-lg pl-3 pr-10 py-2 text-sm placeholder-gray-400 focus:ring-blue-500 focus:ring-2">
+						<button id="addFriendBTN" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 dark:hover:text-white hover:text-gray-500">
+							${iconHomePlus}
+						</button>
+						</div>
+					</div>
+
+					<!-- Content Container -->
+  					<div class="flex-1 flex flex-col min-h-0">
+						<div id="friendInvite" class="flex-shrink-0"></div>
+						<div id="friendList" class="flex-1 overflow-y-auto"></div>
+					</div>
+				</div>
 
 			</div>
 		`;
@@ -188,6 +249,13 @@ export class HomeView extends View {
 		const tournamentBTN = document.getElementById('tournament-btn');
 		const viewProfileBTN = document.getElementById('viewProfile-btn');
 		const viewLeaderboardBTN = document.getElementById('viewLeaderboard-btn');
+		
+		const sideBar_collapsed = document.getElementById('sideBar-collapsed');
+		const sideBar_friends = document.getElementById('sidebar-friends');
+		const sideBar_close_BTN = document.getElementById('close-social-btn');
+		const sideBar_refreshBTN = document.getElementById('refresh-friends-btn');
+		const addFriend = document.getElementById('addFriendBTN');
+		const input = document.getElementById('addFriendInput') as HTMLInputElement;
 
 		this.addEventListener(profileBTN!, 'click', () => {
 			return this.router.navigateTo('/settings');
@@ -222,5 +290,40 @@ export class HomeView extends View {
 		this.addEventListener(viewLeaderboardBTN!, 'click', () => {
 			return this.router.navigateTo('/about');
 		});
+
+
+
+		// sidebar
+		this.addEventListener(sideBar_collapsed!, 'click', () => {
+			sideBar_friends!.classList.remove('hidden');
+    		sideBar_collapsed!.classList.add('hidden');
+		})
+
+		this.addEventListener(sideBar_close_BTN!, 'click', () => {
+			sideBar_collapsed!.classList.remove('hidden');
+    		sideBar_friends!.classList.add('hidden');
+		})
+
+		this.addEventListener(sideBar_refreshBTN!, 'click', () => {
+			alert('nothing yet');
+		})
+
+		this.addEventListener(addFriend!, 'click', () => {
+			const name = input!.value.trim();
+			if (name) {
+				console.log(name);
+				input.value = '';
+			}
+		})
+
+		this.addEventListener(input, "keydown", (event) => {
+			if (event instanceof KeyboardEvent && event.key === 'Enter') {
+				const name = input!.value.trim();
+				if (name) {
+					console.log(name);
+					input.value = '';
+				}
+			}
+		})
 	};
 }
