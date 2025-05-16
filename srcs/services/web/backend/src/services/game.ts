@@ -16,10 +16,10 @@ export class Game {
 	constructor() {
 		this.players = new Map();
 		this.state = {
-			ball: { x: 50, y: 50, dx: 1, dy: 1 },
+			ball: { x: 0, y: 0, dx: 2, dy: 2 },
 			paddles: {
-				player1: { y: 50 },
-				player2: { y: 50 }
+				player1: { y: 0 },
+				player2: { y: 0 }
 			},
 			scores: { player1: 0, player2: 0 }
 		};
@@ -65,34 +65,50 @@ export class Game {
 
 	startLoop() {
 		this.gameRunning = true;
+		const FIELD_X = 250, FIELD_Y = 150;
+		const PADDLE_X1 = -FIELD_X + 10, PADDLE_X2 = FIELD_X - 10;
+		const PADDLE_HEIGHT = 30;
 		setInterval(() => {
 			if(!this.gameRunning) return;
 			this.state.ball.x += this.state.ball.dx;
 			this.state.ball.y += this.state.ball.dy;
 		
 			// Ball collision with paddles (simplified)
-			if (this.state.ball.x == (10+5) && Math.abs(this.state.ball.y - this.state.paddles.player1.y) < 30) {
-				this.state.ball.dx *= -1
-			} else if (this.state.ball.x == (500-10-5) && Math.abs(this.state.ball.y - this.state.paddles.player2.y) < 30) {
-				this.state.ball.dx *= -1
-			}
+			if (
+                this.state.ball.x <= PADDLE_X1 &&
+                Math.abs(this.state.ball.y - this.state.paddles.player1.y) < PADDLE_HEIGHT
+            ) {
+                this.state.ball.dx *= -1;
+            } else if (
+                this.state.ball.x >= PADDLE_X2 &&
+                Math.abs(this.state.ball.y - this.state.paddles.player2.y) < PADDLE_HEIGHT
+            ) {
+                this.state.ball.dx *= -1;
+            }
 		
 			// Ball collision with walls
-			if (this.state.ball.y <= 5 || this.state.ball.y >= (300-5)) {
+			if (this.state.ball.y <= -FIELD_Y || this.state.ball.y >= FIELD_Y) {
 				this.state.ball.dy *= -1;
 			}
-			if (this.state.ball.x <= 5) {
+
+			// Scoring
+			if (this.state.ball.x <= -FIELD_X + 5) {
 				this.state.scores.player2++
-				this.state.ball.x = (500-10-5)
+				this.state.ball.x = PADDLE_X2 - 10;
 				this.state.ball.y = this.state.paddles.player2.y
-				// this.state.ball.dx *= -1;
 			}
-			if (this.state.ball.x >= (500-5)) {
+			if (this.state.ball.x >= FIELD_X - 5) {
 				this.state.scores.player1++
-				this.state.ball.x = (10+5)
+				this.state.ball.x = PADDLE_X1 + 10;
 				this.state.ball.y = this.state.paddles.player1.y
-				// this.state.ball.dx *= -1;
 			}
+
+			this.players.forEach(player => {
+				player.send(JSON.stringify({
+					type: 'gameState',
+					state: this.state
+				}));
+			});
 
 			if(this.state.scores.player1 >= 7 || this.state.scores.player2 >= 7) {
 				this.gameRunning = false;
@@ -118,13 +134,6 @@ export class Game {
 					this.players.clear();
 				}
 			}
-
-			this.players.forEach(player => {
-				player.send(JSON.stringify({
-					type: 'gameState',
-					state: this.state
-				}));
-			});
 		}, 16);
 	}
 
@@ -136,18 +145,20 @@ export class Game {
 				player = role;
 			}
 		}
+		const STEP = 20;
+		const MIN_Y = -150 + 30, MAX_Y = 150 - 30;
 		if (player == "player1") {
-			if (input === 'up' && this.state.paddles.player1.y > 30) {
-				this.state.paddles.player1.y -= 10;
-			} else if (input === 'down' && this.state.paddles.player1.y < (300-30)) {
-				this.state.paddles.player1.y += 10;
+			if (input === 'up' && this.state.paddles.player1.y > MIN_Y) {
+				this.state.paddles.player1.y -= STEP;
+			} else if (input === 'down' && this.state.paddles.player1.y < MAX_Y) {
+				this.state.paddles.player1.y += STEP;
 			}
 		}
 		else if (player == "player2") {
-			if (input === 'up' && this.state.paddles.player2.y > 30) {
-				this.state.paddles.player2.y -= 10;
-			} else if (input === 'down' && this.state.paddles.player2.y < (300-30)) {
-				this.state.paddles.player2.y += 10;
+			if (input === 'up' && this.state.paddles.player2.y > MIN_Y) {
+				this.state.paddles.player2.y -= STEP;
+			} else if (input === 'down' && this.state.paddles.player2.y < MAX_Y) {
+				this.state.paddles.player2.y += STEP;
 			}
 		}
 	}
