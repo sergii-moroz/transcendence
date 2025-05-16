@@ -190,7 +190,7 @@ export class HomeView extends View {
 		const viewLeaderboardBTN = document.getElementById('viewLeaderboard-btn');
 
 		this.addEventListener(profileBTN!, 'click', () => {
-			return this.router.navigateTo('/profile');
+			return this.router.navigateTo('/settings');
 		});
 
 		this.addEventListener(leaderboardBTN!, 'click', () => {
@@ -216,7 +216,7 @@ export class HomeView extends View {
 		});
 
 		this.addEventListener(viewProfileBTN!, 'click', () => {
-			return this.router.navigateTo('/profile');
+			return this.router.navigateTo('/settings');
 		});
 
 		this.addEventListener(viewLeaderboardBTN!, 'click', () => {
