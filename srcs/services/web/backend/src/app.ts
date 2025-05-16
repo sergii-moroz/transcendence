@@ -7,6 +7,8 @@ import path from "path";
 import fs from 'fs';
 
 import { authRoutes } from "./routes/v1/auth.js";
+import { routes } from "./routes/v1/routes.js";
+import { views } from "./routes/v1/views.js";
 import { gameRoomSock } from "./routes/v1/gameRoom.js";
 import { waitingRoomSock } from "./routes/v1/waitingRoom.js";
 import { initializeDB } from "./db/init.js";
@@ -72,11 +74,12 @@ export const build = async (opts: FastifyServerOptions) => {
 		prefix: '/'
 	})
 
-	// app.register(routes)
-	app.register(waitingRoomSock, {prefix: "ws"})
-	app.register(gameRoomSock, {prefix: "ws"})
-	app.register(authRoutes, {prefix: "api"})
-	app.register(twoFARoutes, {prefix: 'api/2fa'})
+	app.register(routes);
+	app.register(views, {prefix: "api"});
+	app.register(waitingRoomSock, {prefix: "ws"});
+	app.register(gameRoomSock, {prefix: "ws"});
+	app.register(authRoutes, {prefix: "api"});
+	app.register(twoFARoutes, {prefix: 'api/2fa'});
 
 	// GLOBAL ERROR HANDLING
 	app.setErrorHandler( async (error, request, reply) => {

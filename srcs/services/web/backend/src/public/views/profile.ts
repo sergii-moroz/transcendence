@@ -10,15 +10,8 @@ export class ProfileView extends View {
 		`;
 	}
 
-	async prehandler() {
+	async prehandler(): Promise<Record<string, any> | null>  {
 		const res = await this.api.getProfile();
-
-		if (!res.ok) {
-			return this.router.navigateTo('/home');
-		}
-
-		const { profile } = await res.json();
-
-		return (profile);
+		return (res);
 	}
 }

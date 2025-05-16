@@ -24,16 +24,19 @@ export class View {
 	}
 
 	mount = async (parent: HTMLElement) => {
-		parent.innerHTML = '';
 
 		const input = await this.prehandler();
+		if (!input) {
+			alert ("cant load API data");
+			return this.router.navigateTo('/'); //somewhere else
+		}
 		// console.log(`input: ${input}`);
 		this.setContent(input);
 		parent.append(this.element);
 		this.setupEventListeners();
 	}
 
-	async prehandler(): Promise<Record<string, any>> 
+	async prehandler(): Promise<Record<string, any> | null> 
 	{
 		// Should be overridden by subclasses if needed
 		return {};

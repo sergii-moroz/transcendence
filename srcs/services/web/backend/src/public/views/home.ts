@@ -108,15 +108,15 @@ export class HomeView extends View {
 										
 										<div class="grid grid-cols-3 gap-4 mb-6">
 											<div class="dark:bg-gray-700/50 bg-gray-100 rounded-lg p-3 text-center dark:hover:bg-gray-700/60 hover:bg-gray-100/60 transition-colors">
-												<div class="text-2xl font-bold mb-1">42</div>
+												<div class="text-2xl font-bold mb-1">${input.stats.matches}</div>
 												<div class="text-xs dark:text-gray-400 text-gray-500">Matches</div>
 											</div>
 											<div class="dark:bg-gray-700/50 bg-gray-100 rounded-lg p-3 text-center dark:hover:bg-gray-700/60 hover:bg-gray-100/60 transition-colors">
-												<div class="text-2xl font-bold mb-1">42</div>
+												<div class="text-2xl font-bold mb-1">${input.stats.wins}</div>
 												<div class="text-xs dark:text-gray-400 text-gray-500">Wins</div>
 											</div>
 											<div class="dark:bg-gray-700/50 bg-gray-100 rounded-lg p-3 text-center dark:hover:bg-gray-700/60 hover:bg-gray-100/60 transition-colors">
-												<div class="text-2xl font-bold text-green-400 mb-1">42%</div>
+												<div class="text-2xl font-bold text-green-400 mb-1">${input.stats.percentage}%</div>
 												<div class="text-xs dark:text-gray-400 text-gray-500">Win Rate</div>
 											</div>
 										</div>
@@ -145,13 +145,13 @@ export class HomeView extends View {
 													${iconHomeTrophy}
 												</div>
 												<div class="flex-1">
-													<div class="font-medium">Pro Gamer</div>
+													<div class="font-medium">${input.topPlayer.name}</div>
 													<div class="text-xs dark:text-gray-400 text-gray-500">
-														42 wins • 42 matches
+														${input.topPlayer.wins} wins • ${input.topPlayer.matches} matches
 													</div>
 												</div>
 												<div class="flex flex-col items-end">
-													<div class="text-lg font-bold text-yellow-400">42%</div>
+													<div class="text-lg font-bold text-yellow-400">${input.topPlayer.percentage}%</div>
 													<div class="text-xs dark:text-gray-400 text-gray-500">win rate</div>
 												</div>
 											</div>
@@ -174,11 +174,10 @@ export class HomeView extends View {
 		`;
 	}
 
-	// override async prehandler(): Promise<Record<string, any>> {
-	// 	if (this.router.currentUser)
-	// 		return { username: this.router.currentUser.username};
-	// 	return { username: 'error'};
-	// }
+	override async prehandler(): Promise<Record<string, any> | null> {
+		const input = await this.api.getHome();
+		return input;
+	}
 
 	setupEventListeners() {
 		const profileBTN = document.getElementById('profile-btn');
