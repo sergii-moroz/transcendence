@@ -100,9 +100,17 @@ export class GameView extends View {
 		});
 	}
 
+	logicalToCanvasX(x: number): number {
+		return (x + 250);
+	}
+
+	logicalToCanvasY(y: number): number {
+		return (y + 150);
+	}
+
 
 	drawBall = (x: number, y: number) => {
-		this.ctx.fillStyle = "#ff0000"
+		this.ctx.fillStyle = "#ffffff"
 		this.ctx.beginPath()
 		this.ctx.arc(x, y, 5, 0.0, 2.0 * Math.PI, false)
 		this.ctx.closePath()
@@ -110,7 +118,7 @@ export class GameView extends View {
 	}
 
 	clearField = (width: number, height: number) => {
-		this.ctx.fillStyle = "#00ff00"
+		this.ctx.fillStyle = "#393f3f"
 		this.ctx.fillRect(0, 0, width, height);
 	}
 
@@ -118,7 +126,7 @@ export class GameView extends View {
 		const w = 10
 		const h = 60
 
-		this.ctx.fillStyle = "#0000ff"
+		this.ctx.fillStyle = "#02a5f7"
 		this.ctx.fillRect(0, y - 0.5 * h, w, h)
 	}
 
@@ -126,12 +134,12 @@ export class GameView extends View {
 		const w = 10
 		const h = 60
 
-		this.ctx.fillStyle = "#ff00ff"
+		this.ctx.fillStyle = "#f7026a"
 		this.ctx.fillRect(500 - w, y - 0.5 * h, w, h)
 	}
 
 	drawScore = (pos_x: number, pos_y: number, score: number) => {
-		this.ctx.fillStyle = "#ffffff"
+		this.ctx.fillStyle = "#bfbfbf"
 		this.ctx.font = "30px Arial"
 		
 		this.ctx.fillText(score.toString(), pos_x, pos_y)
@@ -141,8 +149,8 @@ export class GameView extends View {
 		this.clearField(500, 300)
 		this.drawScore(100, 100, state.scores.player1)
 		this.drawScore(350, 100, state.scores.player2)
-		this.drawPaddle1(state.paddles.player1.y)
-		this.drawPaddle2(state.paddles.player2.y)
-		this.drawBall(state.ball.x, state.ball.y)
+		this.drawPaddle1(this.logicalToCanvasY(state.paddles.player1.y))
+		this.drawPaddle2(this.logicalToCanvasY(state.paddles.player2.y))
+		this.drawBall(this.logicalToCanvasX(state.ball.x), this.logicalToCanvasY(state.ball.y))
 	}
 }
