@@ -110,18 +110,18 @@ export class Game {
 				}));
 			});
 
-			if(this.state.scores.player1 >= 7 || this.state.scores.player2 >= 7) {
+			if(this.state.scores.player1 >= 2 || this.state.scores.player2 >= 2) {
 				this.gameRunning = false;
-				if(this.state.scores.player1 >= 7) {
+				if(this.state.scores.player1 >= 2) {
 					this.players.forEach(player => {
 						player.send(JSON.stringify({
 							type: 'gameOver',
 							message: 'Player 1 wins!',
 							winner: 'player1',
 						}));
-						player.close();
+						// player.close();
 					});
-					this.players.clear();
+					// this.players.clear();
 				} else {
 					this.players.forEach(player => {
 						player.send(JSON.stringify({
@@ -129,9 +129,9 @@ export class Game {
 							message: 'Player 2 wins!',
 							winner: 'player2',
 						}));
-						player.close();
+						// player.close();
 					});
-					this.players.clear();
+					// this.players.clear();
 				}
 			}
 		}, 16);

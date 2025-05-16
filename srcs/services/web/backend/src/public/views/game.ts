@@ -9,9 +9,11 @@ export class GameView extends View {
 
 	setContent = (input: Record<string, any>) => {
 		this.element.innerHTML = `
+		<div style="display: flex; flex-direction: column; align-items: center;">
 			<h2 id="score"></h2>
 			<canvas id="game"></canvas>
 			<button id="home-link">Home</button>
+		</div>
 		`;
 	}
 	
@@ -52,8 +54,13 @@ export class GameView extends View {
 			}
 
 			if (data.type === 'gameOver') {
-				alert(data.message);
-				this.router.navigateTo('/home');
+				this.drawGameOver(data.message as string, data.winner as string);
+				setTimeout(() => {
+					this.router.navigateTo('/home');
+					if(this.socket && this.socket.readyState === WebSocket.OPEN) {
+						this.socket.close();
+					}
+				}, 3000);
 			}
 		};
 
@@ -73,6 +80,10 @@ export class GameView extends View {
 		this.handleSocket();
 		this.addEventListener(document.getElementById('home-link')!, 'click', (e) => {
 			e.preventDefault();
+			if(this.socket && this.socket.readyState === WebSocket.OPEN) {
+				this.socket.close();
+				console.log('Disconnecting from socket, going home...');
+			}
 			this.router.navigateTo('/home');
 		});
 
@@ -143,6 +154,23 @@ export class GameView extends View {
 		this.ctx.font = "30px Arial"
 		
 		this.ctx.fillText(score.toString(), pos_x, pos_y)
+	}
+
+	drawGameOver = (message: string, winner: string) => {
+		if(winner == 'player1') {
+			this.ctx.fillStyle = "#02a5f7"
+		}
+		else {
+			this.ctx.fillStyle = "#f7026a"
+		}
+		this.ctx.fillRect(0, 0, 500, 300);
+		this.ctx.fillStyle = "#ffffff";
+		this.ctx.font = "bold 40px Arial";
+		this.ctx.textAlign = "center";
+		this.ctx.textBaseline = "middle";
+		this.ctx.fillText(message, 250, 130);
+		this.ctx.font = "15px Arial";
+		this.ctx.fillText(`Redirecting to home in 3 seconds`, 250, 170);
 	}
 
 	drawGameState = (state: GameState) => {
