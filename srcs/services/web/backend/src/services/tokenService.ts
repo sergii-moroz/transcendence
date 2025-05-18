@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 
 const ACCESS_TOKEN_SECRET = process.env.JWT_ACCESS_SECRET || 'supersecret-key-supersecret-key!' as string;
 const REFRESH_TOKEN_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh-secret' as string;
+const TWO_FA_ACCESS_TOKEN_SECRET = process.env.JWT_2FA_ACCESS_SECRET || crypto.randomBytes(32).toString('hex') as string
 
 export function generateAccessToken(user: JwtUserPayload): string {
 	return jwt.sign({ id: user.id, username: user.username }, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
@@ -25,4 +26,12 @@ export function verifyAccessToken(token: string): JwtUserPayload {
 
 export function verifyRefreshToken(token: string): JwtUserPayload {
 	return jwt.verify(token, REFRESH_TOKEN_SECRET) as JwtUserPayload;
+}
+
+export const generate2FAAccessToken = (user: JwtUserPayload): string => {
+	return jwt.sign(user, TWO_FA_ACCESS_TOKEN_SECRET, { expiresIn: '5m'})
+}
+
+export const verify2FAAccessToken = (token: string) => {
+	return jwt.verify(token, TWO_FA_ACCESS_TOKEN_SECRET) as JwtUserPayload
 }
