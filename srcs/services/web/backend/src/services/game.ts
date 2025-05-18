@@ -50,6 +50,7 @@ export class Game {
 	removePlayer(player: WebSocket) {
 		for (const [role, conn] of this.players.entries()) {
 			if (conn === player) {
+				conn.close();
 				this.players.delete(role);
 			} else {
 				conn.send(JSON.stringify({
