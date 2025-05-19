@@ -26,11 +26,26 @@ export class GameView extends View {
 
 		this.canvas = document.getElementById("game") as HTMLCanvasElement;
 		this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
-		this.canvas.width = 500;
-		this.canvas.height = 300;
+		this.handleCanvasScaling();
 
 		this.gameRoomId = window.location.pathname.split('/')[2];
 		this.setupEventListeners();
+	}
+
+	handleCanvasScaling = () => {
+	    const maxWidth = Math.min(window.innerWidth * 0.9, 1000); // 90% of window or max 1000px
+	    const maxHeight = Math.min(window.innerHeight * 0.9, 600); // 90% of window or max 600px
+
+	    let width = maxWidth;
+	    let height = width * 3 / 5;
+
+	    if (height > maxHeight) {
+	        height = maxHeight;
+	        width = height * 5 / 3;
+	    }
+
+	    this.canvas.width = Math.round(width);
+	    this.canvas.height = Math.round(height);
 	}
 
 	handleSocket = () => {
@@ -109,21 +124,24 @@ export class GameView extends View {
 				}
 			}
 		});
+
+		this.addEventListener(window, 'resize', this.handleCanvasScaling);
 	}
 
 	logicalToCanvasX(x: number): number {
-		return (x + 250);
+		return (x + 250) / 500 * this.canvas.width;
 	}
 
 	logicalToCanvasY(y: number): number {
-		return (y + 150);
+		return (y + 150) / 300 * this.canvas.height;
 	}
 
 
 	drawBall = (x: number, y: number) => {
+		let radius = this.canvas.width / 100;
 		this.ctx.fillStyle = "#ffffff"
 		this.ctx.beginPath()
-		this.ctx.arc(x, y, 5, 0.0, 2.0 * Math.PI, false)
+		this.ctx.arc(x, y, radius, 0.0, 2.0 * Math.PI, false)
 		this.ctx.closePath()
 		this.ctx.fill()
 	}
@@ -134,19 +152,19 @@ export class GameView extends View {
 	}
 
 	drawPaddle1 = (y: number) => {
-		const w = 10
-		const h = 60
+		const w = this.canvas.width / 50;
+		const h = this.canvas.height / 5;
 
-		this.ctx.fillStyle = "#02a5f7"
-		this.ctx.fillRect(0, y - 0.5 * h, w, h)
+		this.ctx.fillStyle = "#02a5f7";
+		this.ctx.fillRect(0, y - 0.5 * h, w, h);
 	}
 
 	drawPaddle2 = (y: number) => {
-		const w = 10
-		const h = 60
+		const w = this.canvas.width / 50;
+		const h = this.canvas.height / 5;
 
-		this.ctx.fillStyle = "#f7026a"
-		this.ctx.fillRect(500 - w, y - 0.5 * h, w, h)
+		this.ctx.fillStyle = "#f7026a";
+		this.ctx.fillRect(this.canvas.width - w, y - 0.5 * h, w, h);
 	}
 
 	drawScore = (pos_x: number, pos_y: number, score: number) => {
@@ -163,20 +181,24 @@ export class GameView extends View {
 		else {
 			this.ctx.fillStyle = "#f7026a"
 		}
-		this.ctx.fillRect(0, 0, 500, 300);
+		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 		this.ctx.fillStyle = "#ffffff";
 		this.ctx.font = "bold 40px Arial";
 		this.ctx.textAlign = "center";
 		this.ctx.textBaseline = "middle";
-		this.ctx.fillText(message, 250, 130);
+		this.ctx.fillText(message, (this.canvas.width / 2), this.canvas.height / 2);
 		this.ctx.font = "15px Arial";
-		this.ctx.fillText(`Redirecting to home in 3 seconds`, 250, 170);
+		this.ctx.fillText(`Redirecting to home in 3 seconds`, (this.canvas.width / 2), (this.canvas.height / 2) + 30);
 	}
 
 	drawGameState = (state: GameState) => {
-		this.clearField(500, 300)
-		this.drawScore(100, 100, state.scores.player1)
-		this.drawScore(350, 100, state.scores.player2)
+		let score1_x = (this.canvas.width / 5);
+		let score2_x = this.canvas.width - (this.canvas.width / 5);
+		let score_y = (this.canvas.height / 3);
+
+		this.clearField(this.canvas.width, this.canvas.height)
+		this.drawScore(score1_x, score_y, state.scores.player1)
+		this.drawScore(score2_x, score_y, state.scores.player2)
 		this.drawPaddle1(this.logicalToCanvasY(state.paddles.player1.y))
 		this.drawPaddle2(this.logicalToCanvasY(state.paddles.player2.y))
 		this.drawBall(this.logicalToCanvasX(state.ball.x), this.logicalToCanvasY(state.ball.y))

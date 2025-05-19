@@ -111,9 +111,9 @@ export class Game {
 				}));
 			});
 
-			if(this.state.scores.player1 >= 2 || this.state.scores.player2 >= 2) {
+			if(this.state.scores.player1 >= 7 || this.state.scores.player2 >= 7) {
 				this.gameRunning = false;
-				if(this.state.scores.player1 >= 2) {
+				if(this.state.scores.player1 >= 7) {
 					this.players.forEach(player => {
 						player.send(JSON.stringify({
 							type: 'gameOver',
