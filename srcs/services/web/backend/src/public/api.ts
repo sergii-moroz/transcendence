@@ -98,6 +98,8 @@ export class Api {
 			body: JSON.stringify({ username, password }),
 		});
 
+		if (res.ok && res.status === 202) return res
+
 		if (res.ok) {
 			this.startAutoRefresh();
 		}
@@ -234,7 +236,22 @@ export class Api {
 	async is2FAEnabled() {
 		return this.request('/2fa/enable')
 	}
-}
 
+	async verify2FALogin(code: string) {
+		const token = sessionStorage.getItem('2fa_token')
+		// console.log("verify2FALogin: TOKEN: ", token)
+		const res = await this.request('/2fa/verify-login', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ token, code })
+		})
+
+		// console.log("verify2FAlogin RES:", res)
+		return res
+	}
+
+}
 // TODO:
 // better error handling
