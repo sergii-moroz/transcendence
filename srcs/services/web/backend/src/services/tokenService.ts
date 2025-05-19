@@ -29,7 +29,7 @@ export function verifyRefreshToken(token: string): JwtUserPayload {
 }
 
 export const generate2FAAccessToken = (user: JwtUserPayload): string => {
-	return jwt.sign(user, TWO_FA_ACCESS_TOKEN_SECRET, { expiresIn: '5m'})
+	return jwt.sign({ id: user.id, username: user.username }, TWO_FA_ACCESS_TOKEN_SECRET, { expiresIn: '5m'})
 }
 
 export const verify2FAAccessToken = (token: string) => {
