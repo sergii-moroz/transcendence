@@ -58,7 +58,6 @@ export class Game {
 					message: 'Game ended, other player left, you win!',
 					winner: role,
 				}));
-				conn.close();
 				this.players.delete(role);
 			}
 		}
