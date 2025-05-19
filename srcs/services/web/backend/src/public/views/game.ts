@@ -49,7 +49,7 @@ export class GameView extends View {
 	}
 
 	handleSocket = () => {
-		this.socket = new WebSocket(`ws://localhost:4242/ws/game/${this.gameRoomId}`);
+		this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/game/${this.gameRoomId}`);
 
 		this.socket.onopen = () => {
 			console.log('WebSocket connection established.');
