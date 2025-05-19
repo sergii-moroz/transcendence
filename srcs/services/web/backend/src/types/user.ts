@@ -40,11 +40,13 @@ export interface HomeResponse {
 
 interface Friend {
 	name: string;
-	online: boolean;
 	picture: string;
 }
 
 export interface SidebarResponse {
-	friends: Friend[];
-	FriendRequests: string[];
+	friends: {
+		online: Friend[];
+		offline: Friend[];
+	}
+	FriendRequests: Friend[];
 }

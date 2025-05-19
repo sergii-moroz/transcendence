@@ -200,7 +200,7 @@ export class HomeView extends View {
 					</div>
 
 				<!-- Social Sidebar - Friends List -->
-				<div id="sidebar-friends" class="w-80 dark:bg-gray-800 bg-white border-l dark:border-gray-700 border-gray-200 flex flex-col">
+				<div id="sidebar-friends" class="w-80 h-screen dark:bg-gray-800 bg-white border-l dark:border-gray-700 border-gray-200 flex flex-col">
 					<div class="p-4 flex justify-between items-center">
 						<h2 class="text-lg font-bold flex items-center">
 							<span class="mr-2">${iconHomeFriends}</span>
@@ -227,9 +227,9 @@ export class HomeView extends View {
 					</div>
 
 					<!-- Content Container -->
-  					<div class="flex-1 flex flex-col min-h-0">
+  					<div class="flex flex-col h-full overflow-y-auto">
 						<div id="friendInvite" class="flex-shrink-0"></div>
-						<div id="friendList" class="flex-1 overflow-y-auto"></div>
+						<div id="friendList" class="flex-shrink-0"></div>
 					</div>
 				</div>
 
@@ -310,7 +310,7 @@ export class HomeView extends View {
 			hide(sideBar_collapsed!);
 			show(sideBar_friends!);
 
-			this.populateFriends();
+			this.populateSidebar();
 		})
 
 		this.addEventListener(sideBar_close_BTN!, 'click', () => {
@@ -320,7 +320,7 @@ export class HomeView extends View {
 
 		this.addEventListener(sideBar_refreshBTN!, 'click', () => {
 			alert('nothing yet');
-			this.populateFriends();
+			this.populateSidebar();
 		})
 
 		this.addEventListener(addFriend!, 'click', () => {
@@ -343,46 +343,121 @@ export class HomeView extends View {
 
 	};
 
-	async populateFriends() {
+	async populateSidebar() {
 		const root = document.getElementById('friendInvite');
 		root!.innerHTML = '';
 		const data = await this.api.getSidebar() as SidebarResponse;
 		if (!data) return;
 
 		this.addRequests(data, root!);
+		this.addFriends(data, root!);
 	}
 
 	addRequests(data: SidebarResponse, root: HTMLElement) {
-		const element = document.createElement('div');
-		element.innerHTML = `
+		if (data.FriendRequests.length > 0) {
+			const element = document.createElement('div');
+			element.innerHTML = `
+				<div class="p-4 border-b dark:border-gray-700 border-gray-200">
+					<h3 class="font-bold text-lg mb-3 pb-2">
+						Friend  Requests
+					</h3>
+					<div id="insertContainer" class="space-y-3"></div>
+				</div>
+			`;
+	
+			const requestsContainer = element.querySelector('#insertContainer');
+	
+			for (let i = 0; i < data.FriendRequests.length; i++) {
+				const requestElement = document.createElement('div');
+				requestElement.className = 'dark:bg-gray-700 bg-gray-100 rounded-3xl shadow-sm p-2 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg';
+				requestElement.innerHTML = `
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-2"> <!-- Added wrapper div with gap control -->
+							<img 
+								src="${data.FriendRequests[i].picture}"
+								onerror="this.src='../uploads/default.jpg'"
+								class="w-10 h-10 rounded-full object-cover"
+							>
+							<span class="font-medium">${data.FriendRequests[i].name}</span>
+						</div>
+						<div class="flex gap-2">
+							<button class="p-1.5 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors">
+								${iconHomeCheck}
+							</button>
+							<button class="p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors">
+								${iconHomeX}
+							</button>
+						</div>
+					</div>
+				`;
+				requestsContainer!.appendChild(requestElement);
+			}
+			root.append(element);
+		}
+	}
+
+	addFriends(data: SidebarResponse, root: HTMLElement) {
+		const online = document.createElement('div');
+		online.innerHTML = `
 			<div class="p-4 border-b dark:border-gray-700 border-gray-200">
-				<h2 class="font-bold text-lg mb-3 pb-2">
-					Friend  Requests
-				</h2>
-				<div id="insertContainer" class="space-y-3"></div>
+				<h3 class="text-xs font-bold text-gray-400 mb-3">ONLINE • ${data.friends.online.length}</h3>
+				<div id="insertContainer" class="space-y-2"></div>
 			</div>
 		`;
 
-		const requestsContainer = element.querySelector('#insertContainer');
-
-		for (let i = 0; i < data.FriendRequests.length; i++) {
-			const requestElement = document.createElement('div');
-			requestElement.className = 'dark:bg-gray-700 bg-gray-100 rounded-3xl shadow-sm p-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg';
-			requestElement.innerHTML = `
-				<div class="flex items-center justify-between">
-					<span class="font-medium pl-5">${data.FriendRequests[i]}</span>
-					<div class="flex gap-2">
-						<button class="p-1.5 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors">
-							${iconHomeCheck}
-						</button>
-						<button class="p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors">
-							${iconHomeX}
-						</button>
-					</div>
-				</div>
-			`;
-			requestsContainer!.appendChild(requestElement);
+		if (data.friends.online.length > 0)
+		{
+			const requestsContainer = online.querySelector('#insertContainer');
+	
+			for (let i = 0; i < data.friends.online.length; i++) {
+				const requestElement = document.createElement('div');
+				requestElement.className = "friend-item flex items-center p-2 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg";
+				requestElement.innerHTML = `
+						<div class="relative mr-3">
+							<img 
+								src=${data.friends.online[i].picture}
+								onerror="this.src='../uploads/default.jpg'"
+								class="w-10 h-10 rounded-full"
+							>
+							<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
+						</div>
+						<span class="font-medium">${data.friends.online[i].name}</span>
+				`;
+				requestsContainer!.appendChild(requestElement);
+			}
 		}
-		root.append(element);
+		root.append(online);
+
+
+		const offline = document.createElement('div');
+		offline.innerHTML = `
+			<div class="p-4">
+				<h3 class="text-xs font-bold text-gray-400 mb-3">OFFLINE • ${data.friends.offline.length}</h3>
+				<div id="insertContainer" class="space-y-2"></div>
+			</div>
+		`;
+
+		if (data.friends.offline.length > 0)
+		{
+			const requestsContainer = offline.querySelector('#insertContainer');
+	
+			for (let i = 0; i < data.friends.offline.length; i++) {
+				const requestElement = document.createElement('div');
+				requestElement.className = "friend-item flex items-center p-2 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg";
+				requestElement.innerHTML = `
+						<div class="relative mr-3">
+							<img 
+								src=${data.friends.offline[i].picture}
+								onerror="this.src='../uploads/default.jpg'"
+								class="w-10 h-10 rounded-full"
+							>
+							<div class="absolute bottom-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
+						</div>
+						<span class="font-medium">${data.friends.offline[i].name}</span>
+				`;
+				requestsContainer!.appendChild(requestElement);
+			}
+		}
+		root.append(offline);
 	}
 }

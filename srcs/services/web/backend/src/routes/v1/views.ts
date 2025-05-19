@@ -34,21 +34,77 @@ export const views = async (app: FastifyInstance, opts: FastifyPluginOptions) =>
 
 	app.get('/sidebar', async (req, reply) => {
 		const answer: SidebarResponse = {
-			friends: [
+			friends: {
+				online: [
+					{
+						name: "Hartmut",
+						picture: "../uploads/hans.jpg"
+					},
+					{
+						name: "Peter",
+						picture: "john.jpg"
+					},
+					{
+						name: "Klaus",
+						picture: "john.jpg"
+					},
+					{
+						name: "Klaus",
+						picture: "john.jpg"
+					},
+					{
+						name: "Klaus",
+						picture: "john.jpg"
+					},
+					{
+						name: "Klaus",
+						picture: "john.jpg"
+					},
+					{
+						name: "Klaus",
+						picture: "john.jpg"
+					},
+					{
+						name: "Klaus",
+						picture: "john.jpg"
+					},
+					{
+						name: "Klaus",
+						picture: "john.jpg"
+					},
+					{
+						name: "Klaus",
+						picture: "john.jpg"
+					},
+					{
+						name: "Klaus",
+						picture: "john.jpg"
+					},
+					{
+						name: "Klaus",
+						picture: "john.jpg"
+					}
+				],
+				offline: [
+					{
+						name: "Manfred",
+						picture: "../uploads/hans.jpg"
+					},
+					{
+						name: "Horst",
+						picture: "jane.jpg"
+					}
+				]
+			},
+			FriendRequests: [
 				{
-					name: "John Doe",
-					online: true,
-					picture: "john.jpg"
+					name: "Bernd",
+					picture: "../uploads/bernd.jpg"
 				},
 				{
-					name: "Jane Smith",
-					online: false,
-					picture: "jane.jpg"
+					name: "Ben",
+					picture: 'aa'
 				}
-			],
-			FriendRequests: [
-				'Tim',
-				'Ben'
 			]
 		};
 		return reply.send(answer);
