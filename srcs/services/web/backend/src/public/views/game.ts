@@ -33,19 +33,19 @@ export class GameView extends View {
 	}
 
 	handleCanvasScaling = () => {
-	    const maxWidth = Math.min(window.innerWidth * 0.9, 1000); // 90% of window or max 1000px
-	    const maxHeight = Math.min(window.innerHeight * 0.9, 600); // 90% of window or max 600px
+		const maxWidth = Math.min(window.innerWidth * 0.9, 1000); // 90% of window or max 1000px
+		const maxHeight = Math.min(window.innerHeight * 0.9, 600); // 90% of window or max 600px
 
-	    let width = maxWidth;
-	    let height = width * 3 / 5;
+		let width = maxWidth;
+		let height = width * 3 / 5;
 
-	    if (height > maxHeight) {
-	        height = maxHeight;
-	        width = height * 5 / 3;
-	    }
+		if (height > maxHeight) {
+			height = maxHeight;
+			width = height * 5 / 3;
+		}
 
-	    this.canvas.width = Math.round(width);
-	    this.canvas.height = Math.round(height);
+		this.canvas.width = Math.round(width);
+		this.canvas.height = Math.round(height);
 	}
 
 	handleSocket = () => {
