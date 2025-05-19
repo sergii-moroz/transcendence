@@ -31,8 +31,20 @@ interface TopPlayer extends PlayerStats {
 // 	}
 // }
 
+
 export interface HomeResponse {
 	stats: PlayerStats;
 	topPlayer: TopPlayer;
 	friendAmount: number;
+}
+
+interface Friend {
+	name: string;
+	online: boolean;
+	picture: string;
+}
+
+export interface SidebarResponse {
+	friends: Friend[];
+	FriendRequests: string[];
 }

@@ -1,3 +1,4 @@
+import { SidebarResponse } from "../../types/user.js";
 import {
 	iconHomeProfile,
 	iconHomeLeaderboard,
@@ -10,7 +11,8 @@ import {
 	iconHomeFriends,
 	iconHomeRefresh,
 	iconHomeX,
-	iconHomePlus
+	iconHomePlus,
+	iconHomeCheck
 } from "../components/icons.js";
 
 import { View } from "../view.js"
@@ -217,7 +219,7 @@ export class HomeView extends View {
 					<!-- Add friend -->
 					<div class="p-4 border-b border-t dark:border-gray-700 border-gray-100">
 						<div class="relative">
-						<input id="addFriendInput" type="text" placeholder="Add friend..." class="w-full dark:bg-gray-700 bg-gray-100 border-none rounded-lg pl-3 pr-10 py-2 text-sm placeholder-gray-400 focus:ring-blue-500 focus:ring-2">
+						<input id="addFriendInput" type="text" placeholder="Add friend..." class="w-full dark:bg-gray-700 bg-gray-100 border-none rounded-lg pl-3 pr-10 py-2 text-sm placeholder-gray-400 focus:ring-blue-500 focus:ring-2 duration-300 hover:scale-[1.02] hover:shadow-lgmake">
 						<button id="addFriendBTN" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 dark:hover:text-white hover:text-gray-500">
 							${iconHomePlus}
 						</button>
@@ -301,12 +303,14 @@ export class HomeView extends View {
 			el.classList.add('hidden');
 		}
 
-		hide(sideBar_friends!);
-
+		
 		// sidebar
+		hide(sideBar_friends!);
 		this.addEventListener(sideBar_collapsed!, 'click', () => {
 			hide(sideBar_collapsed!);
 			show(sideBar_friends!);
+
+			this.populateFriends();
 		})
 
 		this.addEventListener(sideBar_close_BTN!, 'click', () => {
@@ -316,6 +320,7 @@ export class HomeView extends View {
 
 		this.addEventListener(sideBar_refreshBTN!, 'click', () => {
 			alert('nothing yet');
+			this.populateFriends();
 		})
 
 		this.addEventListener(addFriend!, 'click', () => {
@@ -335,5 +340,49 @@ export class HomeView extends View {
 				}
 			}
 		})
+
 	};
+
+	async populateFriends() {
+		const root = document.getElementById('friendInvite');
+		root!.innerHTML = '';
+		const data = await this.api.getSidebar() as SidebarResponse;
+		if (!data) return;
+
+		this.addRequests(data, root!);
+	}
+
+	addRequests(data: SidebarResponse, root: HTMLElement) {
+		const element = document.createElement('div');
+		element.innerHTML = `
+			<div class="p-4 border-b dark:border-gray-700 border-gray-200">
+				<h2 class="font-bold text-lg mb-3 pb-2">
+					Friend  Requests
+				</h2>
+				<div id="insertContainer" class="space-y-3"></div>
+			</div>
+		`;
+
+		const requestsContainer = element.querySelector('#insertContainer');
+
+		for (let i = 0; i < data.FriendRequests.length; i++) {
+			const requestElement = document.createElement('div');
+			requestElement.className = 'dark:bg-gray-700 bg-gray-100 rounded-3xl shadow-sm p-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg';
+			requestElement.innerHTML = `
+				<div class="flex items-center justify-between">
+					<span class="font-medium pl-5">${data.FriendRequests[i]}</span>
+					<div class="flex gap-2">
+						<button class="p-1.5 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors">
+							${iconHomeCheck}
+						</button>
+						<button class="p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors">
+							${iconHomeX}
+						</button>
+					</div>
+				</div>
+			`;
+			requestsContainer!.appendChild(requestElement);
+		}
+		root.append(element);
+	}
 }

@@ -227,10 +227,20 @@ export class Api {
 
 	async getHome(): Promise<Record<string, any> | null> {
 		try {
-			const res = await this.request('/home')
+			const res = await this.request('/home');
 			if (res.ok) return await res.json();
 		} catch (error) {
 			console.error("Home API call failed:", error);
+		}
+		return null;
+	}
+
+	async getSidebar(): Promise<Record<string, any> | null> {
+		try {
+			const res = await this.request('/sidebar');
+			if (res.ok) return await res.json();
+		} catch (error) {
+			console.error("Sidebar API call failed:", error);
 		}
 		return null;
 	}

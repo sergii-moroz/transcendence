@@ -4,7 +4,7 @@ import {
 } from "fastify"
 import { 
 	HomeResponse,
-	JwtUserPayload,
+	SidebarResponse,
 } from "../../types/user.js";
 import { findUserById } from "../../services/userService.js";
 
@@ -30,5 +30,27 @@ export const views = async (app: FastifyInstance, opts: FastifyPluginOptions) =>
 	app.get('/profile', async (req, reply) => {
 		const userInfo = await findUserById(req.user.id)
 		reply.send(userInfo)
+	});
+
+	app.get('/sidebar', async (req, reply) => {
+		const answer: SidebarResponse = {
+			friends: [
+				{
+					name: "John Doe",
+					online: true,
+					picture: "john.jpg"
+				},
+				{
+					name: "Jane Smith",
+					online: false,
+					picture: "jane.jpg"
+				}
+			],
+			FriendRequests: [
+				'Tim',
+				'Ben'
+			]
+		};
+		return reply.send(answer);
 	});
 }
