@@ -15,7 +15,7 @@ export class Router {
 		this.rootElement = document.getElementById('app');
 		this.currentView = null;
 		this.api = new Api();
-		this.publicRoutes = ['/login', '/register', '/'];
+		this.publicRoutes = ['/login', '/register', '/', '/login/2fa/verify'];
 		this.currentUser = null;
 
 		window.addEventListener('popstate', this.handleRouteChange);
@@ -43,11 +43,20 @@ export class Router {
 
 		try {
 			if (!this.publicRoutes.includes(path)) {
-				if (!this.currentUser) {
+				if (!this.currentUser) { console.log("ROUTER checkAuth:")
 					this.currentUser = await this.api.checkAuth();
 					if (!this.currentUser) {
-							return this.navigateTo('/login');
+						console.log("ROUTER USER: NULL")
+						return this.navigateTo('/login');
 					}
+				} else {
+					console.log("ROUTER: USER:", this.currentUser)
+					// it means this.currentUser isn't NULL
+					// but access token && CSRF Token is expired
+					//
+					// await this.api.refreshToken()
+					// !!! TODO !!!
+
 				}
 			}
 			else if (this.currentUser) {
