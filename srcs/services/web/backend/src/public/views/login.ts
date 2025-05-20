@@ -104,6 +104,12 @@ export class LoginView extends View {
 			if (!res) return
 
 			const jsonRes = await res.json();
+			console.log("jsonRES:", jsonRes)
+
+			if (res.ok && jsonRes.requires2FA) {
+				sessionStorage.setItem('2fa_token', jsonRes.token)
+				return this.router.navigateTo('/login/2fa/verify')
+			}
 
 			if (res.ok) {
 				return this.router.navigateTo('/home');

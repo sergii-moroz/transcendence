@@ -4,7 +4,7 @@ import { db } from '../db/connections.js';
 
 export const findUserById = async (id: number): Promise<User | undefined> => {
 	return new Promise((resolve, reject) => {
-		db.get<User>('SELECT username, bio FROM users WHERE id = ?', [id], (err, row) => {
+		db.get<User>('SELECT * FROM users WHERE id = ?', [id], (err, row) => { //username, bio
 			if (err) reject(err)
 			else resolve(row)
 		})

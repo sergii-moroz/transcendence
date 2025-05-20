@@ -14,7 +14,7 @@ export const update2FASecret = async (username: string, secret: string): Promise
 	});
 };
 
-export const load2FASecret = async (id: number): Promise<string | undefined> => {
+export const get2FASecret = async (id: number): Promise<string | undefined> => {
 	return new Promise((resolve, reject) => {
 		db.get<User>(
 			'SELECT two_factor_secret FROM users WHERE id = ?',
@@ -40,6 +40,20 @@ export const mark2FAVerified = async (id: number): Promise<void> => {
 	});
 };
 
+// export const is2FAVerified = async (id: number): Promise<boolean> => {
+// 	return new Promise((resolve, reject) => {
+// 		db.get<User>(
+// 			'SELECT two_factor_verified FROM users WHERE id = ?',
+// 			[id],
+// 			(err, row) => {
+// 				if (err) return reject(err)
+// 				if (!row) return resolve(false)
+// 				resolve(row.two_factor_verified)
+// 			}
+// 		)
+// 	})
+// }
+
 export const generateBackupCodes = (count = 10): string[] => {
 	return Array.from({ length: count }, () =>
 		Math.random().toString(36).slice(-10).toUpperCase()
@@ -59,7 +73,7 @@ export const setBackupCodes = async (codesStr: string, id:number):Promise<void> 
 	})
 }
 
-export const markTwoFactorEnabled = async (id: number): Promise<void> => {
+export const mark2FAEnabled = async (id: number): Promise<void> => {
 	return new Promise((resolve, reject) => {
 		db.run(
 			'UPDATE users SET two_factor_enabled = ? WHERE id = ?',
@@ -71,3 +85,17 @@ export const markTwoFactorEnabled = async (id: number): Promise<void> => {
 		);
 	});
 };
+
+export const is2FAEnabled = async (id: number): Promise<boolean> => {
+	return new Promise((resolve, reject) => {
+		db.get<User>(
+			'SELECT two_factor_enabled FROM users WHERE id = ?',
+			[id],
+			(err, row) => {
+				if (err) return reject(err)
+				if (!row) return resolve(false)
+				resolve(row.two_factor_enabled)
+			}
+		)
+	})
+}
