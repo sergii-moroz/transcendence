@@ -20,6 +20,8 @@ import { RootView } from "./views/root.js"
 
 import { Router } from "./router.js"
 import { View } from "./view.js"
+import { IconButton } from "./components/iconButton.js"
+import { Button2FA } from "./components/button-2fa.js"
 
 const routes: Record<string, typeof View> = {
 	'/': RootView,
@@ -42,3 +44,6 @@ const routes: Record<string, typeof View> = {
 };
 
 new Router(routes);
+
+customElements.define('icon-button', IconButton)
+customElements.define('button-2fa', Button2FA)

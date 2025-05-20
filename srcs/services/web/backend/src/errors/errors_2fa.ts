@@ -17,3 +17,9 @@ export const SecretNotFoundError = createError(
 	'2FA secret not found',
 	404
 );
+
+export const Register2FAError = createError(
+	'FST_2FA_REGISTER_FAILED',
+	'Failed to register 2FA for user',
+	500
+);

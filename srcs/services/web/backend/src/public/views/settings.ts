@@ -111,7 +111,8 @@ export class SettingsView extends View {
 							<span>Google Authenticator</span> is supported.
 							<span>SMS</span> and <span>E-mail</span> verification would be added in the near future.
 						</p>
-						<a href="/settings/2fa/verification-method" data-link class="col-span-3 sm:col-span-1 tw-btn w-full flex items-center justify-center lg:text-base">Enable 2FA</a>
+						<!-- a href="/settings/2fa/verification-method" id="btn-2fa" data-link class="col-span-3 sm:col-span-1 tw-btn w-full flex items-center justify-center lg:text-base">Enable 2FA</a -->
+						<button-2fa class="col-span-3 sm:col-span-1 tw-btn w-full flex items-center justify-center lg:text-base"></button-2fa>
 
 						<h4
 							class="col-span-3 font-semibold border border-transparent border-b-gray-200
@@ -159,9 +160,19 @@ export class SettingsView extends View {
 		return (profile);
 	}
 
-	setupEventListeners() {
+	async setupEventListeners() {
 		const items = document.querySelectorAll<HTMLElement>('[data-menu-item]')
 		const contents = document.querySelectorAll<HTMLElement>('[data-content-block]')
+		const btn2fa = document.querySelector<HTMLButtonElement>('#btn-2fa')
+
+		const res = await this.api.is2FAEnabled()
+		const twofa = await res.json()
+
+		if (twofa.enabled) {
+			if (btn2fa) {
+				btn2fa.innerHTML = "Disable 2FA"
+			}
+		}
 
 		const updateSelectedItem = (selectedIndex: number) => {
 			items.forEach((item, index) => {
@@ -205,5 +216,13 @@ export class SettingsView extends View {
 
 		// initialize menu
 		handleWindowSize()
+
+		const onClickHandler = () => {
+			console.log('click')
+		}
+
+		if (btn2fa) {
+			this.addEventListener(btn2fa, 'click', onClickHandler)
+		}
 	}
 }
