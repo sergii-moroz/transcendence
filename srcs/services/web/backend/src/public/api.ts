@@ -247,8 +247,6 @@ export class Api {
 		}
 		return null;
 	}
-}
-
 	async enable2FA() {
 		const res = await this.request('/2fa/enable', {
 			method: 'POST',
@@ -259,11 +257,11 @@ export class Api {
 		})
 		return res
 	}
-
+	
 	async is2FAEnabled() {
 		return this.request('/2fa/enable')
 	}
-
+	
 	async verify2FALogin(code: string) {
 		const token = sessionStorage.getItem('2fa_token')
 		// console.log("verify2FALogin: TOKEN: ", token)
@@ -274,11 +272,12 @@ export class Api {
 			},
 			body: JSON.stringify({ token, code })
 		})
-
+	
 		// console.log("verify2FAlogin RES:", res)
 		return res
 	}
-
 }
+
+
 // TODO:
 // better error handling

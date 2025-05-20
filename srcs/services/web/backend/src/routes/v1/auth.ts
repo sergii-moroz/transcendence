@@ -15,8 +15,8 @@ import {
 
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import bcrypt from 'bcrypt'
-import { createUser, findUserByUsername, verifyPassword } from "../../services/userService.js";
-import { createCsrfToken, generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../services/tokenService.js";
+// import { createUser, findUserByUsername, verifyPassword } from "../../services/userService.js";
+// import { createCsrfToken, generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../services/tokenService.js";
 import { loginSchema, registerSchema } from "../../schemas/auth.js";
 import { JwtUserPayload } from "../../types/user.js";
 import { checkCsrf } from "../../services/authService.js";

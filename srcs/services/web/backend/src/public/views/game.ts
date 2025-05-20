@@ -71,10 +71,10 @@ export class GameView extends View {
 			if (data.type === 'gameOver') {
 				this.drawGameOver(data.message as string, data.winner as string);
 				setTimeout(() => {
-					this.router.navigateTo('/home');
 					if(this.socket && this.socket.readyState === WebSocket.OPEN) {
 						this.socket.close();
 					}
+					this.router.navigateTo('/home');
 				}, 3000);
 			}
 		};

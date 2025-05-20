@@ -24,7 +24,6 @@ export class View {
 	}
 
 	mount = async (parent: HTMLElement) => {
-
 		const input = await this.prehandler();
 		if (!input) {
 			alert ("cant load API data");
@@ -35,24 +34,25 @@ export class View {
 		parent.append(this.element);
 		this.setupEventListeners();
 	}
-
+	
 	async prehandler(): Promise<Record<string, any> | null> 
 	{
 		// Should be overridden by subclasses if needed
 		return {};
 	}
-
+	
 	setupEventListeners() {
 		// Should be overridden by subclasses if needed
 	}
-
+	
 	addEventListener(element: HTMLElement | Window | Document, type: string, handler: (e: Event | KeyboardEvent) => void)
 	{
 		element.addEventListener(type, handler);
 		this.eventListeners.push({element, type, handler});
 	}
-
-	unmount = () => {
+	
+	unmount = (parent: HTMLElement) => {
+		parent.innerHTML = '';
 		this.cleanupEventListeners();
 		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
 			this.socket.close();

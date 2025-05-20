@@ -37,7 +37,7 @@ export class Router {
 		const path: string = window.location.pathname;
 
 		if (this.currentView) {
-			this.currentView.unmount();
+			this.currentView.unmount(this.rootElement!);
 			this.currentView = null;
 		}
 
