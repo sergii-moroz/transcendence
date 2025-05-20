@@ -1,3 +1,18 @@
+import {
+	createCsrfToken,
+	verifyRefreshToken,
+	generateAccessToken,
+	generateRefreshToken,
+	generate2FAAccessToken,
+} from "../../services/tokenService.js";
+
+import {
+	createUser,
+	findUserById,
+	verifyPassword,
+	findUserByUsername,
+} from "../../services/userService.js";
+
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import bcrypt from 'bcrypt'
 import { createUser, findUserByUsername, verifyPassword } from "../../services/userService.js";
@@ -58,6 +73,13 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 			const valid = await verifyPassword(password, user.password);
 			if (!valid) return reply.code(401).send({ error: 'Invalid credentials' });
 
+			if (user.two_factor_enabled) {
+				const tempToken = generate2FAAccessToken(user);
+				// app.log.info(tempToken)
+				return reply.code(202).send({ requires2FA: true, token: tempToken });
+			}
+
+			// Normal login (no 2FA)
 			const accessToken = generateAccessToken(user);
 			const refreshToken = generateRefreshToken(user);
 			const csrfToken = createCsrfToken();

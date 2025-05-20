@@ -42,6 +42,13 @@ export const loginSchema = {
 				csrfToken: { type: 'string' },
 			}
 		},
+		202: {
+			type: 'object',
+			properties: {
+				requires2FA: { type: 'boolean' },
+				token: { type: 'string' }
+			}
+		},
 		401: {
 			type: 'object',
 			properties: {

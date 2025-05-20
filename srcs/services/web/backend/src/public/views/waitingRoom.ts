@@ -11,7 +11,7 @@ export class WaitingView extends View {
 		`;
 	}
 	handleSocket = () => {
-		this.socket = new WebSocket('ws://localhost:4242/ws/waiting-room');
+		this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/waiting-room`);
 		
 		this.socket.onopen = () => {
 			console.log('WebSocket connection established.');

@@ -31,4 +31,5 @@ export interface gameJson {
 	type: string;
 	state: GameState;
 	message?: string;
+	winner?: string;
 }

@@ -12,23 +12,25 @@ export class Api {
 	}
 
 	async request(endpoint: string,
-		// options: = {}
 		options: RequestInit & { headers?: Record<string, string> } = {}
 	) {
 		const url = `${this.baseUrl}${endpoint}`;
+
 		let res = await fetch(url, {
 			...options,
 			credentials: 'include',
 		});
 
 		if (!res.ok) {
+
 			const errorRes = res.clone();
 			const errorData: ErrorResponse = await errorRes.json();
-			console.log("error data:", errorData);
+
 			if (errorData.code !== 'FST_2FA_INVALID_CODE') {
+
 				await this.refreshToken()
 
-				if (options.headers && options.headers['X-CSRF-Token']) {
+				if (options.headers) {
 					options.headers['X-CSRF-Token'] = this.getCsrfToken();
 				}
 
@@ -36,19 +38,16 @@ export class Api {
 					...options,
 					credentials: 'include'
 				});
+
 			}
 		}
-
-		// if (res.status === 401) {
-		// 	await this.refreshToken();
-		// 	res = await fetch(url, options);
-		// }
 
 		return res;
 	}
 
 	async refreshToken() {
-		return await fetch(`${this.baseUrl}/refresh`, {
+		// return await fetch(`${this.baseUrl}/refresh`, {
+		const res = await fetch(`${this.baseUrl}/refresh`, {
 			method: 'POST',
 			headers: {
 				'X-CSRF-Token': this.getCsrfToken() || '',
@@ -56,9 +55,11 @@ export class Api {
 			credentials: 'include',
 		});
 
-		// if (!res.ok) {
-		// 	console.error('Auto-refresh failed');
-		// }
+		if (res.ok && !this.refreshIntervalId) {
+			this.startAutoRefresh()
+		}
+
+		return res
 	}
 
 	getCsrfToken() {
@@ -97,8 +98,10 @@ export class Api {
 			body: JSON.stringify({ username, password }),
 		});
 
+		if (res.ok && res.status === 202) return res
+
 		if (res.ok) {
-		this.startAutoRefresh();
+			this.startAutoRefresh();
 		}
 		return res;
 	}
@@ -246,5 +249,36 @@ export class Api {
 	}
 }
 
+	async enable2FA() {
+		const res = await this.request('/2fa/enable', {
+			method: 'POST',
+			headers: {
+				'X-CSRF-Token': this.getCsrfToken(),
+			},
+			credentials: 'include'
+		})
+		return res
+	}
+
+	async is2FAEnabled() {
+		return this.request('/2fa/enable')
+	}
+
+	async verify2FALogin(code: string) {
+		const token = sessionStorage.getItem('2fa_token')
+		// console.log("verify2FALogin: TOKEN: ", token)
+		const res = await this.request('/2fa/verify-login', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ token, code })
+		})
+
+		// console.log("verify2FAlogin RES:", res)
+		return res
+	}
+
+}
 // TODO:
 // better error handling
