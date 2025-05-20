@@ -132,7 +132,13 @@ export class Api {
 	}
 
 	async getProfile() {
-		return this.request('/profile');
+		try {
+			const res = await this.request('/profile');
+			if (res.ok) return await res.json();
+		} catch (error) {
+			console.error("Profile API call failed:", error);
+		}
+		return null;
 	}
 
 	async checkAuth(): Promise<User | null> {
@@ -221,6 +227,27 @@ export class Api {
 		})
 		return res
 	}
+
+	async getHome(): Promise<Record<string, any> | null> {
+		try {
+			const res = await this.request('/home');
+			if (res.ok) return await res.json();
+		} catch (error) {
+			console.error("Home API call failed:", error);
+		}
+		return null;
+	}
+
+	async getSidebar(): Promise<Record<string, any> | null> {
+		try {
+			const res = await this.request('/sidebar');
+			if (res.ok) return await res.json();
+		} catch (error) {
+			console.error("Sidebar API call failed:", error);
+		}
+		return null;
+	}
+}
 
 	async enable2FA() {
 		const res = await this.request('/2fa/enable', {

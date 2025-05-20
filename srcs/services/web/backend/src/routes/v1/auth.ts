@@ -14,10 +14,12 @@ import {
 } from "../../services/userService.js";
 
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
+import bcrypt from 'bcrypt'
+import { createUser, findUserByUsername, verifyPassword } from "../../services/userService.js";
+import { createCsrfToken, generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../services/tokenService.js";
 import { loginSchema, registerSchema } from "../../schemas/auth.js";
 import { JwtUserPayload } from "../../types/user.js";
 import { checkCsrf } from "../../services/authService.js";
-import bcrypt from 'bcrypt'
 
 export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
 
@@ -120,12 +122,6 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 
 	app.get('/user', (req, reply) => {
 		reply.send(req.user);
-	});
-
-	app.get('/profile', async (req, reply) => {
-		const user = req.user as JwtUserPayload;
-		const userInfo = await findUserById(user.id)
-		reply.send({ profile: userInfo })
 	});
 
 	app.post('/refresh', async (req, reply) => {

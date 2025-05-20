@@ -150,13 +150,7 @@ export class SettingsView extends View {
 	override async prehandler(): Promise<Record<string, any>> {
 		const res = await this.api.getProfile();
 
-		if (!res.ok) {
-			this.router.navigateTo('/home');
-		}
-
-		const { profile } = await res.json();
-
-		return (profile);
+		return res;
 	}
 
 	setupEventListeners() {

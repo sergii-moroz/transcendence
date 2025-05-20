@@ -7,7 +7,7 @@ export class GameView extends View {
 	ctx!: CanvasRenderingContext2D;
 	gameRoomId!: string;
 
-	setContent = (input: Record<string, any>) => {
+	setContent = () => {
 		this.element.innerHTML = `
 		<div style="display: flex; flex-direction: column; align-items: center;">
 			<h2 id="score"></h2>
@@ -20,8 +20,8 @@ export class GameView extends View {
 	mount = async (parent: HTMLElement) => {
 		parent.innerHTML = '';
 		
-		const input = await this.prehandler();
-		this.setContent(input);
+		// const input = await this.prehandler();
+		this.setContent();
 		parent.append(this.element);
 
 		this.canvas = document.getElementById("game") as HTMLCanvasElement;
