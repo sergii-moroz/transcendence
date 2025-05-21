@@ -7,7 +7,7 @@
     "build:ts": "tsc -p tsconfig.json",
     "build:css2": "postcss src/public/style.css -o dist/public/style.css",
     "build:css": "npx @tailwindcss/cli -i src/public/style.css -o dist/public/style.css",
-    "build:assets": "cpy src/public/*.{html,css} --flat dist/public && cpy src/public/uploads --flat dist/public/uploads",
+    "build:assets": "cpy src/public/**/*.{html,css} dist/public",
     "build": "npm run build:ts && npm run build:assets && npm run build:css",
     "watch:tsc": "tsc -w",
     "watch:css": "postcss src/public/style.css -o dist/public/style.css --watch",
