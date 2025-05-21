@@ -15,11 +15,23 @@
 	--font-roboto: "Roboto", "sans-serif";
 
 	@keyframes errorBar {
-		from { width: 100%; }
-		to { width: 0%; }
+		from { width: 100%; opacity: 1;}
+		to { width: 0%; opacity: 0.2;}
 	}
 
-	--animate-error-bar: errorBar 5s linear forwards;
+	@keyframes spin-down {
+	from {
+		transform: rotate(0deg);
+		opacity: 1;
+	}
+	to {
+		transform: rotate(360deg);
+		opacity: 0.2;
+	}
+}
+
+	--animate-error-bar: errorBar 4s linear forwards;
+	--animate-spin-down: spin-down 4s linear forwards;
 }
 
 @layer base {
