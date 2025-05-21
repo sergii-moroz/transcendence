@@ -138,7 +138,7 @@ export class RegisterForm extends HTMLElement {
 			hasError = true
 		}
 
-		if (password.length > 16) {
+		if (password.length > 64) {
 			this.showError(this.passwordError, 'Your password is too long')
 			hasError = true
 		}
@@ -155,12 +155,12 @@ export class RegisterForm extends HTMLElement {
 
 		if (hasError) return
 
-		const res = await API.register(this.username.value, this.password.value, this.repeated.value)
+			const res = await API.register(this.username.value, this.password.value, this.repeated.value)
 
 		if (res.success) {
 			return Router.navigateTo('/home')
 		} else {
-			this.showError(this.repeatedError, res.error ?? 'Registration failed')
+			this.showError(this.repeatedError, res.message ?? 'Registration failed')
 		}
 	}
 

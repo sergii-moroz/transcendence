@@ -59,7 +59,6 @@ export class API {
 
 	static async register(username: string, password: string, repeated: string) {
 		const response = await this.post('/api/register', { username, password, repeated })
-		console.log("API: register:", response)
 		return response.json()
 	}
 
