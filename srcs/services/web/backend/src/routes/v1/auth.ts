@@ -15,19 +15,18 @@ import {
 
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import bcrypt from 'bcrypt'
-// import { createUser, findUserByUsername, verifyPassword } from "../../services/userService.js";
-// import { createCsrfToken, generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../services/tokenService.js";
 import { loginSchema, registerSchema } from "../../schemas/auth.js";
 import { JwtUserPayload } from "../../types/user.js";
-import { checkCsrf } from "../../services/authService.js";
+import { checkCsrf, validateRegisterInput } from "../../services/authService.js";
+import { RegisterInputProps } from "../../types/registration.js";
 
 export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
 
 	app.post('/register', {schema: registerSchema}, async (req, reply) => {
-		const { username, password } = req.body as {username: string, password: string};
-		const hashed = await bcrypt.hash(password, 10);
-
 		try {
+			const { username, password } = validateRegisterInput(req.body as RegisterInputProps)
+			const hashed = await bcrypt.hash(password, 10);
+
 			const userId = await createUser(username, hashed)
 
 			const user = { id: userId, username: username};
@@ -57,8 +56,7 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 				})
 				.send({ success: true });
 		} catch (err) {
-			console.error('Register error:', err);
-			return reply.code(400).send({ error: 'User already exists or error occurred' });
+			throw err
 		}
 	});
 
