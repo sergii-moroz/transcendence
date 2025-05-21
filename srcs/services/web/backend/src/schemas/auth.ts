@@ -1,10 +1,13 @@
+import { errorResponseSchema } from "./error-response-schema.js";
+
 export const registerSchema = {
 	body: {
 		type: 'object',
-		required: ['username', 'password'],
+		required: ['username', 'password', 'repeated'],
 		properties: {
-			username: { type: 'string', minLength: 3 },
-			password: { type: 'string', minLength: 6 },
+			username: { type: 'string', minLength: 5, maxLength: 16 },
+			password: { type: 'string', minLength: 6, maxLength: 64},
+			repeated: { type: 'string', minLength: 6, maxLength: 64},
 		}
 	},
 	response: {
@@ -15,12 +18,7 @@ export const registerSchema = {
 				userId: { type: 'number' },
 			}
 		},
-		400: {
-			type: 'object',
-			properties: {
-				error: { type: 'string' }
-			}
-		}
+		400: errorResponseSchema
 	}
 };
 
