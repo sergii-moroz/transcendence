@@ -1,7 +1,8 @@
 import crypto from 'crypto'
+import { db } from '../db/connections.js'
 
 export class Game {
-	players: Map< string, WebSocket >;
+	players: Map< string, {socket: WebSocket, id: string} >;
 	state: {
 		ball: { x: number; y: number; dx: number, dy: number},
 		paddles: {
@@ -27,33 +28,33 @@ export class Game {
 		this.gameRunning = false;
 	}
 
-	addPlayer(player: WebSocket) {
+	addPlayer(socket: WebSocket, id: string) {
 		if (this.players.size === 0) {
-			this.players.set('player1', player);
+			this.players.set('player1', {socket, id});
 			console.custom('INFO', `${this.gameRoomId}: Player 1 joined`);
 		}
 		else if (this.players.size === 1) {
-			this.players.set('player2', player);
+			this.players.set('player2', {socket, id});
 			this.startLoop();
 			console.custom('INFO', `${this.gameRoomId}: Player 2 joined`);
 		}
 		else {
-			player.send(JSON.stringify({
+			socket.send(JSON.stringify({
 				type: 'Error',
 				message: 'Game is full.'
 			}));
 			console.custom('ERROR', `${this.gameRoomId}: User tried to join a full game`);
-			player.close();
+			socket.close();
 		}
 	}
 
 	removePlayer(player: WebSocket) {
-		for (const [role, conn] of this.players.entries()) {
-			if (conn === player) {
-				conn.close();
+		for (const [role, user] of this.players.entries()) {
+			if (user.socket === player) {
+				user.socket.close();
 				this.players.delete(role);
 			} else {
-				conn.send(JSON.stringify({
+				user.socket.send(JSON.stringify({
 					type: 'gameOver',
 					message: 'Game ended, other player left, you win!',
 					winner: role,
@@ -72,7 +73,7 @@ export class Game {
 			if(!this.gameRunning) return;
 			this.state.ball.x += this.state.ball.dx;
 			this.state.ball.y += this.state.ball.dy;
-		
+
 			// Ball collision with paddles (simplified)
 			if (
                 this.state.ball.x <= PADDLE_X1 &&
@@ -85,7 +86,7 @@ export class Game {
             ) {
                 this.state.ball.dx *= -1;
             }
-		
+
 			// Ball collision with walls
 			if (this.state.ball.y <= -FIELD_Y || this.state.ball.y >= FIELD_Y) {
 				this.state.ball.dy *= -1;
@@ -104,7 +105,7 @@ export class Game {
 			}
 
 			this.players.forEach(player => {
-				player.send(JSON.stringify({
+				player.socket.send(JSON.stringify({
 					type: 'gameState',
 					state: this.state
 				}));
@@ -114,34 +115,43 @@ export class Game {
 				this.gameRunning = false;
 				if(this.state.scores.player1 >= 7) {
 					this.players.forEach(player => {
-						player.send(JSON.stringify({
+						player.socket.send(JSON.stringify({
 							type: 'gameOver',
 							message: 'Player 1 wins!',
 							winner: 'player1',
 						}));
-						// player.close();
 					});
-					// this.players.clear();
+					db.run(
+						`UPDATE user_stats SET wins = wins + 1 WHERE user_id = ?`, [this.players.get('player1')?.id]
+					);
+					db.run(
+						`UPDATE user_stats SET losses = losses + 1 WHERE user_id = ?`, [this.players.get('player2')?.id]
+					);
 				} else {
 					this.players.forEach(player => {
-						player.send(JSON.stringify({
+						player.socket.send(JSON.stringify({
 							type: 'gameOver',
 							message: 'Player 2 wins!',
 							winner: 'player2',
 						}));
-						// player.close();
 					});
-					// this.players.clear();
+
+					db.run(
+						`UPDATE user_stats SET wins = wins + 1 WHERE user_id = ?`, [this.players.get('player2')?.id]
+					);
+					db.run(
+						`UPDATE user_stats SET losses = losses + 1 WHERE user_id = ?`, [this.players.get('player1')?.id]
+					);
 				}
 			}
-		}, 16);
+		}, 20);
 	}
 
 	registerPlayerInput(input: string, connection: WebSocket) {
 		if(!this.gameRunning) return;
 		let player = '';
-		for (const [role, conn] of this.players.entries()) {
-			if (conn === connection) {
+		for (const [role, user] of this.players.entries()) {
+			if (user.socket === connection) {
 				player = role;
 			}
 		}

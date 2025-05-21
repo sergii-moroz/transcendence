@@ -8,6 +8,7 @@ import { GameRoomRequest } from "../../types/game.js";
 export const gameRoomSock = async (app: FastifyInstance) => {
 
     app.get('/game/:gameRoomId', { websocket: true }, (socket, req: GameRoomRequest) => {
+		console.log(`New WebSocket connection from ${req.user.id}`);
 		const gameRoomId = req.params.gameRoomId;
 		const game = app.gameInstances.get(gameRoomId);
 
@@ -17,7 +18,7 @@ export const gameRoomSock = async (app: FastifyInstance) => {
 			return;
 		}
 
-		game.addPlayer(socket);
+		game.addPlayer(socket, req.user.id);
 		console.custom('INFO', `User: ${req.user.username} connected to game room: ${gameRoomId}`);
 
 		socket.on('message', (messageBuffer: Event) => {
@@ -25,7 +26,7 @@ export const gameRoomSock = async (app: FastifyInstance) => {
 				if(message.type === 'input') {
 					game.registerPlayerInput(message.input, socket);
 				}
-		})
+		});
 
 		socket.on('close', () => {
 			game.removePlayer(socket);
