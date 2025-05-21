@@ -16,13 +16,13 @@ import { AboutView } from "./views/about.js"
 import { LoginView } from "./views/login.js"
 import { HomeView } from "./views/home.js"
 import { GameView } from "./views/game.js"
-import { RootView } from "./views/root.js"
+// import { RootView } from "./views/root.js"
 
 import { Router } from "./router.js"
 import { View } from "./view.js"
 
 const routes: Record<string, typeof View> = {
-	'/': RootView,
+	// '/': RootView,
 	'/login': LoginView,
 	'/login/2fa/verify': Login2FAVerifyView,
 	'/register': RegisterView,
