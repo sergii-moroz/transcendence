@@ -12,13 +12,25 @@ export async function up() {
 		];
 
 		db.serialize(() => {
+			let completed = 0;
+			const total = users.length;
 			for (const user of users) {
 				const hashed = bcrypt.hashSync(user.password, 10);
 				db.run(
 					`INSERT INTO users (username, password, bio) VALUES (?, ?, ?)`,
 					[user.username, hashed, user.bio],
-					(err) => {
-						if (err) reject(err);
+					function (err) { // Use function to access 'this'
+						if (err) return reject(err);
+						const userId = this.lastID;
+						db.run(
+							'INSERT INTO user_stats (user_id) VALUES (?)',
+							[userId],
+							(err) => {
+								if (err) return reject(err);
+								completed++;
+								if (completed === total) resolve();
+							}
+						);
 					}
 				);
 			}
