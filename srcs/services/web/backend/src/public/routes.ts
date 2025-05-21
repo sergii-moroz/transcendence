@@ -24,4 +24,10 @@ export const routes: tRoutes = {
 		description: "Landing page"
 	},
 
+	"/register": {
+		template: "/templates/register.html",
+		title: `Register | ${APP_TITLE}`,
+		description: "Register"
+	},
+
 }
