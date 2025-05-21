@@ -13,6 +13,7 @@ export class Game {
 	};
 	gameRoomId: string;
 	gameRunning: boolean;
+	winner: string | null;
 
 	constructor() {
 		this.players = new Map();
@@ -24,6 +25,7 @@ export class Game {
 			},
 			scores: { player1: 0, player2: 0 }
 		};
+		this.winner = null;
 		this.gameRoomId = crypto.randomBytes(16).toString('hex');
 		this.gameRunning = false;
 	}
@@ -127,6 +129,7 @@ export class Game {
 					db.run(
 						`UPDATE user_stats SET losses = losses + 1 WHERE user_id = ?`, [this.players.get('player2')?.id]
 					);
+					this.winner = this.players.get('player1')?.id || null;
 				} else {
 					this.players.forEach(player => {
 						player.socket.send(JSON.stringify({
@@ -135,16 +138,16 @@ export class Game {
 							winner: 'player2',
 						}));
 					});
-
 					db.run(
 						`UPDATE user_stats SET wins = wins + 1 WHERE user_id = ?`, [this.players.get('player2')?.id]
 					);
 					db.run(
 						`UPDATE user_stats SET losses = losses + 1 WHERE user_id = ?`, [this.players.get('player1')?.id]
 					);
+					this.winner = this.players.get('player2')?.id || null;
 				}
 			}
-		}, 20);
+		}, 16);
 	}
 
 	registerPlayerInput(input: string, connection: WebSocket) {

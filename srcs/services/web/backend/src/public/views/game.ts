@@ -6,6 +6,9 @@ export class GameView extends View {
 	canvas!: HTMLCanvasElement;
 	ctx!: CanvasRenderingContext2D;
 	gameRoomId!: string;
+	latestState: GameState | null = null;
+	gameOver: boolean = false;
+	gameOverMessage: {message: string, winner: string} | null = null;
 
 	setContent = () => {
 		this.element.innerHTML = `
@@ -30,6 +33,7 @@ export class GameView extends View {
 
 		this.gameRoomId = window.location.pathname.split('/')[2];
 		this.setupEventListeners();
+		this.renderLoop();
 	}
 
 	handleCanvasScaling = () => {
@@ -48,6 +52,15 @@ export class GameView extends View {
 		this.canvas.height = Math.round(height);
 	}
 
+	renderLoop = () => {
+		if (this.latestState && !this.gameOver) {
+			this.drawGameState(this.latestState);
+		} else if (this.gameOver) {
+			this.drawGameOver(this.gameOverMessage!.message, this.gameOverMessage!.winner);
+		}
+		requestAnimationFrame(this.renderLoop);
+	}
+
 	handleSocket = () => {
 		this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/game/${this.gameRoomId}`);
 
@@ -59,7 +72,7 @@ export class GameView extends View {
 			const data = JSON.parse(event.data) as gameJson;
 
 			if (data.type === 'gameState') {
-				this.drawGameState(data.state as GameState);
+				this.latestState = data.state as GameState;
 			}
 
 			if (data.type === 'Error') {
@@ -69,7 +82,11 @@ export class GameView extends View {
 			}
 
 			if (data.type === 'gameOver') {
-				this.drawGameOver(data.message as string, data.winner as string);
+				this.gameOver = true;
+				this.gameOverMessage = {
+					message: data.message as string,
+					winner: data.winner as string
+				};
 				setTimeout(() => {
 					if(this.socket && this.socket.readyState === WebSocket.OPEN) {
 						this.socket.close();
