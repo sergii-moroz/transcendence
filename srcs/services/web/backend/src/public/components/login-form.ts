@@ -2,7 +2,7 @@ import { API } from "../api-static.js"
 import { Router } from "../router-static.js"
 
 const formHTML = `
-<form class="space-y-4 md:space-y-6">
+	<form class="space-y-4 md:space-y-6">
 		<div>
 			<label
 				for="username"
@@ -10,6 +10,7 @@ const formHTML = `
 			>
 				Your Nickname
 			</label>
+
 			<input
 				type="text"
 				name="username"
@@ -44,26 +45,6 @@ const formHTML = `
 			></p>
 		</div>
 
-		<div>
-			<label
-				for="repeated"
-				class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-			>
-				Repeat password
-			</label>
-			<input
-				type="password"
-				name="repeated"
-				id="repeated"
-				placeholder="••••••••"
-				class="tw-input"
-			>
-			<p
-				class="text-red-500 text-xs mt-1 hidden"
-				id="repeated-error"
-			></p>
-		</div>
-
 		<button
 			type="submit"
 			class="w-full text-white text-xl bg-primary hover:bg-primary/80
@@ -71,19 +52,17 @@ const formHTML = `
 				focus:ring-4 focus:outline-none focus:ring-primary-300
 				dark:bg-primary dark:hover:bg-primary/80 dark:focus:ring-primary/80"
 			>
-			Sign up
+			Sign in
 		</button>
 	</form>
 `
 
-export class RegisterForm extends HTMLElement {
+export class LoginForm extends HTMLElement {
 	private form: HTMLElement | null = null
 	private username: HTMLInputElement | null = null
 	private password: HTMLInputElement | null = null
-	private repeated: HTMLInputElement | null = null
-	private usernameError: HTMLInputElement | null = null
-	private passwordError: HTMLInputElement | null = null
-	private repeatedError: HTMLInputElement | null = null
+	private usernameError: HTMLElement | null = null
+	private passwordError: HTMLElement | null = null
 
 	constructor() {
 		super()
@@ -94,11 +73,9 @@ export class RegisterForm extends HTMLElement {
 		this.form = this.querySelector('form')
 		this.username = this.querySelector('#username')
 		this.password = this.querySelector('#password')
-		this.repeated = this.querySelector('#repeated')
 
 		this.usernameError = this.querySelector('#username-error')
 		this.passwordError = this.querySelector('#password-error')
-		this.repeatedError = this.querySelector('#repeated-error')
 
 		this.form?.addEventListener('submit', this)
 	}
@@ -109,58 +86,36 @@ export class RegisterForm extends HTMLElement {
 
 	async handleEvent(event: Event) {
 		event.preventDefault()
+		console.log('click')
 
-		if (!this.username || !this.password || !this.repeated) return
-		if (!this.usernameError || !this.passwordError || !this.repeatedError) return
+		if (!this.username || !this.password) return
+		if (!this.usernameError || !this.passwordError) return
 
 		const username = this.username.value.trim()
 		const password = this.password.value.trim()
-		const repeated = this.repeated.value.trim()
-
-		this.clearErrors()
 
 		let hasError = false
 
-		// BEGIN VALIDATION
+		// VALIDATION
 
-		if (username.length < 5) {
-			this.showError(this.usernameError, 'Username must be at least 5 characters')
+		if (username.length <= 0) {
+			this.showError(this.usernameError, 'Username is required')
 			hasError = true
 		}
 
-		if (username.length > 16) {
-			this.showError(this.usernameError, 'Username is too long')
-			hasError = true
-		}
-
-		if (password.length < 6) {
-			this.showError(this.passwordError, 'Password must be at least 6 characters')
-			hasError = true
-		}
-
-		if (password.length > 64) {
-			this.showError(this.passwordError, 'Your password is too long')
-			hasError = true
-		}
-
-		if (/\s+/g.test(password)) {
-			this.showError(this.passwordError, 'Password could not contain white spaces')
-			hasError = true
-		}
-
-		if (repeated !== password) {
-			this.showError(this.repeatedError, 'Passwords do not match')
+		if (password.length <= 0) {
+			this.showError(this.passwordError, 'Password is required')
 			hasError = true
 		}
 
 		if (hasError) return
 
-		const res = await API.register(this.username.value, this.password.value, this.repeated.value)
+		const res = await API.login(this.username.value, this.password.value)
 
 		if (res.success) {
 			return Router.navigateTo('/home')
 		} else {
-			this.showError(this.repeatedError, res.message ?? 'Registration failed')
+			this.showError(this.passwordError, res.message ?? 'Login failed')
 		}
 	}
 
@@ -181,13 +136,4 @@ export class RegisterForm extends HTMLElement {
 			element.classList.add('hidden')
 		}, 4000)
 	}
-
-	private clearErrors() {
-		[this.usernameError, this.passwordError, this.repeatedError].forEach( item => {
-			if (!item) return
-			item.textContent = ''
-			item.classList.add('hidden')
-		})
-	}
-
 }
