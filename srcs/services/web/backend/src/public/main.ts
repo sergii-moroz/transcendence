@@ -17,6 +17,8 @@ import { LoginView } from "./views/login.js"
 import { HomeView } from "./views/home.js"
 import { GameView } from "./views/game.js"
 import { RootView } from "./views/root.js"
+import { TournamentView } from "./views/tournament.js"
+import { TournamentWaitingView } from "./views/tournamentWaitingRoom.js"
 
 import { Router } from "./router.js"
 import { View } from "./view.js"
@@ -31,6 +33,8 @@ const routes: Record<string, typeof View> = {
 	'/profile': ProfileView,
 	'/waiting-room': WaitingView,
 	'/game/:gameRoomId': GameView,
+	'/tournament-waiting-room': TournamentWaitingView,
+	'/tournament/:tournamentId': TournamentView,
 	'/settings': SettingsView,
 	'/settings/2fa/verification-method': VerificationMethodView,
 	'/settings/2fa/register': Register2FAView,
