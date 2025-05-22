@@ -54,10 +54,16 @@ export const routes: tRoutes = {
 		description: "Select two factor authentification method"
 	},
 
-	"/settings/2fa/register-ga": {
+	"/settings/2fa/ga/register": {
 		template: "/templates/settings/2fa/register-ga.html",
 		title: `2FA Register | ${APP_TITLE}`,
 		description: "Register Google Authenticator"
+	},
+
+	"/settings/2fa/ga/verify": {
+		template: "/templates/settings/2fa/verify-ga.html",
+		title: `2FA Verify | ${APP_TITLE}`,
+		description: "Verify Google Authenticator"
 	},
 
 }
