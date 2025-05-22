@@ -87,11 +87,18 @@ export class GameView extends View {
 					message: data.message as string,
 					winner: data.winner as string
 				};
+				console.log('Game over:', data.message, data.winner, data.tournamentId);
 				setTimeout(() => {
 					if(this.socket && this.socket.readyState === WebSocket.OPEN) {
 						this.socket.close();
 					}
-					this.router.navigateTo('/home');
+					if(data.tournamentId !== undefined && data.tournamentId !== null) {
+						console.log("Redirecting to tournament:", data.tournamentId);
+						this.router.navigateTo(`/tournament/${data.tournamentId}`);
+					}
+					else {
+						this.router.navigateTo('/home');
+					}
 				}, 3000);
 			}
 		};
@@ -205,7 +212,7 @@ export class GameView extends View {
 		this.ctx.textBaseline = "middle";
 		this.ctx.fillText(message, (this.canvas.width / 2), this.canvas.height / 2);
 		this.ctx.font = "15px Arial";
-		this.ctx.fillText(`Redirecting to home in 3 seconds`, (this.canvas.width / 2), (this.canvas.height / 2) + 30);
+		this.ctx.fillText(`Redirecting in 3 seconds`, (this.canvas.width / 2), (this.canvas.height / 2) + 30);
 	}
 
 	drawGameState = (state: GameState) => {

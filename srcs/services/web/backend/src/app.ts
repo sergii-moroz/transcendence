@@ -11,9 +11,12 @@ import { routes } from "./routes/v1/routes.js";
 import { views } from "./routes/v1/views.js";
 import { gameRoomSock } from "./routes/v1/gameRoom.js";
 import { waitingRoomSock } from "./routes/v1/waitingRoom.js";
+import { tWaitingRoomSock } from "./routes/v1/tWaitingRoom.js";
+import { tournamentRoomSock } from "./routes/v1/tournamentRoom.js";
 import { initializeDB } from "./db/init.js";
 import { db } from "./db/connections.js"
 import { Game } from "./services/game.js";
+import { Tournament } from "./services/tournament.js";
 import { verifyAccessToken } from "./services/tokenService.js";
 import { twoFARoutes } from "./routes/v1/2fa.js";
 import { normalizeError } from "./errors/error.js";
@@ -23,9 +26,11 @@ export const build = async (opts: FastifyServerOptions) => {
 
 	const gameInstances = new Map<string, Game>(); //gameID, Game Instance
 	let waitingRoomConns = new Map<string, WebSocket>(); //username, Connection
+	const tournaments = new Map<string, Tournament>(); //tournamentID, Tournament Instance
 
 	app.decorate("gameInstances", gameInstances);
 	app.decorate("waitingRoomConns", waitingRoomConns);
+	app.decorate("tournaments", tournaments);
 	app.decorate("db", db)
 
 	app.register(fastifyCookie, {
@@ -78,6 +83,8 @@ export const build = async (opts: FastifyServerOptions) => {
 	app.register(views, {prefix: "api"});
 	app.register(waitingRoomSock, {prefix: "ws"});
 	app.register(gameRoomSock, {prefix: "ws"});
+	app.register(tWaitingRoomSock, {prefix: "ws"});
+	app.register(tournamentRoomSock, {prefix: "ws"});
 	app.register(authRoutes, {prefix: "api"});
 	app.register(twoFARoutes, {prefix: 'api/2fa'});
 

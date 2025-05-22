@@ -13,6 +13,7 @@ export interface WsMatchMakingMessage {
 	type: string;
 	message?: string;
 	gameRoomId?: string;
+	tournamentId?: string;
 }
 
 export interface GameState {
@@ -32,4 +33,5 @@ export interface gameJson {
 	state: GameState;
 	message?: string;
 	winner?: string;
+	tournamentId?: string | null;
 }
