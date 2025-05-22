@@ -42,4 +42,16 @@ export const routes: tRoutes = {
 		description: "Home page"
 	},
 
+	"/settings": {
+		template: "/templates/settings/index.html",
+		title: `Settings | ${APP_TITLE}`,
+		description: "Settings page"
+	},
+
+	"/settings/2fa/method": {
+		template: "/templates/settings/2fa/method.html",
+		title: `2FA Method | ${APP_TITLE}`,
+		description: "Select two factor authentification method"
+	},
+
 }
