@@ -29,13 +29,23 @@ export class API {
 	 * @param data Data sended to the endpoint
 	 * @returns response.json()
 	 */
-	static async post(endpoint: string, data: object) {
+	static async post(endpoint: string, data: object, opts: { includeCSRF?: boolean} = {}) {
+		const headers: Record<string, string> = {
+			'Content-Type': 'application/json'
+		}
+
+		if (opts.includeCSRF) {
+			const csrfToken = this.getCSRFToken()
+			if (csrfToken) headers['X-CSRF-Token'] = csrfToken
+		}
+
 		const response = await fetch(endpoint, {
 			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
+			headers: headers,
 			credentials: 'include',
 			body: JSON.stringify(data)
 		});
+
 		return response;
 	}
 
@@ -64,4 +74,34 @@ export class API {
 	// static async is2FAEnabled() {
 	// 	return this.request('/api/2fa/enable')
 	// }
+
+	/**
+	 * Retrieves a QR code and secret for 2FA registration.
+	 * Makes an authenticated POST request to the '/2fa/register-ga' endpoint.
+	 *
+	 * @returns {Promise<{qr: string, secret: string}>} A promise that resolves with an object containing:
+	 *									- qr: Base64 encoded QR code image data (as a data URL)
+	 *									- secret: The 2FA secret key in plain text
+	 * @throws Error when request fails or CSRF token is unavailable
+	 * @example
+	 * try {
+	 *	const { qr, secret } = await instance.getQR();
+	 *	console.log('QR data URL:', qr);
+	 *	console.log('Secret key:', secret);
+	 * } catch (error) {
+	 *	console.error('Failed to get QR code:', error);
+	 * }
+	 **/
+	static async getQR() {
+		const response = await this.post('/api/2fa/ga/register', {}, {includeCSRF: true})
+		return response.json()
+	}
+
+	static getCSRFToken() {
+		return document.cookie
+		.split('; ')
+		.find(row => row.startsWith('csrf_token='))
+		?.split('=')[1] || '';
+	}
+
 }
