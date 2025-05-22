@@ -41,7 +41,6 @@ export class API {
 
 	static async login(username: string, password: string) {
 		const response = await this.post('/api/login', { username, password })
-		console.log("API: login:", response)
 
 		if (response.ok && response.status === 202) return response.json()
 

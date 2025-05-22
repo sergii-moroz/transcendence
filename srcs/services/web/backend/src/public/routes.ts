@@ -30,4 +30,16 @@ export const routes: tRoutes = {
 		description: "Register"
 	},
 
+	"/login": {
+		template: "/templates/login.html",
+		title: `Login | ${APP_TITLE}`,
+		description: "Login page"
+	},
+
+	"/home": {
+		template: "/templates/home.html",
+		title: `Home | ${APP_TITLE}`,
+		description: "Home page"
+	},
+
 }
