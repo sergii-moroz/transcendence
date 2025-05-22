@@ -54,4 +54,10 @@ export const routes: tRoutes = {
 		description: "Select two factor authentification method"
 	},
 
+	"/settings/2fa/register-ga": {
+		template: "/templates/settings/2fa/register-ga.html",
+		title: `2FA Register | ${APP_TITLE}`,
+		description: "Register Google Authenticator"
+	},
+
 }
