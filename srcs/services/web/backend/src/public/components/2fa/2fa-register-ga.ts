@@ -24,18 +24,14 @@ const compHTML = `
 		>
 			<p>Open the Google Autenticator app and scan QR code</p>
 			<div>
-				<img src="" alt="2FA QR Code" class="mx-auto rounded-md" />
-				<p
-					class="text-red-500 text-xs mt-1 hidden"
-					id="qr-error"
-				></p>
+				<img src="" alt="2FA QR Code" class="mx-auto rounded-md hidden" />
 			</div>
 			<p>Or enter the following code manually:</p>
 			<p id="secret" class="font-bold text-base"></p>
 			<p
-					class="text-red-500 text-xs mt-1 hidden"
-					id="secret-error"
-				></p>
+				class="text-red-500 text-xs mt-1 hidden"
+				id="message-error"
+			></p>
 			<p class="max-w-sm">Once App is registered, you'll start seeing 6-digit verification codes in the app</p>
 		</div>
 
@@ -51,8 +47,7 @@ const compHTML = `
 export class TwoFARegisterGA extends HTMLElement {
 	private secretElm: HTMLElement | null = null
 	private qrCodeElm: HTMLImageElement | null = null
-	private secretError: HTMLElement | null = null
-	private qrError: HTMLElement | null = null
+	private messageError: HTMLElement | null = null
 	private btnNext: HTMLButtonElement | null = null
 
 	constructor() {
@@ -64,39 +59,9 @@ export class TwoFARegisterGA extends HTMLElement {
 		this.secretElm = this.querySelector('#secret')
 		this.qrCodeElm = this.querySelector('img')
 		this.btnNext = this.querySelector('#btn-next')
+		this.messageError = this.querySelector('#message-error')
 
-		this.secretError = this.querySelector('#secret-error')
-		this.qrError = this.querySelector('#qr-error')
-
-		if (!this.secretElm || !this.qrCodeElm || !this.btnNext) return
-		if (!this.secretError || !this.qrError) return
-
-		let hasError = false
-
-		try {
-			const res = await API.getQR()
-
-			if (!res?.qr) {
-				this.showError(this.qrError, 'Unable to load QR code. Please try again.')
-				hasError = true
-			}
-
-			if (!res?.secret) {
-				this.showError(this.secretError, 'Unable to load sercret code. Please try again.')
-				hasError = true
-			}
-
-			if (hasError) return
-
-			this.qrCodeElm?.setAttribute('src', res.qr)
-			if (this.secretElm) this.secretElm.textContent = formatString(res.secret)
-
-		} catch (err) {
-			this.showError(this.secretError, 'Server error. Please refresh or try again later.')
-		}
-
-		this.btnNext.classList.remove('tw-btn-disabled')
-		this.btnNext.addEventListener('click', this)
+		await this.loadQR()
 	}
 
 	disconnectedCallback() {
@@ -115,6 +80,33 @@ export class TwoFARegisterGA extends HTMLElement {
 	private showError(element: HTMLElement, message: string) {
 		element.innerHTML = `<p class="text-red-500">${message}</p>`
 		element.classList.remove('hidden')
+	}
+
+	private async loadQR() {
+		if (!this.secretElm || !this.qrCodeElm || !this.btnNext) return
+		if (!this.messageError ) return
+
+		try {
+			const res = await API.getQR()
+
+			if (!res?.qr || !res?.secret) {
+				this.showError(this.messageError, 'Unable to load QR code or secret. Please try again.')
+				return
+			}
+
+			if (this.qrCodeElm) {
+				this.qrCodeElm?.setAttribute('src', res.qr)
+				this.qrCodeElm.classList.remove('hidden')
+			}
+
+			if (this.secretElm) this.secretElm.textContent = formatString(res.secret)
+
+		} catch (err) {
+			this.showError(this.messageError, 'Server error. Please refresh or try again later.')
+		}
+
+		this.btnNext.classList.remove('tw-btn-disabled')
+		this.btnNext.addEventListener('click', this)
 	}
 
 }
