@@ -13,19 +13,21 @@ export class Game {
 	};
 	gameRoomId: string;
 	gameRunning: boolean;
-	winner: string | null;
+	winnerId: string | null;
+	tournamentId: string | null;
 
-	constructor() {
+	constructor(tournamentId: string | null = null) {
+		this.tournamentId = tournamentId;
 		this.players = new Map();
 		this.state = {
-			ball: { x: 0, y: 0, dx: 2, dy: 2 },
+			ball: { x: 0, y: 0, dx: 4, dy: 4 },
 			paddles: {
 				player1: { y: 0 },
 				player2: { y: 0 }
 			},
 			scores: { player1: 0, player2: 0 }
 		};
-		this.winner = null;
+		this.winnerId = null;
 		this.gameRoomId = crypto.randomBytes(16).toString('hex');
 		this.gameRunning = false;
 	}
@@ -60,6 +62,7 @@ export class Game {
 					type: 'gameOver',
 					message: 'Game ended, other player left, you win!',
 					winner: role,
+					tournamentId: this.tournamentId,
 				}));
 				this.players.delete(role);
 			}
@@ -121,30 +124,33 @@ export class Game {
 							type: 'gameOver',
 							message: 'Player 1 wins!',
 							winner: 'player1',
+							tournamentId: this.tournamentId,
 						}));
 					});
+					console.custom('INFO', `${this.gameRoomId} in Tournament ${this.tournamentId}: Player 1 wins!`);
+					this.winnerId = this.players.get('player1')?.id || null;
 					db.run(
 						`UPDATE user_stats SET wins = wins + 1 WHERE user_id = ?`, [this.players.get('player1')?.id]
 					);
 					db.run(
 						`UPDATE user_stats SET losses = losses + 1 WHERE user_id = ?`, [this.players.get('player2')?.id]
 					);
-					this.winner = this.players.get('player1')?.id || null;
 				} else {
 					this.players.forEach(player => {
 						player.socket.send(JSON.stringify({
 							type: 'gameOver',
 							message: 'Player 2 wins!',
 							winner: 'player2',
+							tournamentId: this.tournamentId,
 						}));
 					});
+					this.winnerId = this.players.get('player2')?.id || null;
 					db.run(
 						`UPDATE user_stats SET wins = wins + 1 WHERE user_id = ?`, [this.players.get('player2')?.id]
 					);
 					db.run(
 						`UPDATE user_stats SET losses = losses + 1 WHERE user_id = ?`, [this.players.get('player1')?.id]
 					);
-					this.winner = this.players.get('player2')?.id || null;
 				}
 			}
 		}, 16);

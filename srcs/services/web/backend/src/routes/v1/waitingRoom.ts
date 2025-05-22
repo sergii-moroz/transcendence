@@ -9,19 +9,20 @@ import { Game } from "../../services/game.js";
 export const waitingRoomSock = async (app: FastifyInstance) => {
     
     app.get('/waiting-room', {websocket: true }, async (socket, req) => {
-		let userName: string = req.user.username;
+		let userId: string = req.user.id.toString();
 
 		socket.on('message', (messageBuffer: Event) => {
 			const message = JSON.parse(messageBuffer.toString());
 
 			if(message.type === 'joinRoom') {
-				console.custom('INFO', `${userName} has joined the waiting room`);
+				console.custom('INFO', `${userId} has joined the waiting room`);
 				
-				if(!app.waitingRoomConns.has(userName!)) {
-					app.waitingRoomConns.set(userName!, socket);
+				if(!app.waitingRoomConns.has(userId!)) {
+					app.waitingRoomConns.set(userId!, socket);
 				}
 				else {
-					console.custom('INFO', `${userName} is already in the waiting room`);
+					app.waitingRoomConns.set(userId!, socket);
+					console.custom('INFO', `${userId} is already in the waiting room`);
 				}
 
 				console.custom('INFO', 'Users in waiting room:', [...app.waitingRoomConns.keys()]);
@@ -34,16 +35,15 @@ export const waitingRoomSock = async (app: FastifyInstance) => {
 				if (app.waitingRoomConns.size >= 2) {
 					const game = new Game();
 					app.gameInstances.set(game.gameRoomId, game);
-					redirectToGameRoom(game.gameRoomId, app);
-					app.gameInstances.get(game.gameRoomId).startLoop();
+					redirectToGameRoom(game.gameRoomId, app, app.waitingRoomConns);
 					console.custom('INFO', 'Game started:', game.gameRoomId);
 				}
 			}
 		})
 
 		socket.on('close', () => {
-			if (userName && app.waitingRoomConns.has(userName)) {
-				app.waitingRoomConns.delete(userName);
+			if (userId && app.waitingRoomConns.has(userId)) {
+				app.waitingRoomConns.delete(userId);
 			}
 		})
 
@@ -53,11 +53,11 @@ export const waitingRoomSock = async (app: FastifyInstance) => {
 	});
 }
 
-function redirectToGameRoom(gameRoomId: string, app: FastifyInstance) {
+export function redirectToGameRoom(gameRoomId: string, app: FastifyInstance, waitingRoomConns: Map<string, WebSocket>) {
 	console.custom('INFO', 'Two users are in the waiting room, redirecting to game room...')
 
-	const users = Array.from(app.waitingRoomConns).slice(0, 2);
-	users.forEach((user) => app.waitingRoomConns.delete(user[0]));
+	const users = Array.from(waitingRoomConns).slice(0, 2);
+	users.forEach((user) => waitingRoomConns.delete(user[0]));
 
 	const message = JSON.stringify({
 		type: 'redirectingToGame',
