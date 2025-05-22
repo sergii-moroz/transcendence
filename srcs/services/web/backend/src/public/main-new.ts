@@ -1,3 +1,4 @@
+import { TwoFARegisterGA } from "./components/2fa/2fa-register-ga.js";
 import { ButtonThemeToggle } from "./components/ButtonThemeToggle.js";
 import { IconChevronLeft } from "./components/icons/icon-chevron-left.js";
 import { IconSquareArrowUpRight } from "./components/icons/icon-square-arrow-up-right.js";
@@ -9,9 +10,12 @@ import { Router } from "./router-static.js";
 customElements.define('modal-login-menu', ModalLoginMenu)
 customElements.define('btn-theme-toggle', ButtonThemeToggle)
 
-// FORMS
+// PAGE COMPONENTS
 customElements.define('register-form', RegisterForm)
 customElements.define('login-form', LoginForm)
+
+// 2FA
+customElements.define('two-fa-register-ga', TwoFARegisterGA)
 
 // ICONS
 customElements.define('icon-chevron-left', IconChevronLeft)
