@@ -19,6 +19,7 @@ import { loginSchema, registerSchema } from "../../schemas/auth.js";
 import { JwtUserPayload } from "../../types/user.js";
 import { checkCsrf, validateRegisterInput } from "../../services/authService.js";
 import { RegisterInputProps } from "../../types/registration.js";
+import { InvalidCredentialsError, UserNotFoundError } from "../../errors/login.js";
 
 export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
 
@@ -66,14 +67,14 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 		try {
 			const user = await findUserByUsername(username)
 
-			if (!user) return reply.code(401).send({ error: `User ${username} is not found` });
+			if (!user) throw new UserNotFoundError()
 
 			const valid = await verifyPassword(password, user.password);
-			if (!valid) return reply.code(401).send({ error: 'Invalid credentials' });
+
+			if (!valid) throw new InvalidCredentialsError()
 
 			if (user.two_factor_enabled) {
 				const tempToken = generate2FAAccessToken(user);
-				// app.log.info(tempToken)
 				return reply.code(202).send({ requires2FA: true, token: tempToken });
 			}
 
@@ -105,8 +106,7 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 				.send({ success: true });
 
 		} catch (err) {
-			console.error('Login error:', err);
-			return reply.code(500).send({ error: 'Internal server error' });
+			throw err
 		}
 	});
 
