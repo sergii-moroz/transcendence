@@ -1,5 +1,7 @@
 import { db } from "../db/connections.js";
-import { User } from "../types/user.js";
+import { JwtUserPayload, User } from "../types/user.js";
+import { authenticator } from "otplib";
+import QRCode from 'qrcode'
 
 export const update2FASecret = async (username: string, secret: string): Promise<void> => {
 	return new Promise((resolve, reject) => {
@@ -25,6 +27,20 @@ export const get2FASecret = async (id: number): Promise<string | undefined> => {
 				resolve(row.two_factor_secret);
 		})
 	})
+}
+
+export const generate2FASecretAndQRCode = async (user: JwtUserPayload) => {
+	let secret = await get2FASecret(user.id)
+
+	if (!secret) {
+		secret = authenticator.generateSecret();
+		await update2FASecret(user.username, secret)
+	}
+
+	const otpauth = authenticator.keyuri(user.username, 'ft_transcendence', secret);
+	const qr = await QRCode.toDataURL(otpauth);
+
+	return { qr, secret }
 }
 
 export const mark2FAVerified = async (id: number): Promise<void> => {
