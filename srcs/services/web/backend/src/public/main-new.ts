@@ -1,3 +1,4 @@
+import { TwoFABackupGA } from "./components/2fa/2fa-backup-ga.js";
 import { TwoFARegisterGA } from "./components/2fa/2fa-register-ga.js";
 import { TwoFAVerifyGA } from "./components/2fa/2fa-verify-ga.js";
 import { ButtonThemeToggle } from "./components/ButtonThemeToggle.js";
@@ -19,6 +20,7 @@ customElements.define('login-form', LoginForm)
 // 2FA
 customElements.define('two-fa-register-ga', TwoFARegisterGA)
 customElements.define('two-fa-verify-ga', TwoFAVerifyGA)
+customElements.define('two-fa-backup-ga', TwoFABackupGA)
 
 // ICONS
 customElements.define('icon-square-arrow-up-right', IconSquareArrowUpRight)

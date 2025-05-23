@@ -66,4 +66,10 @@ export const routes: tRoutes = {
 		description: "Verify Google Authenticator"
 	},
 
+	"/settings/2fa/ga/backup": {
+		template: "/templates/settings/2fa/ga-backup.html",
+		title: `2FA Backup | ${APP_TITLE}`,
+		description: "Backup codes"
+	},
+
 }
