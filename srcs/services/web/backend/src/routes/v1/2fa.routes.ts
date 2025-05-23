@@ -33,7 +33,7 @@ import {
 } from "../../services/tokenService.js";
 
 import { gaRegisterSchema, verify2FASchema } from "../../schemas/2fa.schemas.js";
-import { handleGARegister } from "../../controllers/2fa.controller.js";
+import { handleGARegister, handleGAVerify } from "../../controllers/2fa.controllers.js";
 import { JwtUserPayload } from "../../types/user.js";
 import { findUserById } from "../../services/userService.js";
 import { authenticator } from "otplib";
@@ -44,32 +44,14 @@ export const twoFARoutes = async (app: FastifyInstance, opts: FastifyPluginOptio
 		schema: gaRegisterSchema,
 		preHandler: [authenticate, checkCsrf],
 		handler: handleGARegister
-	});
-
-	app.post('/verify', {schema: verify2FASchema, preHandler: [authenticate, checkCsrf]}, async (req, reply) => {
-		try {
-			const user = req.user as JwtUserPayload
-			const { code } = req.body as { code?: string };
-
-			if (!code) {
-				throw new Missing2FACodeError()
-			}
-
-			const secret = await get2FASecret(user.id)
-
-			if (!secret) throw new SecretNotFoundError()
-
-			const isValid = authenticator.check(code, secret)
-
-			if (!isValid) throw new Invalid2FACodeError()
-
-			await mark2FAVerified(user.id)
-
-			reply.send({ success: true });
-		} catch (err) {
-			throw err
-		}
 	})
+
+	app.post('/ga/verify', {
+		schema: verify2FASchema,
+		preHandler: [authenticate, checkCsrf],
+		handler: handleGAVerify
+	})
+
 
 	app.post('/backup-codes', {preHandler: [authenticate, checkCsrf]}, async (req, reply) => {
 

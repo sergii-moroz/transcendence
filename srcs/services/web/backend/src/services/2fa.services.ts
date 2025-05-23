@@ -1,4 +1,5 @@
 import { db } from "../db/connections.js";
+import { Invalid2FACodeError, Missing2FACodeError, SecretNotFoundError } from "../errors/2fa.errors.js";
 import { JwtUserPayload, User } from "../types/user.js";
 import { authenticator } from "otplib";
 import QRCode from 'qrcode'
@@ -41,6 +42,25 @@ export const generate2FASecretAndQRCode = async (user: JwtUserPayload) => {
 	const qr = await QRCode.toDataURL(otpauth);
 
 	return { qr, secret }
+}
+
+export const verifyGACode = async (userId: number, code?: string) => {
+
+		if (!code) {
+			throw new Missing2FACodeError()
+		}
+
+		const secret = await get2FASecret(userId)
+
+		if (!secret) throw new SecretNotFoundError()
+
+		const isValid = authenticator.check(code, secret)
+
+		if (!isValid) throw new Invalid2FACodeError()
+
+		await mark2FAVerified(userId)
+
+		return { success: true }
 }
 
 export const mark2FAVerified = async (id: number): Promise<void> => {
