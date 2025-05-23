@@ -9,6 +9,7 @@ import {
 } from "../../services/authService.js";
 
 import {
+	generate2FASecretAndQRCode,
 	generateBackupCodes,
 	get2FASecret,
 	is2FAEnabled,
@@ -16,13 +17,13 @@ import {
 	mark2FAVerified,
 	setBackupCodes,
 	update2FASecret
-} from "../../services/2faService.js";
+} from "../../services/2fa.services.js";
 
 import {
 	Invalid2FACodeError,
 	Missing2FACodeError,
 	SecretNotFoundError
-} from "../../errors/errors_2fa.js";
+} from "../../errors/2fa.errors.js";
 
 import {
 	createCsrfToken,
@@ -31,31 +32,18 @@ import {
 	verify2FAAccessToken
 } from "../../services/tokenService.js";
 
-import { verify2FASchema } from "../../schemas/2fa-schemas.js";
+import { gaRegisterSchema, verify2FASchema } from "../../schemas/2fa.schemas.js";
+import { handleGARegister } from "../../controllers/2fa.controller.js";
 import { JwtUserPayload } from "../../types/user.js";
-import { authenticator } from "otplib";
 import { findUserById } from "../../services/userService.js";
-import QRCode from 'qrcode'
+import { authenticator } from "otplib";
 
 export const twoFARoutes = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
-	app.post('/register', {preHandler: [authenticate, checkCsrf]}, async (req, reply) => {
-		try {
-			const user = req.user as JwtUserPayload;
 
-			let secret = await get2FASecret(user.id)
-
-			if (!secret) {
-				secret = authenticator.generateSecret();
-				await update2FASecret(user.username, secret)
-			}
-
-			const otpauth = authenticator.keyuri(user.username, 'ft_transcendence', secret);
-			const qr = await QRCode.toDataURL(otpauth);
-
-			reply.send({ qr, secret });
-		} catch (err) {
-			throw err
-		}
+	app.post('/ga/register', {
+		schema: gaRegisterSchema,
+		preHandler: [authenticate, checkCsrf],
+		handler: handleGARegister
 	});
 
 	app.post('/verify', {schema: verify2FASchema, preHandler: [authenticate, checkCsrf]}, async (req, reply) => {
