@@ -1,5 +1,24 @@
 import { errorResponseSchema } from "./error-response-schema.js";
 
+export const gaRegisterSchema = {
+	body: {
+		type: 'object',
+		additionalProperties: false,
+		properties: {}
+	},
+	response: {
+		200: {
+			type: 'object',
+			required: ['qr', 'secret'],
+			properties: {
+				qr: { type: 'string' },
+				secret: { type: 'string' }
+			}
+		},
+		401: errorResponseSchema // optional: if auth fails
+	}
+};
+
 export const verify2FASchema = {
 	body: {
 		type: 'object',
