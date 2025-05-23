@@ -14,21 +14,28 @@ export class TournamentView extends View {
 	}
 
 	mount = async (parent: HTMLElement) => {
-		parent.innerHTML = '';
-		
-		// const input = await this.prehandler();
+		const input = await this.prehandler();
+		if (!input) {
+			alert ("cant load API data");
+			return this.router.navigateTo('/'); //somewhere else
+		}
 		this.tournamentId = window.location.pathname.split('/')[2];
 		console.log('Tournament ID:', this.tournamentId);
+
 		this.setContent();
 		parent.append(this.element);
-
 		this.setupEventListeners();
 	}
 
 	handleSocket = () => {
 			this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/tournament/${this.tournamentId}`);
+			if(!this.socket) {
+				console.error('WebSocket connection failed.');
+				this.router.navigateTo('/home');
+				return;
+			}
 			
-			this.socket.onopen = () => {
+			this.socket!.onopen = () => {
 				console.log('WebSocket connection established.');
 				this.socket!.send(JSON.stringify({ type: 'joinRoom' }));
 			}
@@ -42,7 +49,19 @@ export class TournamentView extends View {
 		
 				if (data.type === 'redirectingToGame') {
 					console.log(`Redirecting to game room: ${data.gameRoomId}`);
-					this.router.navigateTo('/game/' + data.gameRoomId);
+					this.socket?.close();
+					setTimeout(() => {
+						this.router.navigateTo('/game/' + data.gameRoomId);
+					}, 100);
+				}
+
+				if (data.type === "Error") {
+					console.error(`Error: ${data.message}`);
+					alert(`Error: ${data.message}`);
+					if(this.socket && this.socket.readyState === WebSocket.OPEN) {
+						this.socket.close();
+					}
+					this.router.navigateTo('/home');
 				}
 			};
 			

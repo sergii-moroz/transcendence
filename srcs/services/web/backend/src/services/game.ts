@@ -127,7 +127,11 @@ export class Game {
 							tournamentId: this.tournamentId,
 						}));
 					});
-					console.custom('INFO', `${this.gameRoomId} in Tournament ${this.tournamentId}: Player 1 wins!`);
+					if(this.tournamentId) {
+						console.custom('INFO', `Game room ${this.gameRoomId} in Tournament ${this.tournamentId}: Player 1 wins!`);
+					} else {
+						console.custom('INFO', `Game room ${this.gameRoomId}: Player 1 wins!`);
+					}
 					this.winnerId = this.players.get('player1')?.id || null;
 					db.run(
 						`UPDATE user_stats SET wins = wins + 1 WHERE user_id = ?`, [this.players.get('player1')?.id]

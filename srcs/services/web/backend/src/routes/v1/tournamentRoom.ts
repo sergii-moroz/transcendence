@@ -9,7 +9,7 @@ import { Tournament } from "../../services/tournament.js";
 export const tournamentRoomSock = async (app: FastifyInstance) => {
 
     app.get('/tournament/:tournamentId', { websocket: true }, (socket, req: TournamentRoomRequest) => {
-		console.log(`New WebSocket connection from ${req.user.id}`);
+		console.custom("INFO",`New WebSocket connection from ${req.user.id}`);
 		const userId = req.user.id.toString();
 		const userName = req.user.username;
 		const tournamentId = req.params.tournamentId;
@@ -17,6 +17,10 @@ export const tournamentRoomSock = async (app: FastifyInstance) => {
 
 		if (!tournament) {
 			console.custom("WARN", 'User: ' + userName + ' tried to connect to a non-existing tournament: ' + tournamentId);
+			socket.send(JSON.stringify({
+				type: 'Error',
+				message: 'Tournament not found'
+			}));
 			socket.close();
 			return;
 		}
@@ -26,12 +30,12 @@ export const tournamentRoomSock = async (app: FastifyInstance) => {
 			
 			if(message.type === 'joinRoom') {
 				console.custom('INFO', `User: ${req.user.username} connected to tournament: ${tournamentId}`);
-				console.custom('INFO', 'Users in tournament room:', tournament.players.map(player => player[0]));
 				socket.send(JSON.stringify({
 					type: 'joinedRoom',
 					message: `You have joined tournament room`
 				}));
 				tournament.addPlayer(socket, userId);
+				console.custom('INFO', 'Users in tournament room:', tournament.players.map(player => player[0]));
 			}
 		});
 

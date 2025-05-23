@@ -37,31 +37,33 @@ export class Tournament {
 			console.custom('ERROR', `Tournament: User ${id} tried to join a full tournament`);
 		} else if(this.players.length !== 4) {
 			this.players.push([id, socket]);
-			console.custom('INFO', `Tournament: Player ${id} joined`);
+			console.custom('INFO', `Tournament: Player ${id} joined (${this.players.length}/4)`);
 		}
 		if(this.players.length === 4 && !this.isRunning) {
 			this.allConnected = true;
+			console.custom('INFO', `Tournament: Starting tournament...`);
 			this.startTournament();
 		}
 	}
 
 	async matchPlayers() {
-		while(this.isRunning) {
-			if(this.players.length > 1) {
-				const player1 = this.players.pop()!;
-				const player2 = this.players.pop()!;
+		while(this.isRunning && this.players.length > 1) {
+			const player1 = this.players.pop()!;
+			const player2 = this.players.pop()!;
 
-				const game = new Game(this.id);
-				this.games.set(game.gameRoomId, game);
-				this.app.gameInstances.set(game.gameRoomId, game);
-				redirectToGameRoom(game.gameRoomId, this.app, new Map([player1, player2]));
-				console.custom('INFO', `Tournament: Game room ${game.gameRoomId} created with players ${player1[0]} and ${player2[0]}`);
-			}
+			const game = new Game(this.id);
+			this.games.set(game.gameRoomId, game);
+			this.app.gameInstances.set(game.gameRoomId, game);
+
+			await new Promise(resolve => setTimeout(resolve, 50));
+			
+			redirectToGameRoom(game.gameRoomId, [player1, player2]);
+			console.custom('INFO', `Tournament: Game room ${game.gameRoomId} created with players ${player1[0]} and ${player2[0]}`);
 		}
 	}
 
 	async detectWinners() {
-		while(this.isRunning) {
+		while(this.isRunning && this.games.size > 0) {
 			for (const game of this.games.values()) {
 				if(game.winnerId) {
 					this.eliminatedPlayers++;
@@ -80,9 +82,10 @@ export class Tournament {
 
 	}
 
-	startTournament() {
+	async startTournament() {
 		this.isRunning = true;
-		this.matchPlayers();
-		this.detectWinners();
+		await this.matchPlayers();
+		console.custom('INFO', `Tournament: Players matched, waiting for games to finish...`);
+		// await this.detectWinners();
 	}
 }
