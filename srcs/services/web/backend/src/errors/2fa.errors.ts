@@ -17,3 +17,9 @@ export const SecretNotFoundError = createError(
 	'2FA secret not found',
 	404
 );
+
+export const TwoFAAlreadyEnabledError = createError(
+	'FST_2FA_ALREADY_ENABLED',
+	'Two-Factor Authentication is already enabled',
+	400
+);
