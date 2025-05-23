@@ -1,8 +1,16 @@
-import { db } from "../db/connections.js";
-import { Invalid2FACodeError, Missing2FACodeError, SecretNotFoundError } from "../errors/2fa.errors.js";
+import {
+	HashingError,
+	Invalid2FACodeError,
+	Missing2FACodeError,
+	SecretNotFoundError
+} from "../errors/2fa.errors.js";
+
+import { UserNotFoundError } from "../errors/login.errors.js";
 import { JwtUserPayload, User } from "../types/user.js";
+import { db } from "../db/connections.js";
 import { authenticator } from "otplib";
 import QRCode from 'qrcode'
+import bcrypt from 'bcrypt'
 
 export const update2FASecret = async (username: string, secret: string): Promise<void> => {
 	return new Promise((resolve, reject) => {
@@ -46,22 +54,24 @@ export const generate2FASecretAndQRCode = async (user: JwtUserPayload) => {
 
 export const verifyGACode = async (userId: number, code?: string) => {
 
-		if (!code) {
-			throw new Missing2FACodeError()
-		}
+	if (!code) {
+		throw new Missing2FACodeError()
+	}
 
-		const secret = await get2FASecret(userId)
+	const secret = await get2FASecret(userId)
 
-		if (!secret) throw new SecretNotFoundError()
+	if (!secret) throw new SecretNotFoundError()
 
-		const isValid = authenticator.check(code, secret)
+	const isValid = authenticator.check(code, secret)
 
-		if (!isValid) throw new Invalid2FACodeError()
+	if (!isValid) throw new Invalid2FACodeError()
 
-		await mark2FAVerified(userId)
+	await mark2FAVerified(userId)
 
-		return { success: true }
+	return { success: true }
 }
+
+
 
 export const mark2FAVerified = async (id: number): Promise<void> => {
 	return new Promise((resolve, reject) => {
@@ -96,7 +106,26 @@ export const generateBackupCodes = (count = 10): string[] => {
 	)
 }
 
-export const setBackupCodes = async (codesStr: string, id:number):Promise<void> => {
+export const generateBackupCodesService = async (userId: number) => {
+	const codes = generateBackupCodes()
+
+	let codesHashed: string[]
+
+	try {
+		codesHashed = await Promise.all(
+			codes.map(async (code) => await bcrypt.hash(code, 6))
+		)
+	} catch (err) {
+		throw new HashingError()
+	}
+
+	const codesStr = JSON.stringify(codesHashed)
+	await setBackupCodes(codesStr, userId)
+
+	return (codes)
+}
+
+export const setBackupCodes = async (codesStr: string, id: number):Promise<void> => {
 	return new Promise ((resolve, reject) => {
 		db.run(
 			'UPDATE users SET two_factor_backup_codes = ?, two_factor_backup_at = ? WHERE id = ?',
@@ -129,7 +158,7 @@ export const is2FAEnabled = async (id: number): Promise<boolean> => {
 			[id],
 			(err, row) => {
 				if (err) return reject(err)
-				if (!row) return resolve(false)
+				if (!row) return reject(new UserNotFoundError())
 				resolve(row.two_factor_enabled)
 			}
 		)

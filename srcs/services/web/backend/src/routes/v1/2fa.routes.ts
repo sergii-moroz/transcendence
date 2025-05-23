@@ -26,14 +26,24 @@ import {
 } from "../../errors/2fa.errors.js";
 
 import {
+	gaRegisterSchema,
+	generateBackupCodesSchema,
+	verify2FASchema
+} from "../../schemas/2fa.schemas.js";
+
+import {
+	handleGARegister,
+	handleGAVerify,
+	handleGenerateBackupCodes
+} from "../../controllers/2fa.controllers.js";
+
+import {
 	createCsrfToken,
 	generateAccessToken,
 	generateRefreshToken,
 	verify2FAAccessToken
 } from "../../services/tokenService.js";
 
-import { gaRegisterSchema, verify2FASchema } from "../../schemas/2fa.schemas.js";
-import { handleGARegister, handleGAVerify } from "../../controllers/2fa.controllers.js";
 import { JwtUserPayload } from "../../types/user.js";
 import { findUserById } from "../../services/userService.js";
 import { authenticator } from "otplib";
@@ -41,33 +51,21 @@ import { authenticator } from "otplib";
 export const twoFARoutes = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
 
 	app.post('/ga/register', {
-		schema: gaRegisterSchema,
-		preHandler: [authenticate, checkCsrf],
-		handler: handleGARegister
+		schema:			gaRegisterSchema,
+		preHandler:	[authenticate, checkCsrf],
+		handler:		handleGARegister
 	})
 
 	app.post('/ga/verify', {
-		schema: verify2FASchema,
-		preHandler: [authenticate, checkCsrf],
-		handler: handleGAVerify
+		schema:			verify2FASchema,
+		preHandler:	[authenticate, checkCsrf],
+		handler:		handleGAVerify
 	})
 
-
-	app.post('/backup-codes', {preHandler: [authenticate, checkCsrf]}, async (req, reply) => {
-
-		try {
-
-			const user = req.user as JwtUserPayload
-			const codes = generateBackupCodes()
-			const codesStr = JSON.stringify(codes)
-
-			await setBackupCodes(codesStr, user.id)
-			reply.send({codes})
-
-		} catch (err) {
-			throw err
-		}
-
+	app.post('/backup-codes', {
+		schema:			generateBackupCodesSchema,
+		preHandler:	[authenticate, checkCsrf],
+		handler:		handleGenerateBackupCodes
 	})
 
 	app.post('/enable', {preHandler: [authenticate, checkCsrf]}, async (req, reply) => {
@@ -83,11 +81,11 @@ export const twoFARoutes = async (app: FastifyInstance, opts: FastifyPluginOptio
 		}
 	})
 
-	app.get('/enable', async (req, reply) => {
+	// Do i need auth verification here?
+	app.get('/enabled', async (req, reply) => {
 		const user = req.user as JwtUserPayload;
 		const isEnabled = await is2FAEnabled(user.id)
-		app.log.info(isEnabled, "Enabled!!!")
-		reply.send({ enabled: isEnabled })
+		reply.send({ enabled: isEnabled, success: true })
 	});
 
 	app.post('/verify-login', async (req, reply) => {
