@@ -15,7 +15,8 @@ export const gaRegisterSchema = {
 				secret: { type: 'string' }
 			}
 		},
-		401: errorResponseSchema // optional: if auth fails
+		401: errorResponseSchema, // optional: if auth fails
+		500: errorResponseSchema,
 	}
 };
 
