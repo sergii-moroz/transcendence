@@ -8,7 +8,7 @@ import { GameRoomRequest } from "../../types/game.js";
 export const gameRoomSock = async (app: FastifyInstance) => {
 
     app.get('/game/:gameRoomId', { websocket: true }, (socket, req: GameRoomRequest) => {
-		console.log(`New WebSocket connection from ${req.user.id}`);
+		console.custom("INFO", `New WebSocket connection from ${req.user.id}`);
 		const gameRoomId = req.params.gameRoomId;
 		const game = app.gameInstances.get(gameRoomId);
 

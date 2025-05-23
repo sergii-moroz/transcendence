@@ -7,43 +7,43 @@ import {
 import { Game } from "../../services/game.js";
 
 export const waitingRoomSock = async (app: FastifyInstance) => {
-    
-    app.get('/waiting-room', {websocket: true }, async (socket, req) => {
+	let waitingRoomConns = new Array<[string, WebSocket]>();
+
+	app.get('/waiting-room', {websocket: true }, async (socket, req) => {
 		let userId: string = req.user.id.toString();
 
 		socket.on('message', (messageBuffer: Event) => {
 			const message = JSON.parse(messageBuffer.toString());
 
 			if(message.type === 'joinRoom') {
-				console.custom('INFO', `${userId} has joined the waiting room`);
-				
-				if(!app.waitingRoomConns.has(userId!)) {
-					app.waitingRoomConns.set(userId!, socket);
-				}
-				else {
-					app.waitingRoomConns.set(userId!, socket);
+				if(waitingRoomConns.findIndex(([id]) => id === userId) === -1) {
+					waitingRoomConns.push([userId!, socket]);
+					console.custom('INFO', `${userId} is now in the waiting room`);
+				} else {
+					waitingRoomConns.push([userId!, socket]);
 					console.custom('INFO', `${userId} is already in the waiting room`);
 				}
 
-				console.custom('INFO', 'Users in waiting room:', [...app.waitingRoomConns.keys()]);
+				console.custom('INFO', 'Users in waiting room:', [...waitingRoomConns.keys()]);
 
 				socket.send(JSON.stringify({
 					type: 'joinedRoom',
 					message: `You have joined waiting room`
 				}));
 
-				if (app.waitingRoomConns.size >= 2) {
+				if (waitingRoomConns.length >= 2) {
 					const game = new Game();
 					app.gameInstances.set(game.gameRoomId, game);
-					redirectToGameRoom(game.gameRoomId, app, app.waitingRoomConns);
+					redirectToGameRoom(game.gameRoomId, waitingRoomConns);
 					console.custom('INFO', 'Game started:', game.gameRoomId);
 				}
 			}
 		})
 
 		socket.on('close', () => {
-			if (userId && app.waitingRoomConns.has(userId)) {
-				app.waitingRoomConns.delete(userId);
+			const index = waitingRoomConns.findIndex(([id]) => id === userId);
+			if (index !== -1) {
+				waitingRoomConns.splice(index, 1);
 			}
 		})
 
@@ -53,11 +53,10 @@ export const waitingRoomSock = async (app: FastifyInstance) => {
 	});
 }
 
-export function redirectToGameRoom(gameRoomId: string, app: FastifyInstance, waitingRoomConns: Map<string, WebSocket>) {
-	console.custom('INFO', 'Two users are in the waiting room, redirecting to game room...')
-
-	const users = Array.from(waitingRoomConns).slice(0, 2);
-	users.forEach((user) => waitingRoomConns.delete(user[0]));
+export function redirectToGameRoom(gameRoomId: string, waitingRoomConns: Array<[string, WebSocket]>) {
+	const users = [];
+	users.push(waitingRoomConns.shift()!);
+	users.push(waitingRoomConns.shift()!);
 
 	const message = JSON.stringify({
 		type: 'redirectingToGame',

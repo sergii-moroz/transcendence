@@ -25,11 +25,9 @@ export const build = async (opts: FastifyServerOptions) => {
 	const app = fastify(opts)
 
 	const gameInstances = new Map<string, Game>(); //gameID, Game Instance
-	let waitingRoomConns = new Map<string, WebSocket>(); //username, Connection
 	const tournaments = new Map<string, Tournament>(); //tournamentID, Tournament Instance
 
 	app.decorate("gameInstances", gameInstances);
-	app.decorate("waitingRoomConns", waitingRoomConns);
 	app.decorate("tournaments", tournaments);
 	app.decorate("db", db)
 

@@ -7,7 +7,7 @@ import {
 import { Tournament } from "../../services/tournament.js";
 
 export const tWaitingRoomSock = async (app: FastifyInstance) => {
-	const tWaitingRoomConns = new Map<string, WebSocket>();
+	const tWaitingRoomConns = new Array<[string, WebSocket]>();
 
 	app.get('/tournament-waiting-room', {websocket: true }, async (socket, req) => {
 			let userId: string = req.user.id.toString();
@@ -16,14 +16,12 @@ export const tWaitingRoomSock = async (app: FastifyInstance) => {
 				const message = JSON.parse(messageBuffer.toString());
 	
 				if(message.type === 'joinRoom') {
-					console.custom('INFO', `${userId} has joined the waiting room`);
-					
-					if(!tWaitingRoomConns.has(userId!)) {
-						tWaitingRoomConns.set(userId!, socket);
-					}
-					else {
-						tWaitingRoomConns.set(userId!, socket);
-						console.custom('INFO', `${userId} is already in the waiting room`);
+					if(tWaitingRoomConns.findIndex(([id]) => id === userId) === -1) {
+						tWaitingRoomConns.push([userId!, socket]);
+						console.custom('INFO', `${userId} has joined the tournament waiting room`);
+					} else {
+						tWaitingRoomConns.push([userId!, socket]);
+						console.custom('INFO', `${userId} is already in the tournament waiting room`);
 					}
 	
 					console.custom('INFO', 'Users in tournament waiting room:', [...tWaitingRoomConns.keys()]);
@@ -33,7 +31,7 @@ export const tWaitingRoomSock = async (app: FastifyInstance) => {
 						message: `You have joined tournament waiting room`
 					}));
 	
-					if (tWaitingRoomConns.size >= 4) {
+					if (tWaitingRoomConns.length >= 4) {
 						const tournament = new Tournament(app);
 						app.tournaments.set(tournament.id, tournament);
 						redirectToTournament(tournament.id, app, tWaitingRoomConns);
@@ -42,8 +40,9 @@ export const tWaitingRoomSock = async (app: FastifyInstance) => {
 			})
 	
 			socket.on('close', () => {
-				if (userId && tWaitingRoomConns.has(userId)) {
-					tWaitingRoomConns.delete(userId);
+				const index = tWaitingRoomConns.findIndex(([id]) => id === userId);
+				if (index !== -1) {
+					tWaitingRoomConns.splice(index, 1);
 				}
 			})
 	
@@ -53,11 +52,15 @@ export const tWaitingRoomSock = async (app: FastifyInstance) => {
 		});
 }
 
-function redirectToTournament(tournamentId: string, app: FastifyInstance, tWaitingRoomConns: Map<string, WebSocket>) {
+function redirectToTournament(tournamentId: string, app: FastifyInstance, tWaitingRoomConns: Array<[string, WebSocket]>) {
 	console.custom('INFO', 'Two users are in the waiting room, redirecting to tournament room...')
-
-	const users = Array.from(tWaitingRoomConns).slice(0, 4);
-	users.forEach((user) => tWaitingRoomConns.delete(user[0]));
+	if(!app.tournaments.has(tournamentId)) {
+		console.custom('ERROR', 'Tournament not found:', tournamentId);
+		return;
+	}
+	const users = [];
+	users.push(tWaitingRoomConns.shift()!);
+	users.push(tWaitingRoomConns.shift()!);
 
 	const message = JSON.stringify({
 		type: 'redirectingToTournament',
