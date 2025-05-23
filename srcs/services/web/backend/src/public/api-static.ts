@@ -3,15 +3,6 @@ export class API {
 	static refreshInterval: number
 	static refreshIntervalId: ReturnType<typeof setInterval> | null
 
-	static async request(endpoint: string) {
-		// const url = `${this.baseUrl}${endpoint}`
-		const res = await fetch(endpoint, {
-			credentials: 'include'
-		})
-
-		return res
-	}
-
 	/**
 	 * GET REQUEST
 	 * @param endpoint Fetching endpoint
@@ -93,7 +84,7 @@ export class API {
 	 * }
 	 **/
 	static async getQR() {
-		const response = await this.post('/api/2fa/ga/register', {}, {includeCSRF: true})
+		const response = await this.post('/api/2fa/ga/register', {}, { includeCSRF: true })
 		return response.json()
 	}
 
@@ -102,6 +93,11 @@ export class API {
 		.split('; ')
 		.find(row => row.startsWith('csrf_token='))
 		?.split('=')[1] || '';
+	}
+
+	static async twoFAGAVerify(code: string) {
+		const response = await this.post('/api/2fa/ga/verify', { code }, { includeCSRF: true })
+		return response.json()
 	}
 
 }
