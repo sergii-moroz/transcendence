@@ -1,7 +1,7 @@
 import { API } from "../api-static.js"
 import { Router } from "../router-static.js"
 
-const formHTML = `
+const innerHTML = `
 <form class="space-y-4 md:space-y-6">
 		<div>
 			<label
@@ -87,7 +87,7 @@ export class RegisterForm extends HTMLElement {
 
 	constructor() {
 		super()
-		this.innerHTML = formHTML
+		this.render()
 	}
 
 	connectedCallback() {
@@ -117,11 +117,7 @@ export class RegisterForm extends HTMLElement {
 		const password = this.password.value.trim()
 		const repeated = this.repeated.value.trim()
 
-		this.clearErrors()
-
 		let hasError = false
-
-		// BEGIN VALIDATION
 
 		if (username.length < 5) {
 			this.showError(this.usernameError, 'Username must be at least 5 characters')
@@ -182,12 +178,8 @@ export class RegisterForm extends HTMLElement {
 		}, 4000)
 	}
 
-	private clearErrors() {
-		[this.usernameError, this.passwordError, this.repeatedError].forEach( item => {
-			if (!item) return
-			item.textContent = ''
-			item.classList.add('hidden')
-		})
+	private render() {
+		this.innerHTML = innerHTML
 	}
 
 }
