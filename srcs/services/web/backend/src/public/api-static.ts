@@ -62,10 +62,6 @@ export class API {
 		return response.json()
 	}
 
-	// static async is2FAEnabled() {
-	// 	return this.request('/api/2fa/enable')
-	// }
-
 	/**
 	 * Retrieves a QR code and secret for 2FA registration.
 	 * Makes an authenticated POST request to the '/2fa/register-ga' endpoint.
@@ -103,6 +99,10 @@ export class API {
 	static async create2FABackupCodes() {
 		const response = await this.post('/api/2fa/backup-codes', {}, { includeCSRF: true })
 		return response.json()
+	}
+
+	static async is2FAEnabled() {
+		return this.get('/api/2fa/enabled')
 	}
 
 }
