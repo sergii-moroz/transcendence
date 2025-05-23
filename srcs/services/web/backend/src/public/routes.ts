@@ -55,13 +55,13 @@ export const routes: tRoutes = {
 	},
 
 	"/settings/2fa/ga/register": {
-		template: "/templates/settings/2fa/register-ga.html",
+		template: "/templates/settings/2fa/ga-register.html",
 		title: `2FA Register | ${APP_TITLE}`,
 		description: "Register Google Authenticator"
 	},
 
 	"/settings/2fa/ga/verify": {
-		template: "/templates/settings/2fa/verify-ga.html",
+		template: "/templates/settings/2fa/ga-verify.html",
 		title: `2FA Verify | ${APP_TITLE}`,
 		description: "Verify Google Authenticator"
 	},
