@@ -6,6 +6,7 @@ import { redirectToGameRoom } from '../routes/v1/waitingRoom.js';
 export class Tournament {
 	games: Map<string, Game>;
 	players: Array<[id: string, socket: WebSocket]>;
+	knownIds: Set<string>;
 	eliminatedPlayers: number;
 	allConnected: boolean;
 	isRunning: boolean;
@@ -16,6 +17,7 @@ export class Tournament {
 		this.app = app;
 		this.games = new Map();
 		this.players = new Array();
+		this.knownIds = new Set();
 		this.eliminatedPlayers = 0;
 		this.allConnected = false;
 		this.isRunning = false;
@@ -24,20 +26,27 @@ export class Tournament {
 
 	addPlayer(socket: WebSocket, id: string) {
 		if(this.allConnected){
-			for (let i = 0; i < this.players.length; i++) {
-				if (this.players[i][0] === id) {
-					this.players[i][1] = socket;
-					console.custom('INFO', `Tournament: Player ${id} reconnected`);
-				}
+			if (this.knownIds.has(id)) {
+				this.players.push([id, socket]);
+				console.custom('INFO', `Tournament: Player ${id} reconnected`);
 			}
+			else {
+				socket.send(JSON.stringify({
+					type: 'Error',
+					message: 'Tournament is full.'
+				}));
+				console.custom('ERROR', `Tournament: User ${id} tried to join a full tournament`);
+			}
+		} else if(this.players.length !== 4) {
+			this.players.push([id, socket]);
+			this.knownIds.add(id);
+			console.custom('INFO', `Tournament: Player ${id} joined (${this.players.length}/4)`);
+		} else if (this.players.length === 4) {
 			socket.send(JSON.stringify({
 				type: 'Error',
 				message: 'Tournament is full.'
 			}));
 			console.custom('ERROR', `Tournament: User ${id} tried to join a full tournament`);
-		} else if(this.players.length !== 4) {
-			this.players.push([id, socket]);
-			console.custom('INFO', `Tournament: Player ${id} joined (${this.players.length}/4)`);
 		}
 		if(this.players.length === 4 && !this.isRunning) {
 			this.allConnected = true;

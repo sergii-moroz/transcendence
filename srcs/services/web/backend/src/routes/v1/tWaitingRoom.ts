@@ -24,7 +24,7 @@ export const tWaitingRoomSock = async (app: FastifyInstance) => {
 						console.custom('INFO', `${userId} is already in the tournament waiting room`);
 					}
 	
-					console.custom('INFO', 'Users in tournament waiting room:', [...tWaitingRoomConns.keys()]);
+					console.custom('INFO', 'Users in tournament waiting room:', tWaitingRoomConns.map(player => player[0]));
 	
 					socket.send(JSON.stringify({
 						type: 'joinedRoom',
@@ -59,8 +59,10 @@ function redirectToTournament(tournamentId: string, app: FastifyInstance, tWaiti
 		return;
 	}
 	const users = [];
-	users.push(tWaitingRoomConns.shift()!);
-	users.push(tWaitingRoomConns.shift()!);
+	let length = tWaitingRoomConns.length;
+	for (let i = 0; i < length; i++) {
+		users.push(tWaitingRoomConns.shift()!);
+	}
 
 	const message = JSON.stringify({
 		type: 'redirectingToTournament',

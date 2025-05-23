@@ -92,11 +92,10 @@ export class GameView extends View {
 					if(this.socket && this.socket.readyState === WebSocket.OPEN) {
 						this.socket.close();
 					}
-					if(data.tournamentId !== undefined && data.tournamentId !== null) {
+					if(data.tournamentId !== null) {
 						console.log("Redirecting to tournament:", data.tournamentId);
 						this.router.navigateTo(`/tournament/${data.tournamentId}`);
-					}
-					else {
+					} else {
 						this.router.navigateTo('/home');
 					}
 				}, 3000);
