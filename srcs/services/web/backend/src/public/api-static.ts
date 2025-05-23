@@ -100,4 +100,9 @@ export class API {
 		return response.json()
 	}
 
+	static async create2FABackupCodes() {
+		const response = await this.post('/api/2fa/backup-codes', {}, { includeCSRF: true })
+		return response.json()
+	}
+
 }
