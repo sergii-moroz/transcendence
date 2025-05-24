@@ -57,8 +57,24 @@ export const generateBackupCodesSchema = {
 				}
 			}
 		},
-		400: errorResponseSchema,
-		401: errorResponseSchema,
-		500: errorResponseSchema,
+		404: errorResponseSchema, // FST_USER_NOT_FOUND
+		409: errorResponseSchema, // FST_2FA_ALREADY_ENABLED
+		500: errorResponseSchema, // FST_HASHING_ERROR
+	}
+}
+
+export const set2FAEnabledSchema = {
+	description: 'Enable 2FA for the authenticated user',
+	tags: ['2FA'],
+	response: {
+		200: {
+			type: 'object',
+			properties: {
+				success: { type: 'boolean' }
+			},
+			required: ['success']
+		},
+		404: errorResponseSchema, // FST_USER_NOT_FOUND
+		409: errorResponseSchema, // FST_2FA_ALREADY_ENABLED
 	}
 }
