@@ -132,7 +132,7 @@ export class TwoFABackupGA extends HTMLElement {
 		const res = await API.set2FAEnabled()
 
 		if (res.success) {
-			Router.navigateTo('/settings/2fa/ga/completed')
+			Router.navigateTo('/settings/2fa/completed')
 		} else {
 			if (!this.messageError) return
 

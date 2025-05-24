@@ -72,4 +72,10 @@ export const routes: tRoutes = {
 		description: "Backup codes"
 	},
 
+	"/settings/2fa/completed": {
+		template: "/templates/settings/2fa/completed.html",
+		title: `2FA Competed | ${APP_TITLE}`,
+		description: "2FA setup is completed"
+	},
+
 }
