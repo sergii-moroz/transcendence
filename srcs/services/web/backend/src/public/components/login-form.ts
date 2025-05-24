@@ -86,7 +86,6 @@ export class LoginForm extends HTMLElement {
 
 	async handleEvent(event: Event) {
 		event.preventDefault()
-		console.log('click')
 
 		if (!this.username || !this.password) return
 		if (!this.usernameError || !this.passwordError) return
@@ -111,6 +110,11 @@ export class LoginForm extends HTMLElement {
 		if (hasError) return
 
 		const res = await API.login(this.username.value, this.password.value)
+
+		if (res.requires2FA) {
+			sessionStorage.setItem('temp2faToken', res.token)
+			return Router.navigateTo('/login/2fa/verify')
+		}
 
 		if (res.success) {
 			return Router.navigateTo('/home')
