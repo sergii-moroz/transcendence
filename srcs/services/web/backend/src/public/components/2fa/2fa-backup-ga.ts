@@ -128,8 +128,16 @@ export class TwoFABackupGA extends HTMLElement {
 		this.enableBtnNext()
 	}
 
-	private handleNext() {
-		Router.navigateTo('/settings/2fa/ga/completed')
+	private async handleNext() {
+		const res = await API.set2FAEnabled()
+
+		if (res.success) {
+			Router.navigateTo('/settings/2fa/ga/completed')
+		} else {
+			if (!this.messageError) return
+
+			this.showError(this.messageError, res.message ?? 'Server error. Please refresh or try again later')
+		}
 	}
 
 	private async is2FAEnabled() {
