@@ -28,13 +28,15 @@ import {
 import {
 	gaRegisterSchema,
 	generateBackupCodesSchema,
+	set2FAEnabledSchema,
 	verify2FASchema
 } from "../../schemas/2fa.schemas.js";
 
 import {
 	handleGARegister,
 	handleGAVerify,
-	handleGenerateBackupCodes
+	handleGenerateBackupCodes,
+	handleSet2FAEnabled
 } from "../../controllers/2fa.controllers.js";
 
 import {
@@ -68,25 +70,18 @@ export const twoFARoutes = async (app: FastifyInstance, opts: FastifyPluginOptio
 		handler:		handleGenerateBackupCodes
 	})
 
-	app.post('/enable', {preHandler: [authenticate, checkCsrf]}, async (req, reply) => {
-		try {
-
-			const user = req.user as JwtUserPayload
-
-			await mark2FAEnabled(user.id)
-			reply.send({ success: true })
-
-		} catch (err) {
-			throw err
-		}
-	})
-
 	// Do i need auth verification here?
 	app.get('/enabled', async (req, reply) => {
 		const user = req.user as JwtUserPayload;
 		const isEnabled = await is2FAEnabled(user.id)
 		reply.send({ enabled: isEnabled, success: true })
 	});
+
+	app.post('/enabled', {
+		schema: set2FAEnabledSchema,
+		preHandler: [authenticate, checkCsrf],
+		handler: handleSet2FAEnabled
+	})
 
 	app.post('/verify-login', async (req, reply) => {
 		// app.log.info("verify-login")
