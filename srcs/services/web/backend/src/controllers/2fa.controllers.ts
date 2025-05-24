@@ -2,6 +2,7 @@ import {
 	generate2FASecretAndQRCode,
 	generateBackupCodesService,
 	is2FAEnabled,
+	mark2FAEnabled,
 	verifyGACode
 } from "../services/2fa.services.js";
 
@@ -49,6 +50,24 @@ export const handleGenerateBackupCodes = async (
 
 		const result = await generateBackupCodesService(user.id)
 		reply.send({codes: result, success: true})
+	} catch (err) {
+		throw err
+	}
+}
+
+export const handleSet2FAEnabled = async (
+	req:		FastifyRequest,
+	reply:	FastifyReply
+) => {
+	try {
+		const user = req.user as JwtUserPayload
+
+		// check if 2FA is already enabled
+		const isEnabled = await is2FAEnabled(user.id)
+		if (isEnabled) throw new TwoFAAlreadyEnabledError()
+
+		await mark2FAEnabled(user.id)
+		reply.send({ success: true })
 	} catch (err) {
 		throw err
 	}
