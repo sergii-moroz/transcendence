@@ -51,12 +51,6 @@ export class API {
 		return response.json()
 	}
 
-	// static async login2FAVerify(code: string) {
-	// 	const token = sessionStorage.getItem('temp2faToken')
-	// 	const res = await this.post('/api/2fa/verify-login', {token, code}) // rename to /api/login/2fa/verify
-	// 	return res.json()
-	// }
-
 	static async register(username: string, password: string, repeated: string) {
 		const response = await this.post('/api/register', { username, password, repeated })
 		return response.json()
@@ -108,6 +102,12 @@ export class API {
 	static async set2FAEnabled() {
 		const response = await this.post('/api/2fa/enabled', {}, { includeCSRF: true })
 		return response.json()
+	}
+
+	static async twoFALoginVerify(code: string) {
+		const token = sessionStorage.getItem('temp2faToken')
+		const res = await this.post('/api/2fa/login/verify', {token, code})
+		return res.json()
 	}
 
 }
