@@ -78,4 +78,11 @@ export const routes: tRoutes = {
 		description: "2FA setup is completed"
 	},
 
+	"/settings/2fa/already-enabled": {
+		template: "/templates/settings/2fa/already-enabled.html",
+		title: `2FA Competed | ${APP_TITLE}`,
+		description: "2FA setup is completed"
+	},
+
+
 }
