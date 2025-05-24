@@ -1,4 +1,4 @@
-import { iconMoon, iconSun } from "./icons.js"
+import { iconMoon, iconSun } from "./icons/icons.js"
 
 const compoHTML = `
 	<button
