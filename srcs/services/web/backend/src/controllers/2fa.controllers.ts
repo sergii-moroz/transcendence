@@ -2,6 +2,7 @@ import {
 	generate2FASecretAndQRCode,
 	generateBackupCodesService,
 	is2FAEnabled,
+	loginVerify2FAService,
 	mark2FAEnabled,
 	verifyGACode
 } from "../services/2fa.services.js";
@@ -9,6 +10,7 @@ import {
 import { FastifyReply, FastifyRequest } from "fastify";
 import { JwtUserPayload } from "../types/user.js";
 import { TwoFAAlreadyEnabledError } from "../errors/2fa.errors.js";
+import { createCsrfToken, generateAccessToken, generateRefreshToken } from "../services/tokenService.js";
 
 export const handleGARegister = async (
 	req:		FastifyRequest,
@@ -71,4 +73,38 @@ export const handleSet2FAEnabled = async (
 	} catch (err) {
 		throw err
 	}
+}
+
+export const handleLoginVerify2FA = async (
+	req:		FastifyRequest,
+	reply:	FastifyReply
+) => {
+	const { token, code } = req.body as { token: string, code: string }
+
+	const user = await loginVerify2FAService(token, code)
+	const accessToken = generateAccessToken(user);
+	const refreshToken = generateRefreshToken(user);
+	const csrfToken = createCsrfToken();
+
+	return reply
+		.setCookie('token', accessToken, {
+			httpOnly: true,
+			secure: false, // set to true in production with HTTPS // process.env.NODE_ENV === 'production'
+			sameSite: 'strict',
+			path: '/',
+			maxAge: 60 * 15 // 15 min
+		})
+		.setCookie('refreshToken', refreshToken, {
+			httpOnly: true,
+			sameSite: 'strict',
+			path: '/',
+			maxAge: 60 * 60 * 24 * 7 // 7 days
+		})
+		.setCookie('csrf_token', csrfToken, {
+			httpOnly: false,
+			sameSite: 'strict',
+			path: '/',
+			maxAge: 60 * 15
+		})
+		.send({ success: true });
 }

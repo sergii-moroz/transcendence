@@ -3,6 +3,7 @@ import {
 	Invalid2FACodeError,
 	Missing2FACodeError,
 	SecretNotFoundError,
+	TwoFANotEnabledError,
 	UserNotFoundError
 } from "../errors/2fa.errors.js";
 
@@ -11,6 +12,8 @@ import { db } from "../db/connections.js";
 import { authenticator } from "otplib";
 import QRCode from 'qrcode'
 import bcrypt from 'bcrypt'
+import { verify2FAAccessToken } from "./tokenService.js";
+import { findUserById } from "./userService.js";
 
 export const update2FASecret = async (username: string, secret: string): Promise<void> => {
 	return new Promise((resolve, reject) => {
@@ -165,4 +168,18 @@ export const is2FAEnabled = async (id: number): Promise<boolean> => {
 			}
 		)
 	})
+}
+
+export const loginVerify2FAService = async (token: string, code: string) => {
+	const userPayload = verify2FAAccessToken(token)
+	const user = await findUserById(userPayload.id)
+
+	if (!user) throw new UserNotFoundError()
+	if (!user.two_factor_enabled) throw new TwoFANotEnabledError()
+	if (!user.two_factor_secret) throw new SecretNotFoundError()
+
+	const isValid = authenticator.check(code, user.two_factor_secret)
+	if (!isValid) throw new Invalid2FACodeError()
+
+	return user
 }
