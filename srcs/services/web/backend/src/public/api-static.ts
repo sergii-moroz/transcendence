@@ -105,4 +105,9 @@ export class API {
 		return this.get('/api/2fa/enabled')
 	}
 
+	static async set2FAEnabled() {
+		const response = await this.post('/api/2fa/enabled', {}, { includeCSRF: true })
+		return response.json()
+	}
+
 }
