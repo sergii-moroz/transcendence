@@ -2,10 +2,10 @@ import {
 	HashingError,
 	Invalid2FACodeError,
 	Missing2FACodeError,
-	SecretNotFoundError
+	SecretNotFoundError,
+	UserNotFoundError
 } from "../errors/2fa.errors.js";
 
-import { UserNotFoundError } from "../errors/login.errors.js";
 import { JwtUserPayload, User } from "../types/user.js";
 import { db } from "../db/connections.js";
 import { authenticator } from "otplib";
@@ -130,8 +130,9 @@ export const setBackupCodes = async (codesStr: string, id: number):Promise<void>
 		db.run(
 			'UPDATE users SET two_factor_backup_codes = ?, two_factor_backup_at = ? WHERE id = ?',
 			[codesStr, new Date().toISOString(), id],
-			(err) => {
+			function (err) {
 				if (err) return reject(err)
+				if (this.changes === 0) return reject(new UserNotFoundError())
 				resolve()
 			}
 		)
@@ -143,13 +144,14 @@ export const mark2FAEnabled = async (id: number): Promise<void> => {
 		db.run(
 			'UPDATE users SET two_factor_enabled = ? WHERE id = ?',
 			[true, id],
-			(err) => {
+			function (err) {
 				if (err) return reject(err);
+				if (this.changes === 0) return reject(new UserNotFoundError())
 				resolve();
 			}
-		);
-	});
-};
+		)
+	})
+}
 
 export const is2FAEnabled = async (id: number): Promise<boolean> => {
 	return new Promise((resolve, reject) => {
