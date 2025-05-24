@@ -19,7 +19,7 @@ import { loginSchema, registerSchema } from "../../schemas/auth.js";
 import { JwtUserPayload } from "../../types/user.js";
 import { checkCsrf, validateRegisterInput } from "../../services/authService.js";
 import { RegisterInputProps } from "../../types/registration.js";
-import { InvalidCredentialsError, UserNotFoundError } from "../../errors/login.js";
+import { InvalidCredentialsError, UserNotFoundError } from "../../errors/login.errors.js";
 
 export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
 

@@ -53,14 +53,14 @@ export const twoFARoutes = async (app: FastifyInstance, opts: FastifyPluginOptio
 	})
 
 	app.post('/enabled', {
-		schema: set2FAEnabledSchema,
-		preHandler: [authenticate, checkCsrf],
-		handler: handleSet2FAEnabled
+		schema:			set2FAEnabledSchema,
+		preHandler:	[authenticate, checkCsrf],
+		handler:		handleSet2FAEnabled
 	})
 
 	app.post('/login/verify', {
-		schema: loginVerify2FASchema,
-		handler: handleLoginVerify2FA
+		schema:			loginVerify2FASchema,
+		handler:		handleLoginVerify2FA
 	})
 
 }
