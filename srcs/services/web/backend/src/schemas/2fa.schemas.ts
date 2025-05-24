@@ -63,6 +63,20 @@ export const generateBackupCodesSchema = {
 	}
 }
 
+export const is2FAEnabledSchema = {
+	response: {
+		200: {
+			type: 'object',
+			properties: {
+				enabled: { type: 'boolean' },
+				success: { type: 'boolean' }
+			},
+			required: ['enabled', 'success']
+		},
+		404: errorResponseSchema, // FST_USER_NOT_FOUND
+	}
+}
+
 export const set2FAEnabledSchema = {
 	description: 'Enable 2FA for the authenticated user',
 	tags: ['2FA'],
@@ -76,5 +90,27 @@ export const set2FAEnabledSchema = {
 		},
 		404: errorResponseSchema, // FST_USER_NOT_FOUND
 		409: errorResponseSchema, // FST_2FA_ALREADY_ENABLED
+	}
+}
+
+export const loginVerify2FASchema = {
+	body: {
+		type: 'object',
+		required: ['token', 'code'],
+		properties: {
+			token: { type: 'string' },
+			code: { type: 'string' }
+		}
+	},
+	response: {
+		200: {
+			type: 'object',
+			properties: {
+				success: { type: 'boolean' }
+			}
+		},
+		400: errorResponseSchema, // FST_2FA_NOT_ENABLED
+		401: errorResponseSchema, // FST_2FA_INVALID_CODE
+		404: errorResponseSchema, // FST_2FA_SECRET_NOT_FOUND, FST_USER_NOT_FOUND
 	}
 }
