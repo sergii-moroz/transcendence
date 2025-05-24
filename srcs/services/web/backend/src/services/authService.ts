@@ -7,7 +7,7 @@ import {
 	PasswordWhitespaceError,
 	PasswordMissingUppercaseError,
 	PasswordMismatchError,
-} from "../errors/registration.js";
+} from "../errors/registration.errors.js";
 
 import { FastifyReply, FastifyRequest } from "fastify";
 import { verifyAccessToken } from "./tokenService.js";
