@@ -35,3 +35,9 @@ export const UserNotFoundError = createError(
 	'User not found',
 	404
 );
+
+export const TwoFANotEnabledError = createError(
+	'FST_2FA_NOT_ENABLED',
+	'Two-factor authentication is not enabled on this account',
+	400
+)
