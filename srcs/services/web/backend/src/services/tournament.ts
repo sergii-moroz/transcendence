@@ -27,6 +27,10 @@ export class Tournament {
 			if (this.knownIds.has(id) && this.knownIds.get(id) === false) {
 				this.players.push([id, socket]);
 				console.custom('INFO', `Tournament: Player ${id} reconnected`);
+				if(this.players.length > 1 && this.isRunning) {
+					console.custom('INFO', `Tournament: Starting next round...`);
+					this.startTournament();
+				}
 			} else if (this.knownIds.has(id) && this.knownIds.get(id) === true) {
 				socket.send(JSON.stringify({
 					type: 'Error',
