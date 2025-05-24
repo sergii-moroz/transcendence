@@ -27,7 +27,21 @@ export class Tournament {
 			if (this.knownIds.has(id) && this.knownIds.get(id) === false) {
 				this.players.push([id, socket]);
 				console.custom('INFO', `Tournament: Player ${id} reconnected`);
-				if(this.players.length > 1 && this.isRunning) {
+				const remaining = Array.from(this.knownIds.entries()).filter(([_, eliminated]) => !eliminated);
+				if (remaining.length === 1) {
+					const [finalWinnerId] = remaining[0];
+					console.custom('INFO', `Tournament: Tournament finished with winner ${finalWinnerId}`);
+					this.isRunning = false;
+					this.players.find(([id]) => id === finalWinnerId)?.[1].send(JSON.stringify({
+						type: 'victory',
+						message: `Congratulations! You have won the tournament!`,
+						winnerId: finalWinnerId,
+						tournamentId: this.id
+					}));
+					this.app.tournaments.delete(this.id);
+					return;
+				}
+				if(this.isRunning) {
 					console.custom('INFO', `Tournament: Starting next round...`);
 					this.startTournament();
 				}
@@ -93,31 +107,8 @@ export class Tournament {
 							this.knownIds.set(player.id, true); // eliminated
 						}
 					}
-					// Only push the winner if not already eliminated
-					if (!this.knownIds.get(winnerId)) {
-						const winnerEntry = Array.from(game.players.values()).find(p => p.id === winnerId);
-						if (winnerEntry) {
-							this.players.push([winnerId, winnerEntry.socket]);
-							console.custom('INFO', `Tournament: Game room ${game.gameRoomId} finished with winner ${winnerId}`);
-						} else {
-							console.custom('ERROR', `Tournament: Could not find winner socket for user ${winnerId}`);
-						}
-					}
 					this.games.delete(game.gameRoomId);
-
-					// Check if only one player remains not eliminated
-					const remaining = Array.from(this.knownIds.entries()).filter(([_, eliminated]) => !eliminated);
-					if (remaining.length === 1) {
-						const [finalWinnerId] = remaining[0];
-						this.isRunning = false;
-						this.app.tournaments.delete(this.id);
-						console.custom('INFO', `Tournament: Tournament finished with winner ${finalWinnerId}`);
-						clearInterval(interval);
-						return;
-					}
-
-					if (this.players.length > 1)
-						this.matchPlayers();
+					this.app.gameInstances.delete(game.gameRoomId);
 				}
 			}
 		}, 500);
@@ -125,6 +116,7 @@ export class Tournament {
 
 	async startTournament() {
 		this.isRunning = true;
+		// Check if the winner has not been found yet
 		await this.matchPlayers();
 		console.custom('INFO', `Tournament: Players matched, waiting for games to finish...`);
 		this.detectWinners();

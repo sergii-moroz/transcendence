@@ -152,14 +152,27 @@ export class Game {
 
 				// Update stats
 				if (winner) {
-					db.run(
-						`UPDATE user_stats SET wins = wins + 1 WHERE user_id = ?`, [winner.id]
-					);
+					if(this.tournamentId) {
+						db.run(
+							`UPDATE user_stats SET t_wins = t_wins + 1 WHERE user_id = ?`, [winner.id]
+						);
+						
+					} else {
+						db.run(
+							`UPDATE user_stats SET wins = wins + 1 WHERE user_id = ?`, [winner.id]
+						);
+					}
 				}
 				if (loser) {
-					db.run(
-						`UPDATE user_stats SET losses = losses + 1 WHERE user_id = ?`, [loser.id]
-					);
+					if(this.tournamentId) {
+						db.run(
+							`UPDATE user_stats SET t_losses = t_losses + 1 WHERE user_id = ?`, [loser.id]
+						);
+					} else {
+						db.run(
+							`UPDATE user_stats SET losses = losses + 1 WHERE user_id = ?`, [loser.id]
+						);
+					}
 				}
 			}
 		}, 16);

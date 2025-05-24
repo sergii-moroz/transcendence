@@ -55,6 +55,13 @@ export class TournamentView extends View {
 					}, 100);
 				}
 
+				if (data.type === 'victory') {
+					console.log(`Victory message: ${data.message}`);
+					alert(`Victory! ${data.message}`);
+					this.socket?.close();
+					this.router.navigateTo('/home');
+				}
+
 				if (data.type === "Error") {
 					console.error(`Error: ${data.message}`);
 					alert(`Error: ${data.message}`);
