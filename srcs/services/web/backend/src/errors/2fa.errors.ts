@@ -21,11 +21,17 @@ export const SecretNotFoundError = createError(
 export const TwoFAAlreadyEnabledError = createError(
 	'FST_2FA_ALREADY_ENABLED',
 	'Two-Factor Authentication is already enabled',
-	400
+	409
 );
 
 export const HashingError = createError(
 	'FST_HASHING_ERROR',
 	'Failed to hash code(s)',
 	500
+);
+
+export const UserNotFoundError = createError(
+	'FST_USER_NOT_FOUND',
+	'User not found',
+	404
 );
