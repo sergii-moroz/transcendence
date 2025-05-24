@@ -116,49 +116,49 @@ export class Game {
 				}));
 			});
 
-			if(this.state.scores.player1 >= 7 || this.state.scores.player2 >= 7) {
+			if (this.state.scores.player1 >= 7 || this.state.scores.player2 >= 7) {
 				this.gameRunning = false;
-				if(this.state.scores.player1 >= 7) {
-					this.players.forEach(player => {
-						player.socket.send(JSON.stringify({
-							type: 'gameOver',
-							message: 'Player 1 wins!',
-							winner: 'player1',
-							tournamentId: this.tournamentId,
-						}));
-					});
-					if(this.tournamentId) {
-						console.custom('INFO', `Game room ${this.gameRoomId} in Tournament ${this.tournamentId}: Player 1 wins!`);
-					} else {
-						console.custom('INFO', `Game room ${this.gameRoomId}: Player 1 wins!`);
-					}
-					this.winnerId = this.players.get('player1')?.id || null;
-					db.run(
-						`UPDATE user_stats SET wins = wins + 1 WHERE user_id = ?`, [this.players.get('player1')?.id]
-					);
-					db.run(
-						`UPDATE user_stats SET losses = losses + 1 WHERE user_id = ?`, [this.players.get('player2')?.id]
-					);
+
+				const winnerRole = this.state.scores.player1 >= 7 ? 'player1' : 'player2';
+				const loserRole = winnerRole === 'player1' ? 'player2' : 'player1';
+				const winner = this.players.get(winnerRole);
+				const loser = this.players.get(loserRole);
+
+				this.winnerId = winner?.id || null;
+
+				// Send gameOver message
+				if (winner) {
+					winner.socket.send(JSON.stringify({
+						type: 'gameOver',
+						message: `${winnerRole === 'player1' ? 'Player 1' : 'Player 2'} wins!`,
+						winner: winnerRole,
+						tournamentId: this.tournamentId, // Only winner gets tournamentId
+					}));
+				}
+				if (loser) {
+					loser.socket.send(JSON.stringify({
+						type: 'gameOver',
+						message: `${winnerRole === 'player1' ? 'Player 1' : 'Player 2'} wins!`,
+						winner: winnerRole,
+						tournamentId: null, // Loser does not get tournamentId
+					}));
+				}
+
+				if (this.tournamentId) {
+					console.custom('INFO', `Game room ${this.gameRoomId} in Tournament ${this.tournamentId}: ${winnerRole === 'player1' ? 'Player 1' : 'Player 2'} wins!`);
 				} else {
-					this.players.forEach(player => {
-						player.socket.send(JSON.stringify({
-							type: 'gameOver',
-							message: 'Player 2 wins!',
-							winner: 'player2',
-							tournamentId: this.tournamentId,
-						}));
-					});
-					if(this.tournamentId) {
-						console.custom('INFO', `Game room ${this.gameRoomId} in Tournament ${this.tournamentId}: Player 1 wins!`);
-					} else {
-						console.custom('INFO', `Game room ${this.gameRoomId}: Player 1 wins!`);
-					}
-					this.winnerId = this.players.get('player2')?.id || null;
+					console.custom('INFO', `Game room ${this.gameRoomId}: ${winnerRole === 'player1' ? 'Player 1' : 'Player 2'} wins!`);
+				}
+
+				// Update stats
+				if (winner) {
 					db.run(
-						`UPDATE user_stats SET wins = wins + 1 WHERE user_id = ?`, [this.players.get('player2')?.id]
+						`UPDATE user_stats SET wins = wins + 1 WHERE user_id = ?`, [winner.id]
 					);
+				}
+				if (loser) {
 					db.run(
-						`UPDATE user_stats SET losses = losses + 1 WHERE user_id = ?`, [this.players.get('player1')?.id]
+						`UPDATE user_stats SET losses = losses + 1 WHERE user_id = ?`, [loser.id]
 					);
 				}
 			}

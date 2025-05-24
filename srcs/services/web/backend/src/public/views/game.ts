@@ -89,9 +89,6 @@ export class GameView extends View {
 				};
 				console.log('Game over:', data.message, data.winner, data.tournamentId);
 				setTimeout(() => {
-					if(this.socket && this.socket.readyState === WebSocket.OPEN) {
-						this.socket.close();
-					}
 					if(data.tournamentId !== null) {
 						console.log("Redirecting to tournament:", data.tournamentId);
 						this.router.navigateTo(`/tournament/${data.tournamentId}`);
@@ -104,7 +101,6 @@ export class GameView extends View {
 
 		this.socket.onclose = () => {
 			console.log("WebSocket connection got closed by server");
-			this.router.navigateTo('/home');
 		};
 
 		this.socket.onerror = (err: Event) => {
