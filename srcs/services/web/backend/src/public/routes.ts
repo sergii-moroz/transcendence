@@ -36,6 +36,12 @@ export const routes: tRoutes = {
 		description: "Login page"
 	},
 
+	"/login/2fa/verify": {
+		template: "/templates/login-2fa-verify.html",
+		title: `Login 2FA | ${APP_TITLE}`,
+		description: "Login verify 2FA page"
+	},
+
 	"/home": {
 		template: "/templates/home.html",
 		title: `Home | ${APP_TITLE}`,
