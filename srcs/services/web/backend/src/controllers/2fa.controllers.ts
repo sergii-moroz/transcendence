@@ -7,10 +7,22 @@ import {
 	verifyGACode
 } from "../services/2fa.services.js";
 
+import {
+	createCsrfToken,
+	generateAccessToken,
+	generateRefreshToken
+} from "../services/tokenService.js";
+
+import {
+	AccessTokenExpiredError,
+	NoAccessTokenError
+} from "../errors/middleware.errors.js";
+
 import { FastifyReply, FastifyRequest } from "fastify";
+
 import { JwtUserPayload } from "../types/user.js";
 import { TwoFAAlreadyEnabledError } from "../errors/2fa.errors.js";
-import { createCsrfToken, generateAccessToken, generateRefreshToken } from "../services/tokenService.js";
+import jwt from "jsonwebtoken";
 
 export const handleGARegister = async (
 	req:		FastifyRequest,
@@ -118,6 +130,8 @@ export const handleLoginVerify2FA = async (
 			})
 			.send({ success: true });
 	} catch (err) {
+		if (err instanceof jwt.TokenExpiredError) throw new AccessTokenExpiredError()
+		if (err instanceof jwt.JsonWebTokenError) throw new NoAccessTokenError()
 		throw err
 	}
 }
