@@ -9,6 +9,14 @@ import {
 	PasswordMismatchError,
 } from "../errors/registration.errors.js";
 
+import {
+	AccessTokenExpiredError,
+	CsrfMismatchError,
+	CsrfMissingError,
+	InvalidAccessTokenError,
+	NoAccessTokenError
+} from "../errors/middleware.errors.js";
+
 import { FastifyReply, FastifyRequest } from "fastify";
 import { verifyAccessToken } from "./tokenService.js";
 import { RegisterInputProps } from "../types/registration.js";
@@ -41,21 +49,20 @@ export const checkCsrf = async (
 	const csrfCookie = request.cookies.csrf_token;
 	const csrfHeader = request.headers['x-csrf-token'];
 
-	if (!csrfCookie || !csrfHeader || csrfCookie !== csrfHeader) {
-		return reply.code(403).send({ error: 'CSRF token mismatch' });
-	}
+	if (!csrfCookie || !csrfHeader) throw new CsrfMissingError()
+	if (csrfCookie !== csrfHeader) throw new CsrfMismatchError()
 }
 
 export const authenticate = async (request: FastifyRequest, reply: FastifyReply) => {
 	const token = request.cookies.token;
 
-	if (!token) {
-		return reply.code(401).send({ error: 'Unauthorized: No token provided' });
-	}
+	if (!token) throw new NoAccessTokenError
 
 	try {
 		request.user = verifyAccessToken(token);
-	} catch (err) {
-		return reply.code(401).send({ error: 'Invalid or expired token' });
+	} catch (err: any) {
+		// `jsonwebtoken`, it throws err.name === 'TokenExpiredError' for expired tokens.
+		if (err.name === 'TokenExpiredError') throw new AccessTokenExpiredError()
+		throw new InvalidAccessTokenError()
 	}
 }
