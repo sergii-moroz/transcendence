@@ -13,7 +13,7 @@ import {
 	iconHomeX,
 	iconHomePlus,
 	iconHomeCheck
-} from "../components/icons.js";
+} from "../components/icons/icons.js";
 
 import { View } from "../view.js"
 
@@ -24,7 +24,7 @@ export class HomeView extends View {
 			<div class="min-h-screen flex overflow-hidden">
 				<!-- content Part + background modules -->
 				<div class="flex-1 relative overflow-y-auto">
-					
+
 					<!-- background modules -->
 					<div class="absolute inset-0 overflow-hidden z-0">
 						<div class="absolute top-5 left-1/8 w-94 h-110 dark:bg-purple-600 bg-green-400 opacity-20 rounded-full blur-3xl"></div>
@@ -69,7 +69,7 @@ export class HomeView extends View {
 									</button>
 									</div>
 								</div>
-							
+
 								<!-- Multiplayer Card -->
 								<div class="dark:bg-gray-800 bg-white rounded-2xl overflow-hidden border dark:border-gray-700 border-gray-200 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
 									<div class="p-6">
@@ -83,7 +83,7 @@ export class HomeView extends View {
 									</button>
 									</div>
 								</div>
-							
+
 								<!-- Tournament Card -->
 								<div class="dark:bg-gray-800 bg-white rounded-2xl overflow-hidden border dark:border-gray-700 border-gray-200 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
 									<div class="p-6">
@@ -96,7 +96,7 @@ export class HomeView extends View {
 										Join Tournament
 									</button>
 									</div>
-								</div>							
+								</div>
 							</div>
 
 							<!-- Stats and Leaderboard Section -->
@@ -111,7 +111,7 @@ export class HomeView extends View {
 											</div>
 											<h3 class="text-xl font-bold text-white">Your Stats</h3>
 										</div>
-										
+
 										<div class="grid grid-cols-3 gap-4 mb-6">
 											<div class="dark:bg-gray-700/50 bg-gray-100 rounded-lg p-3 text-center dark:hover:bg-gray-700/60 hover:bg-gray-100/60 transition-colors">
 												<div class="text-2xl font-bold mb-1">${input.stats.matches}</div>
@@ -127,7 +127,7 @@ export class HomeView extends View {
 											</div>
 										</div>
 									</div>
-									
+
 									<div class="p-6 pt-0">
 										<button id="viewProfile-btn" class="w-full px-4 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-medium rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
 											View Profile →
@@ -144,7 +144,7 @@ export class HomeView extends View {
 										</div>
 										<h3 class="text-xl font-bold">Top Player</h3>
 										</div>
-										
+
 										<div class="space-y-4 mb-6">
 											<div class="flex items-center p-3 dark:bg-gray-700/50 bg-gray-100 rounded-lg transition-colors dark:hover:bg-gray-700/70 hover:bg-gray-100/60">
 												<div class="pr-3">
@@ -163,7 +163,7 @@ export class HomeView extends View {
 											</div>
 										</div>
 									</div>
-									
+
 									<div class="p-6 pt-0">
 										<button id="viewLeaderboard-btn" class="w-full px-4 py-2.5 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 font-medium rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
 											View Leaderboard →
@@ -215,7 +215,7 @@ export class HomeView extends View {
 							</button>
 						</div>
 					</div>
-					
+
 					<!-- Add friend -->
 					<div class="p-4 border-b border-t dark:border-gray-700 border-gray-100">
 						<div class="relative">
@@ -251,7 +251,7 @@ export class HomeView extends View {
 		const tournamentBTN = document.getElementById('tournament-btn');
 		const viewProfileBTN = document.getElementById('viewProfile-btn');
 		const viewLeaderboardBTN = document.getElementById('viewLeaderboard-btn');
-		
+
 		const sideBar_collapsed = document.getElementById('sideBar-collapsed');
 		const sideBar_friends = document.getElementById('sidebar-friends');
 		const sideBar_close_BTN = document.getElementById('close-social-btn');
@@ -297,13 +297,13 @@ export class HomeView extends View {
 			el.classList.remove('hidden');
 			el.classList.add('flex', 'flex-col');
 		}
-		
+
 		function hide(el: HTMLElement) {
 			el.classList.remove('flex', 'flex-col');
 			el.classList.add('hidden');
 		}
 
-		
+
 		// sidebar
 		hide(sideBar_friends!);
 		this.addEventListener(sideBar_collapsed!, 'click', () => {
@@ -364,16 +364,16 @@ export class HomeView extends View {
 					<div id="insertContainer" class="space-y-3"></div>
 				</div>
 			`;
-	
+
 			const requestsContainer = element.querySelector('#insertContainer');
-	
+
 			for (let i = 0; i < data.FriendRequests.length; i++) {
 				const requestElement = document.createElement('div');
 				requestElement.className = 'dark:bg-gray-700 bg-gray-100 rounded-3xl shadow-sm p-2 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg';
 				requestElement.innerHTML = `
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-2"> <!-- Added wrapper div with gap control -->
-							<img 
+							<img
 								src="${data.FriendRequests[i].picture}"
 								onerror="this.src='../uploads/default.jpg'"
 								class="w-10 h-10 rounded-full object-cover"
@@ -408,13 +408,13 @@ export class HomeView extends View {
 		if (data.friends.online.length > 0)
 		{
 			const requestsContainer = online.querySelector('#insertContainer');
-	
+
 			for (let i = 0; i < data.friends.online.length; i++) {
 				const requestElement = document.createElement('div');
 				requestElement.className = "friend-item flex items-center p-2 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg";
 				requestElement.innerHTML = `
 						<div class="relative mr-3">
-							<img 
+							<img
 								src=${data.friends.online[i].picture}
 								onerror="this.src='../uploads/default.jpg'"
 								class="w-10 h-10 rounded-full"
@@ -440,13 +440,13 @@ export class HomeView extends View {
 		if (data.friends.offline.length > 0)
 		{
 			const requestsContainer = offline.querySelector('#insertContainer');
-	
+
 			for (let i = 0; i < data.friends.offline.length; i++) {
 				const requestElement = document.createElement('div');
 				requestElement.className = "friend-item flex items-center p-2 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg";
 				requestElement.innerHTML = `
 						<div class="relative mr-3">
-							<img 
+							<img
 								src=${data.friends.offline[i].picture}
 								onerror="this.src='../uploads/default.jpg'"
 								class="w-10 h-10 rounded-full"
