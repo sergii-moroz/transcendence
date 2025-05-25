@@ -8,7 +8,6 @@ import {
 
 import {
 	createUser,
-	findUserById,
 	verifyPassword,
 	findUserByUsername,
 } from "../../services/userService.js";
@@ -16,10 +15,10 @@ import {
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import bcrypt from 'bcrypt'
 import { loginSchema, registerSchema } from "../../schemas/auth.js";
-import { JwtUserPayload } from "../../types/user.js";
 import { checkCsrf, validateRegisterInput } from "../../services/authService.js";
 import { RegisterInputProps } from "../../types/registration.js";
 import { InvalidCredentialsError, UserNotFoundError } from "../../errors/login.errors.js";
+import { NoRefreshTokenError } from "../../errors/middleware.errors.js";
 
 export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
 
@@ -124,7 +123,8 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 
 	app.post('/refresh', async (req, reply) => {
 		const refreshToken = req.cookies.refreshToken;
-		if (!refreshToken) return reply.code(401).send({ error: 'No refresh token' });
+
+		if (!refreshToken) throw new NoRefreshTokenError()
 
 		try {
 			const payload = verifyRefreshToken(refreshToken);
@@ -146,7 +146,7 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 				})
 				.send({ success: true });
 		} catch (err) {
-			return reply.code(401).send({ error: 'Invalid or expired refresh token' });
+			throw err
 		}
 	});
 
