@@ -127,3 +127,108 @@ export class API {
 		const res = await this.post('/api/2fa/login/verify', {token, code})
 		return res.json()
 	}
+
+	// ==========================================
+	// PRIVATE: HELPERS
+	// ==========================================
+
+	/**
+	 * Attempts to execute the provided `fn` function, which should return a `fetch` response.
+	 *
+	 * If the response has a 401 status and the JSON body includes one of the following custom error codes:
+	 * - `FST_MIDDLEWARE_ACCESS_TOKEN_EXPIRED`
+	 * - `FST_MIDDLEWARE_NO_ACCESS_TOKEN`
+	 *
+	 * Then it will attempt to refresh the access token. If the refresh is successful,
+	 * the original function `fn` is retried once.
+	 *
+	 * This utility is useful for automatically recovering from expired or missing access tokens
+	 * in GET/POST API calls.
+	 *
+	 * @param fn A function that returns a `Promise<Response>`, typically a fetch call.
+	 * @returns A `Promise<Response>` resolving to either the original or retried response.
+	 */
+	private static async tryWithRefresh(fn: () => Promise<Response>) {
+		const response = await fn()
+
+		if (response.status === 401) {
+			const contentType = response.headers.get('Content-Type')
+			const error = contentType?.includes('application/json')
+				? await response.clone().json().catch(() => null)
+				: null
+
+			if (error?.code === 'FST_MIDDLEWARE_ACCESS_TOKEN_EXPIRED' || error?.code === 'FST_MIDDLEWARE_NO_ACCESS_TOKEN') {
+				const refreshed = await this.refreshToken()
+				if (refreshed) {
+					return await fn()
+				}
+			}
+		}
+
+		return response
+	}
+
+	/**
+	 * Prepares a `RequestInit` configuration object for a POST request using `fetch`.
+	 *
+	 * This includes setting the request method, headers (including `Content-Type` and optional CSRF token),
+	 * credentials for cookie inclusion, and a stringified JSON body.
+	 *
+	 * @param data - The data to be sent in the request body.
+	 * @param opts - Optional configuration. If `includeCSRF` is `true`, the CSRF token will be added to the headers.
+	 * @returns A `RequestInit` object suitable for use with a `fetch` POST request.
+	 */
+	private static postRequestInit = (data: object, opts: { includeCSRF?: boolean} = {}): RequestInit => {
+		const headers: Record<string, string> = {
+			'Content-Type': 'application/json'
+		}
+
+		if (opts.includeCSRF) {
+			const csrfToken = this.getCSRFToken()
+			if (csrfToken) headers['X-CSRF-Token'] = csrfToken
+		}
+
+		return {
+			method: 'POST',
+			headers: headers,
+			credentials: 'include',
+			body: JSON.stringify(data)
+		}
+	}
+
+	/**
+	 * Attempts to refresh the access token by making a POST request to the refresh endpoint.
+	 *
+	 * Sends an empty POST body but includes the CSRF token in the request headers (if available).
+	 * If the request is successful (`res.ok` is true), the function returns `true`.
+	 * If the request fails or an error is thrown, it gracefully returns `false`.
+	 *
+	 * @returns A boolean indicating whether the token refresh was successful.
+	 */
+	private static async refreshToken() {
+		const postRequestInit = this.postRequestInit({}, {includeCSRF: true})
+
+		try {
+			const res = await fetch('/api/refresh', postRequestInit)
+			return res.ok
+		} catch (err) {
+			return false
+		}
+	}
+
+	/**
+	 * Retrieves the CSRF token stored in the browser's cookies.
+	 *
+	 * Searches the `document.cookie` string for a cookie named `csrf_token`
+	 * and extracts its value. If the cookie is not found, an empty string is returned.
+	 *
+	 * @returns {string} The CSRF token value or an empty string if not present.
+	 */
+	private static getCSRFToken() {
+		return document.cookie
+			.split('; ')
+			.find(row => row.startsWith('csrf_token='))
+			?.split('=')[1] || '';
+	}
+
+}
