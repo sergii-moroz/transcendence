@@ -7,7 +7,7 @@ import { IconCheck } from "./components/icons/icon-check.js";
 import { IconChevronLeft } from "./components/icons/icon-chevron-left.js";
 import { IconSquareArrowUpRight } from "./components/icons/icon-square-arrow-up-right.js";
 import { LoginForm } from "./components/login-form.js";
-import { ModalLoginMenu } from "./components/ModalLoginMenu.js";
+import { ModalLoginMenu } from "./components/modal-login-menu.js";
 import { RegisterForm } from "./components/register-form.js";
 import { Router } from "./router-static.js";
 
