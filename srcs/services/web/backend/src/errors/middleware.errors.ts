@@ -29,3 +29,21 @@ export const CsrfMismatchError = createError(
 	'CSRF token mismatch',
 	403
 )
+
+export const RefreshTokenExpiredError = createError(
+	'FST_MIDDLEWARE_REFRESH_TOKEN_EXPIRED',
+	'Refresh token expired',
+	401
+)
+
+export const NoRefreshTokenError = createError(
+	'FST_MIDDLEWARE_NO_REFRESH_TOKEN',
+	'No refresh token provided',
+	401
+)
+
+export const RefreshTokenInvalidError = createError(
+	'FST_MIDDLEWARE_REFRESH_TOKEN_INVALID',
+	'Refresh token is invalid or expired',
+	401
+);
