@@ -68,6 +68,7 @@ export class TournamentView extends View {
 					if(this.socket && this.socket.readyState === WebSocket.OPEN) {
 						this.socket.close();
 					}
+					this.router.navigateTo('/home');
 				}
 			};
 			
@@ -81,6 +82,7 @@ export class TournamentView extends View {
 				if(this.socket && this.socket.readyState === WebSocket.OPEN) {
 					this.socket.close();
 				}
+				this.router.navigateTo('/home');
 			};
 		}
 		
