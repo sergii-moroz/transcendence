@@ -2,11 +2,12 @@ import { FastifyInstance } from 'fastify';
 import { Game } from './game.js';
 import crypto from 'crypto';
 import { redirectToGameRoom } from '../routes/v1/waitingRoom.js';
+import { db } from '../db/connections.js';
 
 export class Tournament {
 	games: Map<string, Game>;
 	players: Array<[id: string, socket: WebSocket]>;
-	knownIds: Map<string, boolean>;
+	knownIds: Map<string, boolean>; // true = eliminated, false = not eliminated
 	allConnected: boolean;
 	isRunning: boolean;
 	id: string;
@@ -25,22 +26,33 @@ export class Tournament {
 	addPlayer(socket: WebSocket, id: string) {
 		if(this.allConnected){
 			if (this.knownIds.has(id) && this.knownIds.get(id) === false) {
+				this.players = this.players.filter(([pid]) => pid !== id);
 				this.players.push([id, socket]);
 				console.custom('INFO', `Tournament: Player ${id} reconnected`);
+
+				console.custom('DEBUG', 'knownIds before remaining:', Array.from(this.knownIds.entries()));
 				const remaining = Array.from(this.knownIds.entries()).filter(([_, eliminated]) => !eliminated);
+				console.custom('INFO', `Tournament: Remaining players after rejoin: ${remaining.map(([id]) => id).join(', ')}`);
 				if (remaining.length === 1) {
 					const [finalWinnerId] = remaining[0];
 					console.custom('INFO', `Tournament: Tournament finished with winner ${finalWinnerId}`);
 					this.isRunning = false;
-					this.players.find(([id]) => id === finalWinnerId)?.[1].send(JSON.stringify({
-						type: 'victory',
-						message: `Congratulations! You have won the tournament!`,
-						winnerId: finalWinnerId,
-						tournamentId: this.id
-					}));
+					const winnerSocket = this.players.find(([id]) => id === finalWinnerId)?.[1];
+					if (winnerSocket) {
+						winnerSocket.send(JSON.stringify({
+							type: 'victory',
+							message: `Congratulations! You have won the tournament!`,
+							winnerId: finalWinnerId,
+							tournamentId: this.id
+						}));
+					}
+					db.run(
+							`UPDATE user_stats SET t_wins = t_wins + 1 WHERE user_id = ?`, [finalWinnerId]
+					);
 					this.app.tournaments.delete(this.id);
 					return;
 				}
+
 				if(this.isRunning) {
 					console.custom('INFO', `Tournament: Starting next round...`);
 					this.startTournament();
@@ -104,7 +116,8 @@ export class Tournament {
 					// Mark all players in this game as eliminated except the winner
 					for (const player of game.players.values()) {
 						if (player.id !== winnerId) {
-							this.knownIds.set(player.id, true); // eliminated
+							this.knownIds.set(String(player.id), true); // eliminated
+							console.custom('DEBUG', `Eliminated: ${player.id}, knownIds: ${Array.from(this.knownIds.entries())}`);
 						}
 					}
 					this.games.delete(game.gameRoomId);

@@ -62,13 +62,12 @@ export class TournamentView extends View {
 					this.router.navigateTo('/home');
 				}
 
-				if (data.type === "Error") {
+				if (data.type === 'Error') {
 					console.error(`Error: ${data.message}`);
 					alert(`Error: ${data.message}`);
 					if(this.socket && this.socket.readyState === WebSocket.OPEN) {
 						this.socket.close();
 					}
-					this.router.navigateTo('/home');
 				}
 			};
 			
@@ -82,7 +81,6 @@ export class TournamentView extends View {
 				if(this.socket && this.socket.readyState === WebSocket.OPEN) {
 					this.socket.close();
 				}
-				this.router.navigateTo('/home');
 			};
 		}
 		

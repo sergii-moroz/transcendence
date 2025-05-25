@@ -152,12 +152,7 @@ export class Game {
 
 				// Update stats
 				if (winner) {
-					if(this.tournamentId) {
-						db.run(
-							`UPDATE user_stats SET t_wins = t_wins + 1 WHERE user_id = ?`, [winner.id]
-						);
-						
-					} else {
+					if(!this.tournamentId) {
 						db.run(
 							`UPDATE user_stats SET wins = wins + 1 WHERE user_id = ?`, [winner.id]
 						);
