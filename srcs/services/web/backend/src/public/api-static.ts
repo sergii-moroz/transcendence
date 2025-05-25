@@ -3,54 +3,79 @@ export class API {
 	static refreshInterval: number
 	static refreshIntervalId: ReturnType<typeof setInterval> | null
 
+	// ==========================================
+	// GET REQUEST
+	// ==========================================
+
 	/**
-	 * GET REQUEST
-	 * @param endpoint Fetching endpoint
+	 * Performs a GET request to the specified endpoint.
+	 * Automatically attempts to refresh the access token and retry the request
+	 * if the response indicates an expired or missing access token.
+	 *
+	 * @param endpoint - The API endpoint to send the GET request to.
+	 * @returns A Promise resolving to the parsed JSON response.
 	 */
 	static async get(endpoint: string) {
-		const response = await fetch(endpoint, {
-			credentials: 'include'
-		});
-		return response.json();
+		const response = await this.tryWithRefresh(
+			async () => await fetch(endpoint, { credentials: 'include'})
+		)
+
+		return response.json()
 	}
 
+	// ==========================================
+	// POST REQUEST
+	// ==========================================
+
 	/**
-	 * POST REQUEST
-	 * @param endpoint
-	 * @param data Data sended to the endpoint
-	 * @returns response.json()
+	 * Performs a POST request to the specified endpoint with the provided data.
+	 * Automatically attempts to refresh the access token and retry the request
+	 * if the response indicates an expired or missing access token.
+	 *
+	 * @param endpoint - The API endpoint to send the POST request to.
+	 * @param data - The request payload to be sent in the body.
+	 * @param opts - Optional settings (e.g., whether to include CSRF token).
+	 * @returns A Promise resolving to the raw fetch Response object.
 	 */
 	static async post(endpoint: string, data: object, opts: { includeCSRF?: boolean} = {}) {
-		const headers: Record<string, string> = {
-			'Content-Type': 'application/json'
-		}
-
-		if (opts.includeCSRF) {
-			const csrfToken = this.getCSRFToken()
-			if (csrfToken) headers['X-CSRF-Token'] = csrfToken
-		}
-
-		const response = await fetch(endpoint, {
-			method: 'POST',
-			headers: headers,
-			credentials: 'include',
-			body: JSON.stringify(data)
-		});
+		const response = await this.tryWithRefresh(
+			async () => {
+				const postRequestInit = this.postRequestInit(data, opts)
+				return await fetch(endpoint, postRequestInit);
+			}
+		)
 
 		return response;
 	}
 
+	/**
+	 * Sends a login request to the server with the provided credentials.
+	 * Automatically handles token refresh if the access token is expired or missing.
+	 *
+	 * @param username - The user's username.
+	 * @param password - The user's password.
+	 * @returns A Promise resolving to the parsed JSON response from the server.
+	 */
 	static async login(username: string, password: string) {
 		const response = await this.post('/api/login', { username, password })
 
-		if (response.ok && response.status === 202) return response.json()
+		// if (response.ok && response.status === 202) return response.json()
 
-		if (response.ok) {
-			// this.startAutoRefresh()
-		}
+		// if (response.ok) {
+		// 	this.startAutoRefresh()
+		// }
 		return response.json()
 	}
 
+	/**
+	 * Sends a register request to the server with the provided credentials.
+	 * Automatically handles token refresh if the access token is expired or missing.
+	 *
+	 * @param username - The user's username.
+	 * @param password - The user's password.
+	 * @param repeated - The user's repeated password.
+	 * @returns A Promise resolving to the parsed JSON response from the server.
+	 */
 	static async register(username: string, password: string, repeated: string) {
 		const response = await this.post('/api/register', { username, password, repeated })
 		return response.json()
@@ -78,13 +103,6 @@ export class API {
 		return response.json()
 	}
 
-	static getCSRFToken() {
-		return document.cookie
-		.split('; ')
-		.find(row => row.startsWith('csrf_token='))
-		?.split('=')[1] || '';
-	}
-
 	static async twoFAGAVerify(code: string) {
 		const response = await this.post('/api/2fa/ga/verify', { code }, { includeCSRF: true })
 		return response.json()
@@ -109,5 +127,3 @@ export class API {
 		const res = await this.post('/api/2fa/login/verify', {token, code})
 		return res.json()
 	}
-
-}
