@@ -102,6 +102,8 @@ export const handleLoginVerify2FA = async (
 ) => {
 	const { token, code } = req.body as { token: string, code: string }
 
+	if (!token) throw new NoAccessTokenError()
+
 	try {
 		const user = await loginVerify2FAService(token, code)
 		const accessToken = generateAccessToken(user);
@@ -130,8 +132,6 @@ export const handleLoginVerify2FA = async (
 			})
 			.send({ success: true });
 	} catch (err) {
-		if (err instanceof jwt.TokenExpiredError) throw new AccessTokenExpiredError()
-		if (err instanceof jwt.JsonWebTokenError) throw new NoAccessTokenError()
 		throw err
 	}
 }
