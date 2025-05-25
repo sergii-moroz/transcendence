@@ -11,10 +11,10 @@ import {
 
 import {
 	AccessTokenExpiredError,
+	AccessTokenInvalidError,
 	CsrfMismatchError,
-	CsrfMissingError,
-	InvalidAccessTokenError,
-	NoAccessTokenError
+	NoAccessTokenError,
+	NoCSRFTokenError
 } from "../errors/middleware.errors.js";
 
 import { FastifyReply, FastifyRequest } from "fastify";
@@ -49,7 +49,7 @@ export const checkCsrf = async (
 	const csrfCookie = request.cookies.csrf_token;
 	const csrfHeader = request.headers['x-csrf-token'];
 
-	if (!csrfCookie || !csrfHeader) throw new CsrfMissingError()
+	if (!csrfCookie || !csrfHeader) throw new NoCSRFTokenError()
 	if (csrfCookie !== csrfHeader) throw new CsrfMismatchError()
 }
 
@@ -63,6 +63,6 @@ export const authenticate = async (request: FastifyRequest, reply: FastifyReply)
 	} catch (err: any) {
 		// `jsonwebtoken`, it throws err.name === 'TokenExpiredError' for expired tokens.
 		if (err.name === 'TokenExpiredError') throw new AccessTokenExpiredError()
-		throw new InvalidAccessTokenError()
+		throw new AccessTokenInvalidError()
 	}
 }
