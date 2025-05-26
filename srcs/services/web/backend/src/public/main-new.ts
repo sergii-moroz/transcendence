@@ -6,6 +6,7 @@ import { ButtonThemeToggle } from "./components/button-theme-toggle.js";
 import { IconCheck } from "./components/icons/icon-check.js";
 import { IconChevronLeft } from "./components/icons/icon-chevron-left.js";
 import { IconSquareArrowUpRight } from "./components/icons/icon-square-arrow-up-right.js";
+import { IconUserRound } from "./components/icons/icon-user-round.js";
 import { LoginForm } from "./components/login-form.js";
 import { ModalLoginMenu } from "./components/modal-login-menu.js";
 import { RegisterForm } from "./components/register-form.js";
@@ -28,5 +29,6 @@ customElements.define('two-fa-backup-ga', TwoFABackupGA)
 customElements.define('icon-square-arrow-up-right', IconSquareArrowUpRight)
 customElements.define('icon-chevron-left', IconChevronLeft)
 customElements.define('icon-check', IconCheck)
+customElements.define('icon-user-round', IconUserRound)
 
 Router.init()
