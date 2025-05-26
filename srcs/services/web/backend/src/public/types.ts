@@ -17,7 +17,7 @@ export interface WsMatchMakingMessage {
 }
 
 export interface GameState {
-	ball: { x: number; y: number };
+	ball: { x: number; y: number; dx: number; dy: number };
 	paddles: {
 		player1: { y: number };
 		player2: { y: number };
@@ -25,6 +25,8 @@ export interface GameState {
 	scores: {
 		player1: number;
 		player2: number;
+		user1: string;
+		user2: string;
 	};
 };
 

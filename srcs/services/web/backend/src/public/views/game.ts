@@ -156,9 +156,25 @@ export class GameView extends View {
 	}
 
 
-	drawBall = (x: number, y: number) => {
+	drawBall = (x: number, y: number, dx: number, dy: number) => {
 		let radius = this.canvas.width / 100;
-		this.ctx.fillStyle = "#ffffff"
+
+		const speed = Math.sqrt(dx * dx + dy * dy);
+		const baseSpeed = 4; // standard speed
+		const maxSpeed = 10; // adjust as needed for your game
+
+		// Map speed to a value between 0 (white) and 1 (red)
+		const t = Math.min(1, (speed - baseSpeed) / (maxSpeed - baseSpeed));
+
+		// Interpolate color: white (t=0) to red (t=1)
+		// White: hsl(0, 0%, 100%)
+		// Red:   hsl(0, 100%, 50%)
+		const saturation = t * 100;
+		const lightness = 100 - t * 50;
+
+		this.ctx.fillStyle = `hsl(0, ${saturation}%, ${lightness}%)`;
+
+		// this.ctx.fillStyle = "#ffffff"
 		this.ctx.beginPath()
 		this.ctx.arc(x, y, radius, 0.0, 2.0 * Math.PI, false)
 		this.ctx.closePath()
@@ -186,11 +202,15 @@ export class GameView extends View {
 		this.ctx.fillRect(this.canvas.width - w, y - 0.5 * h, w, h);
 	}
 
-	drawScore = (pos_x: number, pos_y: number, score: number) => {
+	drawScore = (pos_x: number, pos_y: number, score: number, username: string) => {
 		this.ctx.fillStyle = "#bfbfbf"
 		this.ctx.font = "30px Arial"
+		this.ctx.textAlign = "center";
+		this.ctx.textBaseline = "top";
 		
-		this.ctx.fillText(score.toString(), pos_x, pos_y)
+		this.ctx.fillText(score.toString(), pos_x, pos_y);
+		this.ctx.font = "15px Arial"
+		this.ctx.fillText(username, pos_x, pos_y + 30);
 	}
 
 	drawGameOver = (message: string, winner: string) => {
@@ -216,10 +236,10 @@ export class GameView extends View {
 		let score_y = (this.canvas.height / 3);
 
 		this.clearField(this.canvas.width, this.canvas.height)
-		this.drawScore(score1_x, score_y, state.scores.player1)
-		this.drawScore(score2_x, score_y, state.scores.player2)
+		this.drawScore(score1_x, score_y, state.scores.player1, state.scores.user1)
+		this.drawScore(score2_x, score_y, state.scores.player2, state.scores.user2)
 		this.drawPaddle1(this.logicalToCanvasY(state.paddles.player1.y))
 		this.drawPaddle2(this.logicalToCanvasY(state.paddles.player2.y))
-		this.drawBall(this.logicalToCanvasX(state.ball.x), this.logicalToCanvasY(state.ball.y))
+		this.drawBall(this.logicalToCanvasX(state.ball.x), this.logicalToCanvasY(state.ball.y), state.ball.dx, state.ball.dy);
 	}
 }

@@ -2,15 +2,16 @@ import crypto from 'crypto'
 import { db } from '../db/connections.js'
 
 export class Game {
-	players: Map< string, {socket: WebSocket, id: string} >;
+	players: Map< string, {socket: WebSocket, id: string, username: string} >;
 	state: {
 		ball: { x: number; y: number; dx: number, dy: number},
 		paddles: {
 			player1: {y: number},
 			player2: {y: number}
 		},
-		scores: { player1: number, player2: number}
+		scores: { player1: number, player2: number, user1: string, user2: string }
 	};
+	standardBallSpeed: number;
 	gameRoomId: string;
 	gameRunning: boolean;
 	winnerId: string | null;
@@ -19,13 +20,14 @@ export class Game {
 	constructor(tournamentId: string | null = null) {
 		this.tournamentId = tournamentId;
 		this.players = new Map();
+		this.standardBallSpeed = 4;
 		this.state = {
 			ball: { x: 0, y: 0, dx: 4, dy: 4 },
 			paddles: {
 				player1: { y: 0 },
 				player2: { y: 0 }
 			},
-			scores: { player1: 0, player2: 0 }
+			scores: { player1: 0, player2: 0, user1: 'bing', user2: 'bong' }
 		};
 		this.winnerId = null;
 		this.gameRoomId = crypto.randomBytes(16).toString('hex');
@@ -34,11 +36,13 @@ export class Game {
 
 	addPlayer(socket: WebSocket, id: string) {
 		if (this.players.size === 0) {
-			this.players.set('player1', {socket, id});
+			this.players.set('player1', {socket, id, username: 'bing'});
+			this.state.scores.user1 = this.players.get('player1')!.username;
 			console.custom('INFO', `${this.gameRoomId}: Player 1 joined`);
 		}
 		else if (this.players.size === 1) {
-			this.players.set('player2', {socket, id});
+			this.players.set('player2', {socket, id, username: 'bong'});
+			this.state.scores.user2 = this.players.get('player2')!.username;
 			this.startLoop();
 			console.custom('INFO', `${this.gameRoomId}: Player 2 joined`);
 		}
@@ -81,16 +85,20 @@ export class Game {
 
 			// Ball collision with paddles (simplified)
 			if (
-                this.state.ball.x <= PADDLE_X1 &&
-                Math.abs(this.state.ball.y - this.state.paddles.player1.y) < PADDLE_HEIGHT
-            ) {
-                this.state.ball.dx *= -1;
-            } else if (
-                this.state.ball.x >= PADDLE_X2 &&
-                Math.abs(this.state.ball.y - this.state.paddles.player2.y) < PADDLE_HEIGHT
-            ) {
-                this.state.ball.dx *= -1;
-            }
+				this.state.ball.x <= PADDLE_X1 &&
+				Math.abs(this.state.ball.y - this.state.paddles.player1.y) < PADDLE_HEIGHT
+			) {
+				this.state.ball.dx *= -1;
+				this.state.ball.dx *= 1.05; // Increase speed after hitting paddle
+				this.state.ball.dy *= 1.05; // Increase speed after hitting paddle
+			} else if (
+				this.state.ball.x >= PADDLE_X2 &&
+				Math.abs(this.state.ball.y - this.state.paddles.player2.y) < PADDLE_HEIGHT
+			) {
+				this.state.ball.dx *= -1;
+				this.state.ball.dx *= 1.05; // Increase speed after hitting paddle
+				this.state.ball.dy *= 1.05; // Increase speed after hitting paddle
+			}
 
 			// Ball collision with walls
 			if (this.state.ball.y <= -FIELD_Y || this.state.ball.y >= FIELD_Y) {
@@ -100,11 +108,15 @@ export class Game {
 			// Scoring
 			if (this.state.ball.x <= -FIELD_X + 5) {
 				this.state.scores.player2++
+				this.state.ball.dx = this.standardBallSpeed; // Reset ball speed
+				this.state.ball.dy = this.standardBallSpeed; // Reset ball speed
 				this.state.ball.x = PADDLE_X2 - 10;
 				this.state.ball.y = this.state.paddles.player2.y
 			}
 			if (this.state.ball.x >= FIELD_X - 5) {
 				this.state.scores.player1++
+				this.state.ball.dx = this.standardBallSpeed; // Reset ball speed
+				this.state.ball.dy = this.standardBallSpeed; // Reset ball speed
 				this.state.ball.x = PADDLE_X1 + 10;
 				this.state.ball.y = this.state.paddles.player1.y
 			}
@@ -130,7 +142,9 @@ export class Game {
 				if (winner) {
 					winner.socket.send(JSON.stringify({
 						type: 'gameOver',
-						message: `${winnerRole === 'player1' ? 'Player 1' : 'Player 2'} wins!`,
+						message: `${winnerRole === 'player1' 
+							? this.players.get('player1')!.username 
+							: this.players.get('player2')!.username} wins!`,
 						winner: winnerRole,
 						tournamentId: this.tournamentId, // Only winner gets tournamentId
 					}));
@@ -138,7 +152,9 @@ export class Game {
 				if (loser) {
 					loser.socket.send(JSON.stringify({
 						type: 'gameOver',
-						message: `${winnerRole === 'player1' ? 'Player 1' : 'Player 2'} wins!`,
+						message: `${winnerRole === 'player1' 
+							? this.players.get('player1')!.username 
+							: this.players.get('player2')!.username} wins!`,
 						winner: winnerRole,
 						tournamentId: null, // Loser does not get tournamentId
 					}));
