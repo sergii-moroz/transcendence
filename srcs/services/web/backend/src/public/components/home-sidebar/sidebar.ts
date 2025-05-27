@@ -166,9 +166,67 @@ export class Sidebar extends HTMLElement {
 
 	addRequests(data: SidebarResponse) {}
 
-	addOnlineFriends(data: SidebarResponse, root: Element) {}
+	addOnlineFriends(data: SidebarResponse, root: Element) {
+		const online = document.createElement('div');
+		online.innerHTML = `
+			<div class="p-4 border-b dark:border-gray-700 border-gray-200">
+				<h3 class="text-xs font-bold text-gray-400 mb-3">ONLINE • ${data.friends.online.length}</h3>
+				<div id="insertContainer" class="space-y-2"></div>
+			</div>
+		`;
+	
+		const requestsContainer = online.querySelector('#insertContainer');
+	
+		data.friends.online.forEach((friend: Friend & {unreadMessages: boolean}) => {
+			const requestElement = document.createElement('div');
+			requestElement.className = "friend-item flex items-center p-2 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg";
+			requestElement.dataset.friendName = friend.name;
+			requestElement.innerHTML = `
+				<div class="relative mr-3">
+					<img 
+						src=${friend.picture}
+						onerror="this.src='../uploads/default.jpg'"
+						class="w-10 h-10 rounded-full"
+					>
+					<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
+				</div>
+				<span class="font-medium">${friend.name}</span>
+				${friend.unreadMessages ? '  <div class="w-2 h-2 ml-3 bg-blue-500 rounded-full" title="unread Messages"></div>' : ''}
+			`;
+			requestsContainer!.appendChild(requestElement);
+		})
+		root.append(online);
+	}
 
-	addOfflineFriends(data: SidebarResponse, root: Element) {}
+	addOfflineFriends(data: SidebarResponse, root: Element) {
+		const offline = document.createElement('div');
+		offline.innerHTML = `
+			<div class="p-4">
+				<h3 class="text-xs font-bold text-gray-400 mb-3">OFFLINE • ${data.friends.offline.length}</h3>
+				<div id="insertContainer" class="space-y-2"></div>
+			</div>
+		`;
+	
+		const requestsContainer = offline.querySelector('#insertContainer');
+		data.friends.offline.forEach((friend: Friend & {unreadMessages: boolean}) => {
+			const requestElement = document.createElement('div');
+			requestElement.className = "friend-item flex items-center p-2 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg";
+			requestElement.innerHTML = `
+					<div class="relative mr-3">
+						<img 
+							src=${friend.picture}
+							onerror="this.src='../uploads/default.jpg'"
+							class="w-10 h-10 rounded-full"
+						>
+						<div class="absolute bottom-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
+					</div>
+					<span class="font-medium">${friend.name}</span>
+					${friend.unreadMessages ? '  <div class="w-2 h-2 ml-3 bg-blue-500 rounded-full" title="unread Messages"></div>' : ''}
+			`;
+			requestsContainer!.appendChild(requestElement);
+		});
+		root.append(offline);
+	}
 
 	addFriends(data: SidebarResponse) {
 		const root = this.querySelector('#friendList');
