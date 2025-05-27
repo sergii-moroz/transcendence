@@ -1,0 +1,141 @@
+<header
+	class="bg-white border border-transparent shadow
+		dark:bg-gray-800 dark:border-b-gray-700"
+>
+	<div
+		class="flex items-center justify-between py-4 px-8 md:px-11 max-w-7xl mx-auto"
+	>
+		<a href="/home" data-link class="cursor-pointer hover:underline hover:decoration-2 hover:decoration-primary hover:underline-offset-4" >
+			<div class="flex gap-2 items-center hover:[&_div]:bg-primary/20 hover:[&_div]:text-primary dark:hover:[&_div]:bg-gray-200 pointer-events-none" data-item-icon>
+				<div class="size-8 flex items-center shadow dark:border dark:border-gray-700 justify-center rounded-full"><icon-chevron-left></icon-chevron-left></div>
+				Back
+			</div>
+		</a>
+
+		<div
+			class="flex items-center text-2xl font-bold text-gray-900
+			dark:text-white
+			sm:max-w-sm sm:text-3xl
+			md:max-w-md md:text-4xl"
+		>
+			<span class="text-2xl mr-2 hidden sm:block sm:text-3xl md:text-4xl">⚙️</span>
+			Settings
+		</div>
+	</div>
+</header>
+
+<main class="flex flex-col gap-4 p-4 max-w-7xl mx-auto">
+
+	<div
+		class="grid gap-4 sm:grid-cols-2 md:grid-cols-5"
+	>
+		<input type="radio" id="tab-general" name="tabs" class="hidden peer/general" checked>
+		<label for="tab-general" class="hidden sm:block
+			peer-checked/general:text-primary
+			peer-checked/general:font-bold
+			peer-checked/general:[&>div>div>div]:bg-primary
+			peer-checked/general:[&>div>div>div]:text-gray-200">
+			<div
+				class="md:pl-3 sm:pr-6 py-1 rounded-sm cursor-pointer
+					hover:underline hover:decoration-2 hover:decoration-primary hover:underline-offset-4"
+				data-menu-item data-selected
+			>
+				<div class="flex items-center gap-2 lg:text-lg hover:[&_div]:bg-primary/20 hover:[&_div]:text-primary dark:hover:[&_div]:bg-gray-200" data-item-icon>
+					<div class="size-8 flex items-center justify-center rounded-full"><icon-user-round></icon-user-round></div>
+					General
+				</div>
+			</div>
+		</label>
+
+		<input type="radio" id="tab-security" name="tabs" class="hidden peer/security">
+		<label for="tab-security" class="hidden sm:block
+			peer-checked/security:text-primary
+			peer-checked/security:font-bold
+			peer-checked/security:[&>div>div>div]:bg-primary
+			peer-checked/security:[&>div>div>div]:text-gray-200
+		">
+			<div
+				class="pl-3 pr-6 py-1 rounded-sm cursor-pointer
+					hover:underline hover:decoration-2 hover:decoration-primary hover:underline-offset-4"
+				data-menu-item
+			>
+				<div class="flex items-center gap-2 lg:text-lg hover:[&_div]:bg-primary/20 hover:[&_div]:text-primary dark:hover:[&_div]:bg-gray-200" data-item-icon>
+					<div class="size-8 flex items-center justify-center rounded-full"><icon-shield-check></icon-shield-check></div>
+					Security
+				</div>
+			</div>
+		</label>
+
+		<!-- CARD: General -->
+		<div
+			class="tw-card w-full sm:hidden sm:peer-checked/general:block sm:col-span-2 md:col-span-5"
+			data-content-block
+		>
+			<header class="px-4 py-2 bg-primary text-bold text-white text-xl rounded-t-md">General</header>
+			<div class="px-4 py-2">
+				<div class="grid grid-cols-2 gap-4">
+					<h4 class="sm:text-base md:text-lg">Nickname:</h4>
+					<a class="w-full flex items-center lg:text-base">${profile.username}</a>
+
+					<h4 class="sm:text-base md:text-lg">About me:</h4>
+					<a class="w-full flex items-center lg:text-base">${profile.bio}</a>
+				</div>
+			</div>
+		</div>
+
+		<!-- CARD: Security -->
+
+		<div
+			class="tw-card sm:hidden peer-checked/security:block sm:col-span-2 md:col-span-5"
+			data-content-block
+		>
+			<header class="px-4 py-2 bg-primary text-bold text-white text-xl rounded-t-md">Security</header>
+			<div class="grid grid-cols-3 gap-4 px-4 py-2">
+				<h4
+					class="col-span-3 font-semibold border border-transparent border-b-gray-200
+						dark:border-b-gray-700
+						sm:text-lg
+						md:text-xl"
+				>
+						Two factor authentification
+				</h4>
+				<p class="text-xs text-gray-600 dark:text-gray-300 col-span-3 sm:col-span-2 md:text-sm">
+					Two-factor authentication (2FA) is an ehnanced security measure. Once enabled, you'll be required to give two types of identification when you login.
+					<span>Google Authenticator</span> is supported.
+					<span>SMS</span> and <span>E-mail</span> verification would be added in the near future.
+				</p>
+				<!-- <a href="/settings/2fa/method" data-link class="col-span-3 sm:col-span-1 tw-btn w-full flex items-center justify-center lg:text-base">Enable 2FA</a> -->
+				<btn-2fa class="col-span-3 sm:col-span-1"></btn-2fa>
+
+				<h4
+					class="col-span-3 font-semibold border border-transparent border-b-gray-200
+						dark:border-b-gray-700
+						sm:text-lg
+						md:text-xl"
+				>
+					Backup codes
+				</h4>
+				<p class="text-xs text-gray-600 dark:text-gray-300 col-span-3 sm:col-span-2 md:text-sm">
+					Backup codes are an extra set of one-time-use codes that you should keep with you physically.
+					You can use one of these when logging in if your other verification methods aren't available.
+					Don't worry about using them up, you can generate a new set any time.
+				</p>
+				<a class="col-span-3 tw-btn sm:col-span-1 break-keep flex items-center justify-center lg:text-base">Generate backup codes</a>
+
+				<h4
+					class="col-span-3 font-semibold border border-transparent border-b-gray-200
+						dark:border-b-gray-700
+						sm:text-lg
+						md:text-xl"
+				>
+					Reset Password
+				</h4>
+				<p class="text-xs text-gray-600 dark:text-gray-300 col-span-3 sm:col-span-2 md:text-sm">
+					For security reasons, we recommend changing your password regularly.
+					Choose a strong, unique password that you don't use elsewhere.
+				</p>
+				<a class="col-span-3 tw-btn sm:col-span-1 break-keep flex items-center justify-center lg:text-base">Reset Password</a>
+			</div>
+		</div>
+	</div>
+</main>

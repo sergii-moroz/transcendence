@@ -2,7 +2,7 @@ import {
 	iconChevronLeft,
 	iconShieldCheck,
 	iconUserRound,
-} from "../components/icons.js";
+} from "../components/icons/icons.js";
 
 import { View } from "../view.js"
 

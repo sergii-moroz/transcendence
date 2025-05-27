@@ -18,7 +18,7 @@ import { db } from "./db/connections.js"
 import { Game } from "./services/game.js";
 import { Tournament } from "./services/tournament.js";
 import { verifyAccessToken } from "./services/tokenService.js";
-import { twoFARoutes } from "./routes/v1/2fa.js";
+import { twoFARoutes } from "./routes/v1/2fa.routes.js";
 import { normalizeError } from "./errors/error.js";
 
 export const build = async (opts: FastifyServerOptions) => {
@@ -44,25 +44,25 @@ export const build = async (opts: FastifyServerOptions) => {
 	const __filename = fileURLToPath(import.meta.url);
 	const __dirname = path.dirname(__filename);
 
-	app.addHook('preValidation', async (request: FastifyRequest, reply: FastifyReply) => {
-		const requestURL = request.url;
-		const publicRoutes = ['/api/login', '/api/register', '/api/2fa/verify-login'];
-		if ((!requestURL.startsWith('/api/') && !requestURL.startsWith('/ws/')) || publicRoutes.includes(requestURL)) {
-			console.custom('DEBUG', "No authentification required for this route");
-			return;
-		}
-		console.custom('DEBUG', 'Authentifying user...');
-		const token = request.cookies.token;
-		if (!token) {
-			return reply.code(401).send({ type: 'error', message: 'Unauthorized: No token provided' });
-		}
+	// app.addHook('preValidation', async (request: FastifyRequest, reply: FastifyReply) => {
+	// 	const requestURL = request.url;
+	// 	const publicRoutes = ['/api/login', '/api/register', '/api/2fa/verify-login'];
+	// 	if ((!requestURL.startsWith('/api/') && !requestURL.startsWith('/ws/')) || publicRoutes.includes(requestURL)) {
+	// 		console.custom('DEBUG', "No authentification required for this route");
+	// 		return;
+	// 	}
+	// 	console.custom('DEBUG', 'Authentifying user...');
+	// 	const token = request.cookies.token;
+	// 	if (!token) {
+	// 		return reply.code(401).send({ type: 'error', message: 'Unauthorized: No token provided' });
+	// 	}
 
-		try {
-			request.user = verifyAccessToken(token);
-		} catch (err) {
-			return reply.code(401).send({ type: 'error', message: 'Invalid or expired token' });
-		}
-	})
+	// 	try {
+	// 		request.user = verifyAccessToken(token);
+	// 	} catch (err) {
+	// 		return reply.code(401).send({ type: 'error', message: 'Invalid or expired token' });
+	// 	}
+	// })
 
 	app.setNotFoundHandler((request, reply) => {
 		const requestURL = request.url;
@@ -92,7 +92,7 @@ export const build = async (opts: FastifyServerOptions) => {
 
 		app.log.error(error);
 
-		return reply
+		await reply
 			.code(normalizedError.statusCode)
 			.send(normalizedError);
 	})

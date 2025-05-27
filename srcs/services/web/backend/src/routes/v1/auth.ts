@@ -8,26 +8,25 @@ import {
 
 import {
 	createUser,
-	findUserById,
 	verifyPassword,
 	findUserByUsername,
 } from "../../services/userService.js";
 
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import bcrypt from 'bcrypt'
-// import { createUser, findUserByUsername, verifyPassword } from "../../services/userService.js";
-// import { createCsrfToken, generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../../services/tokenService.js";
 import { loginSchema, registerSchema } from "../../schemas/auth.js";
-import { JwtUserPayload } from "../../types/user.js";
-import { checkCsrf } from "../../services/authService.js";
+import { checkCsrf, validateRegisterInput } from "../../services/authService.js";
+import { RegisterInputProps } from "../../types/registration.js";
+import { InvalidCredentialsError, UserNotFoundError } from "../../errors/login.errors.js";
+import { NoRefreshTokenError } from "../../errors/middleware.errors.js";
 
 export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
 
 	app.post('/register', {schema: registerSchema}, async (req, reply) => {
-		const { username, password } = req.body as {username: string, password: string};
-		const hashed = await bcrypt.hash(password, 10);
-
 		try {
+			const { username, password } = validateRegisterInput(req.body as RegisterInputProps)
+			const hashed = await bcrypt.hash(password, 10);
+
 			const userId = await createUser(username, hashed)
 
 			const user = { id: userId, username: username};
@@ -57,8 +56,7 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 				})
 				.send({ success: true });
 		} catch (err) {
-			console.error('Register error:', err);
-			return reply.code(400).send({ error: 'User already exists or error occurred' });
+			throw err
 		}
 	});
 
@@ -68,14 +66,14 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 		try {
 			const user = await findUserByUsername(username)
 
-			if (!user) return reply.code(401).send({ error: `User ${username} is not found` });
+			if (!user) throw new UserNotFoundError()
 
 			const valid = await verifyPassword(password, user.password);
-			if (!valid) return reply.code(401).send({ error: 'Invalid credentials' });
+
+			if (!valid) throw new InvalidCredentialsError()
 
 			if (user.two_factor_enabled) {
 				const tempToken = generate2FAAccessToken(user);
-				// app.log.info(tempToken)
 				return reply.code(202).send({ requires2FA: true, token: tempToken });
 			}
 
@@ -107,8 +105,7 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 				.send({ success: true });
 
 		} catch (err) {
-			console.error('Login error:', err);
-			return reply.code(500).send({ error: 'Internal server error' });
+			throw err
 		}
 	});
 
@@ -126,7 +123,8 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 
 	app.post('/refresh', async (req, reply) => {
 		const refreshToken = req.cookies.refreshToken;
-		if (!refreshToken) return reply.code(401).send({ error: 'No refresh token' });
+
+		if (!refreshToken) throw new NoRefreshTokenError()
 
 		try {
 			const payload = verifyRefreshToken(refreshToken);
@@ -148,7 +146,7 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 				})
 				.send({ success: true });
 		} catch (err) {
-			return reply.code(401).send({ error: 'Invalid or expired refresh token' });
+			throw err
 		}
 	});
 

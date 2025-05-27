@@ -1,3 +1,10 @@
+import {
+	AccessTokenExpiredError,
+	AccessTokenInvalidError,
+	RefreshTokenExpiredError,
+	RefreshTokenInvalidError
+} from '../errors/middleware.errors.js';
+
 import crypto from 'crypto'
 import { JwtUserPayload } from '../types/user.js';
 import jwt from 'jsonwebtoken'
@@ -21,11 +28,23 @@ export function createCsrfToken() {
 }
 
 export function verifyAccessToken(token: string): JwtUserPayload {
-	return jwt.verify(token, ACCESS_TOKEN_SECRET) as JwtUserPayload;
+	try {
+		return jwt.verify(token, ACCESS_TOKEN_SECRET) as JwtUserPayload
+	} catch (err) {
+		if (err instanceof jwt.TokenExpiredError) throw new AccessTokenExpiredError()
+		if (err instanceof jwt.JsonWebTokenError) throw new AccessTokenInvalidError()
+		throw err
+	}
 }
 
 export function verifyRefreshToken(token: string): JwtUserPayload {
-	return jwt.verify(token, REFRESH_TOKEN_SECRET) as JwtUserPayload;
+	try {
+		return jwt.verify(token, REFRESH_TOKEN_SECRET) as JwtUserPayload;
+	} catch (err) {
+		if (err instanceof jwt.TokenExpiredError) throw new RefreshTokenExpiredError()
+		if (err instanceof jwt.JsonWebTokenError) throw new RefreshTokenInvalidError()
+		throw err
+	}
 }
 
 export const generate2FAAccessToken = (user: JwtUserPayload): string => {
