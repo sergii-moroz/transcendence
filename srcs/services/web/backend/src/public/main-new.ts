@@ -34,7 +34,7 @@ customElements.define('two-fa-backup-ga', TwoFABackupGA)
 // Home
 customElements.define('home-header', HomeHeader);
 customElements.define('home-content', HomeContent);
-customElements.define('sidebar', Sidebar);
+customElements.define('friends-sidebar', Sidebar);
 
 
 // ICONS

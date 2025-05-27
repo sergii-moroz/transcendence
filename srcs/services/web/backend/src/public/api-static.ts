@@ -243,4 +243,24 @@ export class API {
 		}
 	}
 
+	static async getSidebar() {
+		try {
+			const res = await this.get('/api/sidebar');
+			return res;
+		} catch (error) {
+			console.error("Sidebar API call failed:", error);
+			return null;
+		}
+	}
+
+	static async getChat(name: string) {
+		try {
+			const res = await this.post('/api/chat', {name});
+			return res.json();
+		} catch (error) {
+			console.error("Chat Sidebar API call failed:", error);
+			return null;
+		}
+	}
+
 }

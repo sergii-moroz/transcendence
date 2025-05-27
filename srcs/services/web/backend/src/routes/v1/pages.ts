@@ -5,7 +5,9 @@ import {
 import { 
 	HomeResponse,
 	SidebarResponse,
-} from "../../types/user.js";
+ 	ChatInitResponse
+} from "../../types/user.js"
+
 import { findUserById } from "../../services/userService.js";
 
 export const pages = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
@@ -37,61 +39,31 @@ export const pages = async (app: FastifyInstance, opts: FastifyPluginOptions) =>
 				online: [
 					{
 						name: "Hartmut",
-						picture: "../uploads/hans.jpg"
+						picture: "../uploads/hans.jpg",
+						unreadMessages: true
 					},
 					{
 						name: "Peter",
-						picture: "john.jpg"
+						picture: "john.jpg",
+						unreadMessages: false
 					},
 					{
 						name: "Klaus",
-						picture: "john.jpg"
-					},
-					{
-						name: "Klaus",
-						picture: "john.jpg"
-					},
-					{
-						name: "Klaus",
-						picture: "john.jpg"
-					},
-					{
-						name: "Klaus",
-						picture: "john.jpg"
-					},
-					{
-						name: "Klaus",
-						picture: "john.jpg"
-					},
-					{
-						name: "Klaus",
-						picture: "john.jpg"
-					},
-					{
-						name: "Klaus",
-						picture: "john.jpg"
-					},
-					{
-						name: "Klaus",
-						picture: "john.jpg"
-					},
-					{
-						name: "Klaus",
-						picture: "john.jpg"
-					},
-					{
-						name: "Klaus",
-						picture: "john.jpg"
+						picture: "john.jpg",
+						unreadMessages: true
+
 					}
 				],
 				offline: [
 					{
 						name: "Manfred",
-						picture: "../uploads/hans.jpg"
+						picture: "../uploads/hans.jpg",
+						unreadMessages: false
 					},
 					{
 						name: "Horst",
-						picture: "jane.jpg"
+						picture: "jane.jpg",
+						unreadMessages: true
 					}
 				]
 			},
@@ -101,11 +73,44 @@ export const pages = async (app: FastifyInstance, opts: FastifyPluginOptions) =>
 					picture: "../uploads/bernd.jpg"
 				},
 				{
-					name: "Ben",
+					name: "Bernhard",
 					picture: 'aa'
 				}
 			]
 		};
-		return reply.send(answer);
+		reply.send(answer);
 	});
+
+	app.post('/chat', async (req, reply) => {
+		const chatPartner = (req.body as { name: string }).name;
+
+		const answer: ChatInitResponse = {
+			friend: {
+				name: chatPartner,
+				picture: "../uploads/bernd.jpg",
+				onlineState: 'online'
+			},
+			messages: [
+				{
+					owner: chatPartner,
+					text: 'hallo',
+					timestamp: '12:12'
+				},
+				{
+					owner: 'you',
+					text: 'baumaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+					timestamp: '11:11'
+				},
+				{
+					owner: chatPartner,
+					text: 'train',
+					timestamp: '10:10'
+				}
+			],
+			gameInvite: true
+		};
+		reply.send(answer);
+	});
+
+	
 }
