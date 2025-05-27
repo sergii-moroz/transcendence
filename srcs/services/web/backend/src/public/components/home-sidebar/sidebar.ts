@@ -87,7 +87,6 @@ export class Sidebar extends HTMLElement {
 			this.initFriends();
 		}
 		else if (target.closest('#refresh-friends-btn')) {
-			console.log('refresh')
 			this.initFriends();
 		}
 		else if (target.closest('#close-social-btn')) {
@@ -376,7 +375,7 @@ export class Sidebar extends HTMLElement {
 				<div id="game-invitations-section" class=""></div>
 			
 				<!-- Chat messages -->
-				<div id="friend-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 dark:bg-gray-700/50 bg-gray-50"></div>
+				<div id="friend-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 dark:bg-gray-700/25 bg-gray-50"></div>
 			
 				<!-- Chat input -->
 				<div id="InputBar" class="p-4 border-t dark:border-gray-700 border-gray-200">
