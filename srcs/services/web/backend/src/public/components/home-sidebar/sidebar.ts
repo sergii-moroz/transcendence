@@ -130,7 +130,11 @@ export class Sidebar extends HTMLElement {
 			}
 		}
 		else if (target.closest('#invite-to-game-btn')) {
-			alert('invite to game');
+			if (!this.querySelector('#game-invitations-container'))
+				alert('invited to game');
+			else
+				alert('there is already an invitation!');
+
 		}
 		else if (target.closest('#acceptGameInvite-btn')) {
 			alert('accept game invite');
@@ -397,7 +401,6 @@ export class Sidebar extends HTMLElement {
 				Game Invitation
 			</h3>
 			<div id="game-invitations-container" class="space-y-3">
-				<!-- Sample game invitation -->
 				<div class="bg-gray-100 rounded-3xl shadow-sm p-2 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
 					<div class="flex items-center justify-between">
 						<div class="pl-3">
