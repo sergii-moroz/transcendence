@@ -92,17 +92,17 @@ export const pages = async (app: FastifyInstance, opts: FastifyPluginOptions) =>
 			},
 			messages: [
 				{
-					owner: chatPartner,
+					owner: 'you',
 					text: 'hallo',
 					timestamp: '12:12'
 				},
 				{
-					owner: 'you',
+					owner: chatPartner,
 					text: 'baumaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
 					timestamp: '11:11'
 				},
 				{
-					owner: chatPartner,
+					owner: 'you',
 					text: 'train',
 					timestamp: '10:10'
 				}
