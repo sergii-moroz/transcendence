@@ -132,6 +132,15 @@ export class Sidebar extends HTMLElement {
 		else if (target.closest('#invite-to-game-btn')) {
 			alert('invite to game');
 		}
+		else if (target.closest('#acceptGameInvite-btn')) {
+			alert('accept game invite');
+		}
+		else if (target.closest('#declineGameInvite-btn')) {
+			alert('decline game invite');
+		}
+		else if (target.closest('#chatProfile-btn')) {
+			alert('show friend profile');
+		}
 	}
 
 	renderCollapsed() {
@@ -378,7 +387,37 @@ export class Sidebar extends HTMLElement {
 		`
 	}
 
-	addGameInvitation() {}
+	addGameInvitation() {
+		const root = this.querySelector('#game-invitations-section');
+		if (!root) return;
+		const invitation = document.createElement('div');
+		invitation.classList = "p-4 border-b border-gray-200";
+		invitation.innerHTML = `
+			<h3 class="font-bold text-lg mb-3 pb-2">
+				Game Invitation
+			</h3>
+			<div id="game-invitations-container" class="space-y-3">
+				<!-- Sample game invitation -->
+				<div class="bg-gray-100 rounded-3xl shadow-sm p-2 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
+					<div class="flex items-center justify-between">
+						<div class="pl-3">
+							<span class="font-medium">1v1</span>
+							<!-- <div class="text-xs text-gray-400">30s remaining</div> -->
+						</div>
+						<div class="flex gap-2">
+							<button id="acceptGameInvite-btn" class="p-1.5 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors">
+								${iconSidebarCheck}
+							</button>
+							<button id="declineGameInvite-btn" class="p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors">
+								${iconX}
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		`
+		root.append(invitation)
+	}
 
 	async initChat(name: string) {
 		try {
@@ -399,5 +438,25 @@ export class Sidebar extends HTMLElement {
 		}
 	}
 
-	addMessages(name: string) {}
+	addMessages(name: string) {
+		const root = this.querySelector('#friend-chat-messages');
+		if (!root || !this.messages || !name) return;
+		this.messages.forEach(message => {
+			const messageElement = document.createElement('div');
+			if (message.owner == name) {
+				messageElement.classList = "ml-auto w-fit max-w-[70%] rounded-2xl rounded-br-none bg-blue-600 border border-blue-700 text-white p-2";
+			} else {
+				messageElement.classList = " w-fit max-w-[70%] rounded-2xl rounded-bl-none bg-blue-100 border border-blue-200 text-blue-800 p-2";
+			}
+			messageElement.innerHTML = `
+				<p class="text-sm text-left break-all">${message.text}</p>
+			`
+			root.append(messageElement);
+		})
+
+
+		requestAnimationFrame(() => {
+			root.lastElementChild!.scrollIntoView({ behavior: 'smooth' });
+		});
+	}
 }
