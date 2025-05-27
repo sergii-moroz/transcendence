@@ -6,6 +6,7 @@ import { Button2FA } from "./components/2fa/button-2fa.js";
 import { ButtonThemeToggle } from "./components/button-theme-toggle.js";
 import { HomeContent } from "./components/home-sidebar/content.js";
 import { HomeHeader } from "./components/home-sidebar/header.js";
+import { Sidebar } from "./components/home-sidebar/sidebar.js";
 import { IconCheck } from "./components/icons/icon-check.js";
 import { IconChevronLeft } from "./components/icons/icon-chevron-left.js";
 import { IconShieldCheck } from "./components/icons/icon-shield-check.js";
@@ -33,6 +34,7 @@ customElements.define('two-fa-backup-ga', TwoFABackupGA)
 // Home
 customElements.define('home-header', HomeHeader);
 customElements.define('home-content', HomeContent);
+customElements.define('sidebar', Sidebar);
 
 
 // ICONS
