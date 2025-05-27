@@ -73,6 +73,9 @@ export class Router {
 			if (path.startsWith('/game/')) {
 				ViewClass = this.routes['/game/:gameRoomId'];
 				this.currentView = new ViewClass(this.api, this);
+			} else if (path.startsWith('/tournament/')) {
+				ViewClass = this.routes['/tournament/:tournamentId'];
+				this.currentView = new ViewClass(this.api, this);
 			} else {
 				ViewClass = this.routes[path] || this.routes["404"];
 				this.currentView = new ViewClass(this.api, this);

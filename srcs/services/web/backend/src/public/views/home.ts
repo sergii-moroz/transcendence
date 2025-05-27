@@ -282,7 +282,7 @@ export class HomeView extends View {
 		});
 
 		this.addEventListener(tournamentBTN!, 'click', () => {
-			alert('not available');
+			return this.router.navigateTo('/tournament-waiting-room');
 		});
 
 		this.addEventListener(viewProfileBTN!, 'click', () => {

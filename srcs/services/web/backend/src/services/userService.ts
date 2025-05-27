@@ -35,7 +35,15 @@ export const createUser = async (username: string, hashedPassword: string): Prom
 			[username, hashedPassword],
 			function (err) {
 				if (err) return reject(err);
-				resolve(this.lastID); // grab new user ID
+				const userId = this.lastID;
+				db.run(
+					`INSERT INTO user_stats (user_id) VALUES (?)`,
+					[userId],
+					(err) => {
+						if (err) return reject(err);
+						resolve(userId); // resolve after both inserts
+					}
+				);
 			}
 		);
 	});
