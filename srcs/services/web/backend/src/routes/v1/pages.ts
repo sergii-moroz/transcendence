@@ -8,7 +8,7 @@ import {
 } from "../../types/user.js";
 import { findUserById } from "../../services/userService.js";
 
-export const views = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
+export const pages = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
 	app.get('/home', async (request, reply) => {
 		const answer: HomeResponse = {
 			stats: {
@@ -22,7 +22,6 @@ export const views = async (app: FastifyInstance, opts: FastifyPluginOptions) =>
 				wins: 42,
 				percentage: 42
 			},
-			friendAmount: 2
 		};
 		return reply.send(answer);
 	});

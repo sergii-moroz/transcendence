@@ -231,4 +231,16 @@ export class API {
 			?.split('=')[1] || '';
 	}
 
+
+
+	static async getHome() {
+		try {
+			const res = await this.get('/api/home');
+			return res;
+		} catch (error) {
+			console.error("Home API call failed:", error);
+			return null;
+		}
+	}
+
 }

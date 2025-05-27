@@ -35,7 +35,6 @@ interface TopPlayer extends PlayerStats {
 export interface HomeResponse {
 	stats: PlayerStats;
 	topPlayer: TopPlayer;
-	friendAmount: number;
 }
 
 interface Friend {
