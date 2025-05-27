@@ -4,6 +4,7 @@ import { TwoFARegisterGA } from "./components/2fa/2fa-register-ga.js";
 import { TwoFAVerifyGA } from "./components/2fa/2fa-verify-ga.js";
 import { Button2FA } from "./components/2fa/button-2fa.js";
 import { ButtonThemeToggle } from "./components/button-theme-toggle.js";
+import { HomeHeader } from "./components/home-sidebar/header.js";
 import { IconCheck } from "./components/icons/icon-check.js";
 import { IconChevronLeft } from "./components/icons/icon-chevron-left.js";
 import { IconShieldCheck } from "./components/icons/icon-shield-check.js";
@@ -27,6 +28,10 @@ customElements.define('two-fa-login-verify', TwoFALoginVerify)
 customElements.define('two-fa-register-ga', TwoFARegisterGA)
 customElements.define('two-fa-verify-ga', TwoFAVerifyGA)
 customElements.define('two-fa-backup-ga', TwoFABackupGA)
+
+// Home
+customElements.define('home-header', HomeHeader);
+
 
 // ICONS
 customElements.define('icon-check', IconCheck)
