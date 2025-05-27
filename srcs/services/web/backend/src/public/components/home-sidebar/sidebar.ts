@@ -11,7 +11,8 @@ import {
 	iconArrowLeft,
 	iconBlock,
 	iconTrash,
-	iconChatSend
+	iconChatSend,
+	iconSidebarCheck
 } from "../icons/icons.js"
 
 export class Sidebar extends HTMLElement {
@@ -58,11 +59,19 @@ export class Sidebar extends HTMLElement {
 
 		if (key === 'Enter') {
 			const addFriendinput = document.getElementById('addFriendInput') as HTMLInputElement;
+			const chatInput = document.getElementById('chat-input') as HTMLInputElement;
 			if (addFriendinput) {
 				const name = addFriendinput.value.trim();
 				if (name) {
 					console.log(`name: ${name}`);
 					addFriendinput.value = '';
+				}
+			}
+			else if (chatInput) {
+				const message = chatInput.value.trim();
+				if (message) {
+					console.log(`Chat message: ${message}`);
+					chatInput.value = '';
 				}
 			}
 		}
@@ -71,8 +80,7 @@ export class Sidebar extends HTMLElement {
 	async handleClick(event: Event) {
 		const target = event.target as HTMLElement;
 
-		if (target.closest('#sideBar-collapsed')) {
-			console.log("aa");
+		if (target.closest('#sideBar-collapsed') || target.closest('#back-to-friends-btn')) {
 			this.state = 'friendList';
 			this.openChatwith = null;
 			this.renderOpen();
@@ -93,6 +101,36 @@ export class Sidebar extends HTMLElement {
 				console.log(name);
 				input.value = '';
 			}
+		}
+		else if (target.closest('#acceptFriendReq')) {
+			alert('accept friend request');
+		}
+		else if (target.closest('#declineFriendReq')) {
+			alert('decline friend request');
+		}
+		else if (target.closest('.friend-item')) {
+			const friendField = target.closest('.friend-item') as HTMLElement;
+			const name = friendField.dataset.friendName!;
+
+			this.state = 'chat';
+			this.initChat(name);
+		}
+		else if (target.closest('#unfriend-btn')) {
+			alert('delete friend');
+		}
+		else if (target.closest('#block-btn')) {
+			alert('block friend');
+		}
+		else if (target.closest('#send-message-btn')) {
+			const chatInput = document.getElementById('chat-input') as HTMLInputElement;
+			const message = chatInput.value.trim();
+			if (message) {
+				console.log(`Chat message: ${message}`);
+				chatInput.value = '';
+			}
+		}
+		else if (target.closest('#invite-to-game-btn')) {
+			alert('invite to game');
 		}
 	}
 
@@ -164,7 +202,52 @@ export class Sidebar extends HTMLElement {
 		`;
 	}
 
-	addRequests(data: SidebarResponse) {}
+	addRequests(data: SidebarResponse) {
+		const root = this.querySelector('#friendInvite');
+		if (!root) return;
+		root.innerHTML = '';
+
+		if (data.FriendRequests.length > 0) {
+			const element = document.createElement('div');
+			element.innerHTML = `
+				<div class="p-4 border-b dark:border-gray-700 border-gray-200">
+					<h3 class="font-bold text-lg mb-3 pb-2">
+						Friend  Requests
+					</h3>
+					<div id="insertContainer" class="space-y-3"></div>
+				</div>
+			`;
+	
+			const requestsContainer = element.querySelector('#insertContainer');
+	
+			data.FriendRequests.forEach((request: Friend) => {
+				const requestElement = document.createElement('div');
+				requestElement.className = 'dark:bg-gray-700 bg-gray-100 rounded-3xl shadow-sm p-2 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg';
+				requestElement.innerHTML = `
+					<div class="flex items-center justify-between">
+						<div id="friendRequestProfile" class="flex items-center gap-2 cursor-pointer">
+							<img 
+								src="${request.picture}"
+								onerror="this.src='../uploads/default.jpg'"
+								class="w-10 h-10 rounded-full object-cover"
+							>
+							<span class="font-medium">${request.name}</span>
+						</div>
+						<div class="flex gap-2">
+							<button id="acceptFriendReq" class="p-1.5 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors">
+								${iconSidebarCheck}
+							</button>
+							<button id="declineFriendReq" class="p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors">
+								${iconX}
+							</button>
+						</div>
+					</div>
+				`;
+				requestsContainer!.appendChild(requestElement);
+			})
+			root.append(element);
+		}
+	}
 
 	addOnlineFriends(data: SidebarResponse, root: Element) {
 		const online = document.createElement('div');
