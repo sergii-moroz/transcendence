@@ -53,9 +53,48 @@ export class Sidebar extends HTMLElement {
 		this.removeEventListener('keydown', this.handleKeyPress);
 	}
 	
-	handleKeyPress(event: KeyboardEvent) {}
+	handleKeyPress(event: KeyboardEvent) {
+		const key = event.key;
 
-	async handleClick(event: Event) {}
+		if (key === 'Enter') {
+			const addFriendinput = document.getElementById('addFriendInput') as HTMLInputElement;
+			if (addFriendinput) {
+				const name = addFriendinput.value.trim();
+				if (name) {
+					console.log(`name: ${name}`);
+					addFriendinput.value = '';
+				}
+			}
+		}
+	}
+
+	async handleClick(event: Event) {
+		const target = event.target as HTMLElement;
+
+		if (target.closest('#sideBar-collapsed')) {
+			console.log("aa");
+			this.state = 'friendList';
+			this.openChatwith = null;
+			this.renderOpen();
+			this.initFriends();
+		}
+		else if (target.closest('#refresh-friends-btn')) {
+			console.log('refresh')
+			this.initFriends();
+		}
+		else if (target.closest('#close-social-btn')) {
+			this.state = 'collapsed'
+			this.renderCollapsed();
+		}
+		else if (target.closest('#addFriendBTN')) {
+			const input = document.getElementById('addFriendInput') as HTMLInputElement;
+			const name = input!.value.trim();
+			if (name) {
+				console.log(name);
+				input.value = '';
+			}
+		}
+	}
 
 	renderCollapsed() {
 		this.innerHTML = `
