@@ -71,7 +71,7 @@ export class WaitingRoom extends HTMLElement {
 			<div class="flex flex-col items-center justify-center h-full min-h-screen">
 				<h2>Waiting for other players...</h2>
 				<p id="waiting-message">Waiting for other players to join...</p>
-				<button id="home-btn">Home</button>
+				<button id="home-btn" class="tw-btn-outline w-20 mt-6">Home</button>
 			</div>
 		`;
 	}
