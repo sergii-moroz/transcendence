@@ -1,7 +1,5 @@
 import {
 	FastifyInstance,
-	FastifyPluginOptions,
-	FastifyRequest
 } from "fastify"
 
 import { Game } from "../../services/game.js";
@@ -20,11 +18,12 @@ export const waitingRoomSock = async (app: FastifyInstance) => {
 					waitingRoomConns.push([userId!, socket]);
 					console.custom('INFO', `${userId} is now in the waiting room`);
 				} else {
-					waitingRoomConns.push([userId!, socket]);
-					console.custom('INFO', `${userId} is already in the waiting room`);
+					const index = waitingRoomConns.findIndex(([id]) => id === userId);
+					waitingRoomConns[index][1] = socket;
+					console.custom('INFO', `${userId} is already in the waiting room, socket updated`);
 				}
 
-				console.custom('INFO', 'Users in waiting room:', [...waitingRoomConns.keys()]);
+				console.custom('INFO', 'Users in waiting room:', waitingRoomConns.map(([id]) => id));
 
 				socket.send(JSON.stringify({
 					type: 'joinedRoom',
