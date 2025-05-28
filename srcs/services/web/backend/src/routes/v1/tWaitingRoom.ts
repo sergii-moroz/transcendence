@@ -20,8 +20,9 @@ export const tWaitingRoomSock = async (app: FastifyInstance) => {
 						tWaitingRoomConns.push([userId!, socket]);
 						console.custom('INFO', `${userId} has joined the tournament waiting room`);
 					} else {
-						tWaitingRoomConns.push([userId!, socket]);
-						console.custom('INFO', `${userId} is already in the tournament waiting room`);
+						const index = tWaitingRoomConns.findIndex(([id]) => id === userId);
+						tWaitingRoomConns[index][1] = socket;
+						console.custom('INFO', `${userId} is already in the tournament waiting room, socket updated`);
 					}
 	
 					console.custom('INFO', 'Users in tournament waiting room:', tWaitingRoomConns.map(player => player[0]));
