@@ -21,32 +21,32 @@ interface TopPlayer extends PlayerStats {
 	name: string;
 }
 
-// interface Friends {
-// 	amountTotal: number;
-// 	online: {
-// 		amount: number;
-// 	}
-// 	offline: {
-// 		amount: number;
-// 	}
-// }
-
-
 export interface HomeResponse {
 	stats: PlayerStats;
 	topPlayer: TopPlayer;
-	friendAmount: number;
 }
 
-interface Friend {
+export interface Friend {
 	name: string;
 	picture: string;
 }
 
 export interface SidebarResponse {
 	friends: {
-		online: Friend[];
-		offline: Friend[];
+		online: (Friend & { unreadMessages: boolean})[];
+		offline: (Friend & { unreadMessages: boolean})[];
 	}
 	FriendRequests: Friend[];
+}
+
+export interface Messages {
+	text: string;
+	timestamp: string;
+	owner: string
+}
+
+export interface ChatInitResponse {
+	messages: Messages[];
+	friend: Friend & {onlineState: string};
+	gameInvite: boolean;
 }

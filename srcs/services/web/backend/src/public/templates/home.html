@@ -1,2 +1,18 @@
-<h1>HOME</h1>
-<a href="/settings" data-link>Settings</a>
+<div class="min-h-screen flex overflow-hidden">
+  <!-- Content Part + background elements -->
+  <div class="flex-1 relative overflow-y-auto">
+    
+    <!-- Background elements -->
+    <div class="absolute inset-0 overflow-hidden z-0">
+      <div class="absolute top-5 left-1/8 w-94 h-110 dark:bg-purple-600 bg-green-400 opacity-20 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-0 right-1/6 w-80 h-80 dark:bg-purple-500 bg-green-400 opacity-15 rounded-full blur-3xl"></div>
+    </div>
+
+    <!-- Content part -->
+    <div class="relative z-10 p-8 max-w-6xl mx-auto">
+      <home-header></home-header>
+      <home-content></home-content>
+    </div>
+  </div>
+  <friends-sidebar></friends-sidebar>
+</div>

@@ -8,7 +8,7 @@ import fs from 'fs';
 
 import { authRoutes } from "./routes/v1/auth.js";
 import { routes } from "./routes/v1/routes.js";
-import { views } from "./routes/v1/views.js";
+import { pages } from "./routes/v1/pages.js";
 import { gameRoomSock } from "./routes/v1/gameRoom.js";
 import { waitingRoomSock } from "./routes/v1/waitingRoom.js";
 import { tWaitingRoomSock } from "./routes/v1/tWaitingRoom.js";
@@ -78,7 +78,7 @@ export const build = async (opts: FastifyServerOptions) => {
 	})
 
 	app.register(routes);
-	app.register(views, {prefix: "api"});
+	app.register(pages, {prefix: "api"});
 	app.register(waitingRoomSock, {prefix: "ws"});
 	app.register(gameRoomSock, {prefix: "ws"});
 	app.register(tWaitingRoomSock, {prefix: "ws"});
