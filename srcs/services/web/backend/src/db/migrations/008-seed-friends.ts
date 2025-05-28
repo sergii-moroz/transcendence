@@ -7,7 +7,7 @@ export async function up() {
 			{ user_id: '1', friend_id: '4', status: 'accepted' },
 			{ user_id: '3', friend_id: '4', status: 'pending' },
 			{ user_id: '2', friend_id: '4', status: 'pending' },
-			{ user_id: '5', friend_id: '4', status: 'accepted' }
+			{ user_id: '4', friend_id: '5', status: 'accepted' }
 		];
 
 		db.serialize(() => {

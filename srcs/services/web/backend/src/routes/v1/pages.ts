@@ -9,7 +9,7 @@ import {
 } from "../../types/user.js"
 
 import { findUserById } from "../../services/userService.js";
-import { getFriendRequests } from "../../db/queries/friends.js";
+import { getFriendRequests, getOnlineFriends } from "../../db/queries/friends.js";
 
 export const pages = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
 	app.get('/home', async (request, reply) => {
@@ -37,34 +37,17 @@ export const pages = async (app: FastifyInstance, opts: FastifyPluginOptions) =>
 	app.get('/sidebar', async (req, reply) => {
 		const answer: SidebarResponse = {
 			friends: {
-				online: [
-					{
-						name: "Hartmut",
-						picture: "/uploads/hans.jpg",
-						unreadMessages: true
-					},
-					{
-						name: "Peter",
-						picture: "/uploads/john.jpg",
-						unreadMessages: false
-					},
-					{
-						name: "Klaus",
-						picture: "/uploads/john.jpg",
-						unreadMessages: true
-
-					}
-				],
+				online: await getOnlineFriends(req.user.id),
 				offline: [
 					{
 						name: "Manfred",
 						picture: "/uploads/hans.jpg",
-						unreadMessages: false
+						// unreadMessages: false
 					},
 					{
 						name: "Horst",
 						picture: "/uploads/jane.jpg",
-						unreadMessages: true
+						// unreadMessages: true
 					}
 				]
 			},
@@ -72,8 +55,8 @@ export const pages = async (app: FastifyInstance, opts: FastifyPluginOptions) =>
 		};
 
 
-		const reqests = await getFriendRequests(req.user.id);
-		console.log(reqests);
+		const reqests = await getOnlineFriends(req.user.id);
+		console.log(`request: `, reqests);
 		reply.send(answer);
 	});
 
