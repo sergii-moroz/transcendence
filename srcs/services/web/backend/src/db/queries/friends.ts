@@ -2,7 +2,7 @@ import { Friend, User } from "../../types/user.js";
 import { db } from "../connections.js";
 
 
-export const getFriendRequests = async (id: number): Promise<Friend[] | undefined> => {
+export const getFriendRequests = async (id: number): Promise<Friend[]> => {
 	return new Promise((resolve, reject) => {
 		db.all<Friend>(' \
 			SELECT username as name, avatar as picture from friends f \
@@ -12,25 +12,19 @@ export const getFriendRequests = async (id: number): Promise<Friend[] | undefine
 			[id],
 			(err, rows) => {
 				if (err) return reject(err);
-				if (rows.length === 0) return resolve(undefined);
-
-				const answer = rows.map(row => ({
-					name: row.name,
-					picture: row.picture
-				}));
-				resolve(answer);
+				resolve(rows);
 		})
 	})
 }
 
-// hardcoded rn
+// hardcoded right now
 const OnlineUsers: string[] = [
 	'dolifero',
 	'smoroz'
 ]
 
-export const getOnlineFriends = async (id: number): Promise<Friend[]> => {
-	return new Promise((resolve, reject) => {
+export const getFriendList = async (id: number): Promise<{online: Friend[], offline: Friend[]}> => {
+	const allFriends = await new Promise<Friend[]>((resolve, reject) => {
 		db.all<Friend>(' \
 			SELECT username as name, avatar as picture from friends f \
 			JOIN users u on u.id = \
@@ -43,14 +37,11 @@ export const getOnlineFriends = async (id: number): Promise<Friend[]> => {
 			[id, id, id],
 			(err, rows) => {
 				if (err) return reject(err);
-				// if (rows.length === 0) return resolve(undefined);
-
-				// console.log(`aa: `, rows.filter(row => OnlineUsers.includes(row.name)));
-				const answer = rows.filter(row => OnlineUsers.includes(row.name)).map(row => ({
-					name: row.name,
-					picture: row.picture
-				}));
-				resolve(answer);
+				resolve(rows);
 		})
 	})
+	return {
+		online: allFriends.filter(friend => OnlineUsers.includes(friend.name)),
+		offline: allFriends.filter(friend => !OnlineUsers.includes(friend.name))
+	};
 }

@@ -9,7 +9,7 @@ import {
 } from "../../types/user.js"
 
 import { findUserById } from "../../services/userService.js";
-import { getFriendRequests, getOnlineFriends } from "../../db/queries/friends.js";
+import { getFriendRequests, getFriendList } from "../../db/queries/friends.js";
 
 export const pages = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
 	app.get('/home', async (request, reply) => {
@@ -36,26 +36,12 @@ export const pages = async (app: FastifyInstance, opts: FastifyPluginOptions) =>
 
 	app.get('/sidebar', async (req, reply) => {
 		const answer: SidebarResponse = {
-			friends: {
-				online: await getOnlineFriends(req.user.id),
-				offline: [
-					{
-						name: "Manfred",
-						picture: "/uploads/hans.jpg",
-						// unreadMessages: false
-					},
-					{
-						name: "Horst",
-						picture: "/uploads/jane.jpg",
-						// unreadMessages: true
-					}
-				]
-			},
+			friends: await getFriendList(req.user.id),
 			FriendRequests: await getFriendRequests(req.user.id)
 		};
 
 
-		const reqests = await getOnlineFriends(req.user.id);
+		const reqests = await getFriendList(req.user.id);
 		console.log(`request: `, reqests);
 		reply.send(answer);
 	});

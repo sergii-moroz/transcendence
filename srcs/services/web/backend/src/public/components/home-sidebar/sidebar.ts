@@ -219,7 +219,7 @@ export class Sidebar extends HTMLElement {
 		if (!root) return;
 		root.innerHTML = '';
 
-		if (data.FriendRequests) {
+		if (data.FriendRequests.length > 0) {
 			const element = document.createElement('div');
 			element.innerHTML = `
 				<div class="p-4 border-b dark:border-gray-700 border-gray-200">

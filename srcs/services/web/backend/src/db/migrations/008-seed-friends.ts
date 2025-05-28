@@ -1,6 +1,8 @@
 import { db } from "../connections.js";
 import bcrypt from 'bcrypt'
 
+// just for debugging right now
+
 export async function up() {
 	return new Promise<void>((resolve, reject) => {
 		const friends = [
