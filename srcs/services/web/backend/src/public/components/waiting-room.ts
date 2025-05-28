@@ -58,11 +58,7 @@ export class WaitingRoom extends HTMLElement {
 		const target = event.target as HTMLElement;
 
 		if (target.closest('#home-btn')) {
-			if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-				this.socket.close();
-				console.log('Disconnecting from socket, navigating home...');
-				Router.navigateTo('/home');
-			}
+			Router.navigateTo('/home');
 		}
 	}
 
