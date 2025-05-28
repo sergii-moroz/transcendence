@@ -1,0 +1,23 @@
+import { db } from "../connections.js";
+
+export async function up() {
+	return new Promise<void>((resolve, reject) => {
+		db.run(`
+			CREATE TABLE IF NOT EXISTS friends (
+				invitor_id INTEGER NOT NULL,
+				recipient_id INTEGER NOT NULL,
+				status TEXT NOT NULL CHECK(status IN ('pending', 'accepted', 'blocked')),
+				blocked_by INTEGER DEFAULT NULL,
+				created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+				FOREIGN KEY (invitor_id) REFERENCES users(id) ON DELETE CASCADE,
+				FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE CASCADE,
+				FOREIGN KEY (blocked_by) REFERENCES users(id) ON DELETE CASCADE,
+				CHECK (status != 'blocked' OR blocked_by IS NOT NULL),
+				CHECK (invitor_id != recipient_id)
+			)
+		`, (err) => {
+			if (err) reject(err);
+			else resolve();
+		});
+	});
+}

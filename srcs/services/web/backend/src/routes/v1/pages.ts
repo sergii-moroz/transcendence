@@ -9,6 +9,7 @@ import {
 } from "../../types/user.js"
 
 import { findUserById } from "../../services/userService.js";
+import { getFriendRequests } from "../../db/queries/friends.js";
 
 export const pages = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
 	app.get('/home', async (request, reply) => {
@@ -39,17 +40,17 @@ export const pages = async (app: FastifyInstance, opts: FastifyPluginOptions) =>
 				online: [
 					{
 						name: "Hartmut",
-						picture: "../uploads/hans.jpg",
+						picture: "/uploads/hans.jpg",
 						unreadMessages: true
 					},
 					{
 						name: "Peter",
-						picture: "john.jpg",
+						picture: "/uploads/john.jpg",
 						unreadMessages: false
 					},
 					{
 						name: "Klaus",
-						picture: "john.jpg",
+						picture: "/uploads/john.jpg",
 						unreadMessages: true
 
 					}
@@ -57,27 +58,22 @@ export const pages = async (app: FastifyInstance, opts: FastifyPluginOptions) =>
 				offline: [
 					{
 						name: "Manfred",
-						picture: "../uploads/hans.jpg",
+						picture: "/uploads/hans.jpg",
 						unreadMessages: false
 					},
 					{
 						name: "Horst",
-						picture: "jane.jpg",
+						picture: "/uploads/jane.jpg",
 						unreadMessages: true
 					}
 				]
 			},
-			FriendRequests: [
-				{
-					name: "Bernd",
-					picture: "../uploads/bernd.jpg"
-				},
-				{
-					name: "Bernhard",
-					picture: 'aa'
-				}
-			]
+			FriendRequests: await getFriendRequests(req.user.id)
 		};
+
+
+		const reqests = await getFriendRequests(req.user.id);
+		console.log(reqests);
 		reply.send(answer);
 	});
 

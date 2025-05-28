@@ -36,7 +36,7 @@ export interface SidebarResponse {
 		online: (Friend & { unreadMessages: boolean})[];
 		offline: (Friend & { unreadMessages: boolean})[];
 	}
-	FriendRequests: Friend[];
+	FriendRequests: Friend[] | undefined;
 }
 
 export interface Messages {
