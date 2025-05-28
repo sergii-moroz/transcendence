@@ -272,7 +272,8 @@ export class Sidebar extends HTMLElement {
 	
 		const requestsContainer = online.querySelector('#insertContainer');
 	
-		data.friends.online.forEach((friend: Friend & {unreadMessages: boolean}) => {
+		data.friends.online.forEach((friend: Friend) => {
+		// data.friends.online.forEach((friend: Friend & {unreadMessages: boolean}) => {
 			const requestElement = document.createElement('div');
 			requestElement.className = "friend-item flex items-center p-2 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg";
 			requestElement.dataset.friendName = friend.name;
@@ -286,8 +287,8 @@ export class Sidebar extends HTMLElement {
 					<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
 				</div>
 				<span class="font-medium">${friend.name}</span>
-				${friend.unreadMessages ? '  <div class="w-2 h-2 ml-3 bg-blue-500 rounded-full" title="unread Messages"></div>' : ''}
 			`;
+			// <!-- ${friend.unreadMessages ? '  <div class="w-2 h-2 ml-3 bg-blue-500 rounded-full" title="unread Messages"></div>' : ''} -->
 			requestsContainer!.appendChild(requestElement);
 		})
 		root.append(online);
@@ -303,21 +304,22 @@ export class Sidebar extends HTMLElement {
 		`;
 	
 		const requestsContainer = offline.querySelector('#insertContainer');
-		data.friends.offline.forEach((friend: Friend & {unreadMessages: boolean}) => {
+		data.friends.offline.forEach((friend: Friend) => {
+		// data.friends.offline.forEach((friend: Friend & {unreadMessages: boolean}) => {
 			const requestElement = document.createElement('div');
 			requestElement.className = "friend-item flex items-center p-2 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg";
 			requestElement.innerHTML = `
-					<div class="relative mr-3">
-						<img 
-							src=${friend.picture}
-							onerror="this.src='/uploads/default.jpg'"
-							class="w-10 h-10 rounded-full"
-						>
-						<div class="absolute bottom-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
-					</div>
-					<span class="font-medium">${friend.name}</span>
-					${friend.unreadMessages ? '  <div class="w-2 h-2 ml-3 bg-blue-500 rounded-full" title="unread Messages"></div>' : ''}
+				<div class="relative mr-3">
+					<img 
+						src=${friend.picture}
+						onerror="this.src='/uploads/default.jpg'"
+						class="w-10 h-10 rounded-full"
+					>
+					<div class="absolute bottom-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
+				</div>
+				<span class="font-medium">${friend.name}</span>
 			`;
+			// ${friend.unreadMessages ? '  <div class="w-2 h-2 ml-3 bg-blue-500 rounded-full" title="unread Messages"></div>' : ''}
 			requestsContainer!.appendChild(requestElement);
 		});
 		root.append(offline);
