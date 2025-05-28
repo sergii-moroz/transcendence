@@ -54,6 +54,12 @@ export const routes: tRoutes = {
 		description: "Waiting room for 1v1 matchmaking"
 	},
 
+	"/game/:gameRoomId": {
+		template: "/templates/game.html",
+		title: `Game | ${APP_TITLE}`,
+		description: "Game room for 1v1 matches"
+	},
+
 	"/settings": {
 		template: "/templates/settings/index.html",
 		title: `Settings | ${APP_TITLE}`,

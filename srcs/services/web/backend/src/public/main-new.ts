@@ -16,6 +16,7 @@ import { LoginForm } from "./components/login-form.js";
 import { ModalLoginMenu } from "./components/modal-login-menu.js";
 import { RegisterForm } from "./components/register-form.js";
 import { WaitingRoom } from "./components/waiting-room.js";
+import { GameRoom } from "./components/game.js";
 import { Router } from "./router-static.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
@@ -47,5 +48,8 @@ customElements.define('icon-user-round', IconUserRound)
 
 // Waiting Room
 customElements.define('waiting-room', WaitingRoom)
+
+// Game
+customElements.define('game-room', GameRoom)
 
 Router.init()
