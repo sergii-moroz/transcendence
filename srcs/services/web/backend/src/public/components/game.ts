@@ -208,11 +208,11 @@ export class GameRoom extends HTMLElement {
 		}
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 		this.ctx.fillStyle = "#ffffff";
-		this.ctx.font = "bold 40px Arial";
+		this.ctx.font = `bold ${this.canvas.width / 30}px Arial`;
 		this.ctx.textAlign = "center";
 		this.ctx.textBaseline = "middle";
 		this.ctx.fillText(message, (this.canvas.width / 2), this.canvas.height / 2);
-		this.ctx.font = "15px Arial";
+		this.ctx.font = `${this.canvas.width / 50}px Arial`;
 		this.ctx.fillText(`Redirecting in 3 seconds`, (this.canvas.width / 2), (this.canvas.height / 2) + 30);
 	}
 
