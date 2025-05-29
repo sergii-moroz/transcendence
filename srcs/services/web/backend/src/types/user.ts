@@ -49,6 +49,6 @@ export interface Messages {
 
 export interface ChatInitResponse {
 	messages: Messages[];
-	friend: Friend & {onlineState: string};
+	friend: Friend & {onlineState: string, blocked: boolean};
 	gameInvite: boolean;
 }

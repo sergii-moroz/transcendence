@@ -303,4 +303,24 @@ export class API {
 		}
 	}
 
+	static async blockFriend(name: string) {
+		try {
+			const res = await this.post('/api/blockFriend', {name});
+			if (!res.ok)
+				console.error("delete Friend API call failed");
+		} catch (error) {
+			console.error("delete Friend API call failed:", error);
+		}
+	}
+
+	static async unblockFriend(name: string) {
+		try {
+			const res = await this.post('/api/unblockFriend', {name});
+			if (!res.ok)
+				console.error("delete Friend API call failed");
+		} catch (error) {
+			console.error("delete Friend API call failed:", error);
+		}
+	}
+
 }

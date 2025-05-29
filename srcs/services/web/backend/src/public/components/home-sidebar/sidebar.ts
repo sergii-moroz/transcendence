@@ -12,7 +12,8 @@ import {
 	iconBlock,
 	iconTrash,
 	iconChatSend,
-	iconSidebarCheck
+	iconSidebarCheck,
+	iconCheck
 } from "../icons/icons.js"
 
 export class Sidebar extends HTMLElement {
@@ -129,7 +130,18 @@ export class Sidebar extends HTMLElement {
 		else if (target.closest('#block-btn')) {
 			if (this.openChatwith == "admin")
 				return alert("cant block admin user!");
-			alert('block friend');
+			await API.blockFriend(this.openChatwith!);
+			const block = this.querySelector('#block-btn') as HTMLElement;
+			const unblock = this.querySelector('#unblock-btn') as HTMLElement;
+			block.classList.add("hidden");
+			unblock.classList.remove("hidden");
+		}
+		else if (target.closest('#unblock-btn')) {
+			await API.unblockFriend(this.openChatwith!);
+			const block = this.querySelector('#block-btn') as HTMLElement;
+			const unblock = this.querySelector('#unblock-btn') as HTMLElement;
+			unblock.classList.add("hidden");
+			block.classList.remove("hidden");
 		}
 		else if (target.closest('#send-message-btn')) {
 			const chatInput = document.getElementById('chat-input') as HTMLInputElement;
@@ -369,6 +381,9 @@ export class Sidebar extends HTMLElement {
 						<button id="block-btn" class="text-gray-400 hover:text-red-500 p-1" title="Block User">
 							${iconBlock}
 						</button>
+						<button id="unblock-btn" class="text-gray-400 hover:text-red-500 p-1" title="Unblock User">
+							${iconCheck}
+						</button>
 						<button id="unfriend-btn" class="text-gray-400 hover:text-red-500 p-1" title="Unfriend">
 							${iconTrash}
 						</button>
@@ -443,6 +458,7 @@ export class Sidebar extends HTMLElement {
 				return this.showErrorState(this.querySelector('#sidebar-chat'));
 			}
 			this.renderChat(data);
+			this.setBlockButton(data.friend.blocked);
 			if (data.gameInvite)
 				this.addGameInvitation();
 			this.messages = data.messages;
@@ -473,5 +489,14 @@ export class Sidebar extends HTMLElement {
 		requestAnimationFrame(() => {
 			root.lastElementChild!.scrollIntoView({ behavior: 'smooth' });
 		});
+	}
+
+	setBlockButton(blocked: boolean) {
+		const block = this.querySelector('#block-btn') as HTMLElement;
+		const unblock = this.querySelector('#unblock-btn') as HTMLElement;
+		if (blocked)
+			block.classList.add("hidden");
+		else
+			unblock.classList.add("hidden");
 	}
 }

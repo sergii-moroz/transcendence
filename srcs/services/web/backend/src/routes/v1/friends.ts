@@ -88,13 +88,56 @@ export const friends = async (app: FastifyInstance, opts: FastifyPluginOptions) 
 		}
 	});
 
+	app.post('/blockFriend', async (req, reply) => {
+		try {
+			const friendName = (req.body as { name: string }).name;
+			const friend_id = await findUserIdByUsername(friendName);
+			await new Promise<void>((resolve, reject) => {
+				db.run(
+					'UPDATE friends SET blocked_by = ? WHERE (inviter_id = ? AND recipient_id = ?) or (inviter_id = ? and recipient_id = ?)',
+					[req.user.id, friend_id, req.user.id, req.user.id, friend_id],
+					function (err) {
+						if (err) reject(err);
+						else resolve();
+					}
+				);
+			});
+			reply.status(200).send;
+		} catch (error) {
+			console.custom("ERROR", error);
+			reply.status(400).send();
+		}
+	});
+
+	app.post('/unblockFriend', async (req, reply) => {
+		try {
+			const friendName = (req.body as { name: string }).name;
+			const friend_id = await findUserIdByUsername(friendName);
+			await new Promise<void>((resolve, reject) => {
+				db.run(
+					'UPDATE friends SET blocked_by = ? WHERE (inviter_id = ? AND recipient_id = ?) or (inviter_id = ? and recipient_id = ?)',
+					[null, friend_id, req.user.id, req.user.id, friend_id],
+					function (err) {
+						if (err) reject(err);
+						else resolve();
+					}
+				);
+			});
+			reply.status(200).send;
+		} catch (error) {
+			console.custom("ERROR", error);
+			reply.status(400).send();
+		}
+	});
+
 	app.post('/chat', async (req, reply) => {
 		const chatPartner = (req.body as { name: string }).name;
 		const answer: ChatInitResponse = {
 			friend: {
 				name: chatPartner,
 				picture: "../uploads/bernd.jpg",
-				onlineState: 'online'
+				onlineState: 'online',
+				blocked: false
 			},
 			messages: [
 				{
