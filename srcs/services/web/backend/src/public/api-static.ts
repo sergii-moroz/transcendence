@@ -263,4 +263,44 @@ export class API {
 		}
 	}
 
+	static async addFriend(name: string) {
+		try {
+			const res = await this.post('/api/addFriend', {name});
+			if (!res.ok)
+				console.error("Add Friend API call failed");
+		} catch (error) {
+			console.error("Add Friend API call failed:", error);
+		}
+	}
+
+	static async acceptFriend(name: string) {
+		try {
+			const res = await this.post('/api/acceptFriend', {name});
+			if (!res.ok)
+				console.error("Accept Friend API call failed");
+		} catch (error) {
+			console.error("Accept Friend API call failed:", error);
+		}
+	}
+
+	static async rejectFriend(name: string) {
+		try {
+			const res = await this.post('/api/rejectFriend', {name});
+			if (!res.ok)
+				console.error("reject Friend API call failed");
+		} catch (error) {
+			console.error("reject Friend API call failed:", error);
+		}
+	}
+
+	static async deleteFriend(name: string) {
+		try {
+			const res = await this.post('/api/deleteFriend', {name});
+			if (!res.ok)
+				console.error("delete Friend API call failed");
+		} catch (error) {
+			console.error("delete Friend API call failed:", error);
+		}
+	}
+
 }

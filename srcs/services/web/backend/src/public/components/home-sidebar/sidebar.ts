@@ -60,13 +60,7 @@ export class Sidebar extends HTMLElement {
 		if (key === 'Enter') {
 			const addFriendinput = document.getElementById('addFriendInput') as HTMLInputElement;
 			const chatInput = document.getElementById('chat-input') as HTMLInputElement;
-			if (addFriendinput) {
-				const name = addFriendinput.value.trim();
-				if (name) {
-					console.log(`name: ${name}`);
-					addFriendinput.value = '';
-				}
-			}
+			if (addFriendinput) this.addFriend(addFriendinput);
 			else if (chatInput) {
 				const message = chatInput.value.trim();
 				if (message) {
@@ -74,6 +68,14 @@ export class Sidebar extends HTMLElement {
 					chatInput.value = '';
 				}
 			}
+		}
+	}
+
+	addFriend(input: HTMLInputElement) {
+		const name = input.value.trim();
+		if (name) {
+			API.addFriend(name);
+			input.value = '';
 		}
 	}
 
@@ -95,17 +97,18 @@ export class Sidebar extends HTMLElement {
 		}
 		else if (target.closest('#addFriendBTN')) {
 			const input = document.getElementById('addFriendInput') as HTMLInputElement;
-			const name = input!.value.trim();
-			if (name) {
-				console.log(name);
-				input.value = '';
-			}
+			if (input) this.addFriend(input);
 		}
 		else if (target.closest('#acceptFriendReq')) {
-			alert('accept friend request');
+			const name = (target.closest('#acceptFriendReq') as HTMLElement).dataset.friendName;
+			await API.acceptFriend(name!);
+			this.initFriends();
 		}
-		else if (target.closest('#declineFriendReq')) {
-			alert('decline friend request');
+		else if (target.closest('#rejectFriendReq')) {
+			const name = (target.closest('#rejectFriendReq') as HTMLElement).dataset.friendName;
+			console.log(name);
+			await API.rejectFriend(name!);
+			this.initFriends();
 		}
 		else if (target.closest('.friend-item')) {
 			const friendField = target.closest('.friend-item') as HTMLElement;
@@ -115,7 +118,14 @@ export class Sidebar extends HTMLElement {
 			this.initChat(name);
 		}
 		else if (target.closest('#unfriend-btn')) {
-			alert('delete friend');
+			if (confirm("Are you sure you want to delete this friend?")) {
+				const name = (target.closest('#unfriend-btn') as HTMLElement).dataset.friendName;
+				await API.deleteFriend(name!);
+				this.state = 'friendList';
+				this.openChatwith = null;
+				this.renderOpen();
+				this.initFriends();
+			}
 		}
 		else if (target.closest('#block-btn')) {
 			alert('block friend');
@@ -138,8 +148,8 @@ export class Sidebar extends HTMLElement {
 		else if (target.closest('#acceptGameInvite-btn')) {
 			alert('accept game invite');
 		}
-		else if (target.closest('#declineGameInvite-btn')) {
-			alert('decline game invite');
+		else if (target.closest('#rejectGameInvite-btn')) {
+			alert('reject game invite');
 		}
 		else if (target.closest('#chatProfile-btn')) {
 			alert('show friend profile');
@@ -246,10 +256,10 @@ export class Sidebar extends HTMLElement {
 							<span class="font-medium">${request.name}</span>
 						</div>
 						<div class="flex gap-2">
-							<button id="acceptFriendReq" class="p-1.5 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors">
+							<button id="acceptFriendReq" class="p-1.5 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors" data-friend-name=${request.name}>
 								${iconSidebarCheck}
 							</button>
-							<button id="declineFriendReq" class="p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors">
+							<button id="rejectFriendReq" class="p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors" data-friend-name=${request.name}>
 								${iconX}
 							</button>
 						</div>
@@ -354,10 +364,10 @@ export class Sidebar extends HTMLElement {
 					</div>
 					
 					<div class="flex items-center gap-2">
-						<button id="block-btn" class="text-gray-400 hover:text-red-500 p-1" title="Block User">
+						<button id="block-btn" class="text-gray-400 hover:text-red-500 p-1" title="Block User" data-friend-name = ${data.friend.name}>
 							${iconBlock}
 						</button>
-						<button id="unfriend-btn" class="text-gray-400 hover:text-red-500 p-1" title="Unfriend">
+						<button id="unfriend-btn" class="text-gray-400 hover:text-red-500 p-1" title="Unfriend" data-friend-name = ${data.friend.name}>
 							${iconTrash}
 						</button>
 						<button id="back-to-friends-btn" class="text-gray-400 hover:text-gray-500 p-1">
@@ -383,7 +393,7 @@ export class Sidebar extends HTMLElement {
 				<div id="InputBar" class="p-4 border-t dark:border-gray-700 border-gray-200">
 					<div class="relative">
 					<input id="chat-input" type="text" placeholder="Type a message..." class="w-full dark:bg-gray-700 bg-gray-100 border-none rounded-lg pl-3 pr-10 py-2 text-sm placeholder-gray-400 focus:ring-blue-500 focus:ring-2 duration-300 hover:scale-[1.02] hover:shadow-lg">
-					<button id="send-message-btn" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-500">
+					<button id="send-message-btn" class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-500" data-friend-name = ${data.friend.name}>
 						${iconChatSend}
 					</button>
 					</div>
@@ -412,7 +422,7 @@ export class Sidebar extends HTMLElement {
 							<button id="acceptGameInvite-btn" class="p-1.5 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors">
 								${iconSidebarCheck}
 							</button>
-							<button id="declineGameInvite-btn" class="p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors">
+							<button id="rejectGameInvite-btn" class="p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors">
 								${iconX}
 							</button>
 						</div>

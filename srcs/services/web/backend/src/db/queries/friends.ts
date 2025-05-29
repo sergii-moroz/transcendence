@@ -1,3 +1,4 @@
+import { findUserIdByUsername } from "../../services/userService.js";
 import { Friend, User } from "../../types/user.js";
 import { db } from "../connections.js";
 
@@ -44,4 +45,25 @@ export const getFriendList = async (id: number): Promise<{online: Friend[], offl
 		online: allFriends.filter(friend => OnlineUsers.includes(friend.name)),
 		offline: allFriends.filter(friend => !OnlineUsers.includes(friend.name))
 	};
+}
+
+// will be put somewhere else later
+export const addFriendtoDB = async (friendName: string, invitor_id: number): Promise<void> => {
+	const recipient_id = await findUserIdByUsername(friendName);
+	if (!recipient_id || recipient_id == invitor_id) throw new Error("Friend is not valid to add");
+	return new Promise((resolve, reject) => {
+		db.run(' \
+			INSERT INTO friends (invitor_id, recipient_id, status) VALUES (?, ?, "pending")',
+			[invitor_id, recipient_id],
+			(err) => {
+				if (err) {
+					console.log(err);
+					if (err.message.includes('Friendship already exists') || err.message.includes('UNIQUE constraint failed'))
+  						return reject(new Error("friend already exists"));
+					return reject(err);
+				} 
+				resolve();
+			}
+		)
+	})
 }
