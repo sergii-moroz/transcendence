@@ -7,7 +7,7 @@ export async function up() {
 			BEFORE INSERT ON friends
 			WHEN EXISTS (
 				SELECT 1 FROM friends
-				WHERE invitor_id = NEW.recipient_id and recipient_id = NEW.invitor_id
+				WHERE inviter_id = NEW.recipient_id and recipient_id = NEW.inviter_id
 			)
 			BEGIN
 				SELECT RAISE(ABORT, 'Friendship already exists in reverse direction');

@@ -15,7 +15,7 @@ export async function up() {
 		db.serialize(() => {
 			for (const friend of friends) {
 				db.run(
-					`INSERT INTO friends (invitor_id, recipient_id, status) VALUES (?, ?, ?)`,
+					`INSERT INTO friends (inviter_id, recipient_id, status) VALUES (?, ?, ?)`,
 					[friend.user_id, friend.friend_id, friend.status],
 					(err) => {
 						if (err) reject(err);

@@ -38,11 +38,11 @@ export const friends = async (app: FastifyInstance, opts: FastifyPluginOptions) 
 	app.post('/acceptFriend', async (req, reply) => {
 		try {
 			const friendName = (req.body as { name: string }).name;
-			const invitor_id = await findUserIdByUsername(friendName);
+			const inviter_id = await findUserIdByUsername(friendName);
 			await new Promise<void>((resolve, reject) => {
 				db.run(
-					'UPDATE friends SET status = "accepted" WHERE invitor_id = ? AND recipient_id = ?',
-					[invitor_id, req.user.id],
+					'UPDATE friends SET status = "accepted" WHERE inviter_id = ? AND recipient_id = ?',
+					[inviter_id, req.user.id],
 					function (err) {
 						if (err) reject(err);
 						else resolve();
@@ -59,11 +59,11 @@ export const friends = async (app: FastifyInstance, opts: FastifyPluginOptions) 
 	app.post('/rejectFriend', async (req, reply) => {
 		try {
 			const friendName = (req.body as { name: string }).name;
-			const invitor_id = await findUserIdByUsername(friendName);
+			const inviter_id = await findUserIdByUsername(friendName);
 			await new Promise<void>((resolve, reject) => {
 				db.run(
-					'DELETE FROM friends WHERE invitor_id = ? AND recipient_id = ?',
-					[invitor_id, req.user.id],
+					'DELETE FROM friends WHERE inviter_id = ? AND recipient_id = ?',
+					[inviter_id, req.user.id],
 					function (err) {
 						if (err) reject(err);
 						else resolve();

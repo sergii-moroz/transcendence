@@ -7,7 +7,7 @@ export const getFriendRequests = async (id: number): Promise<Friend[]> => {
 	return new Promise((resolve, reject) => {
 		db.all<Friend>(' \
 			SELECT username as name, avatar as picture from friends f \
-			JOIN users u on f.invitor_id = u.id \
+			JOIN users u on f.inviter_id = u.id \
 			WHERE recipient_id = ? and status = "pending" \
 			ORDER by created_at',
 			[id],
@@ -20,8 +20,8 @@ export const getFriendRequests = async (id: number): Promise<Friend[]> => {
 
 // hardcoded right now
 const OnlineUsers: string[] = [
+	'admin',
 	'dolifero',
-	'smoroz'
 ]
 
 export const getFriendList = async (id: number): Promise<{online: Friend[], offline: Friend[]}> => {
@@ -30,10 +30,10 @@ export const getFriendList = async (id: number): Promise<{online: Friend[], offl
 			SELECT username as name, avatar as picture from friends f \
 			JOIN users u on u.id = \
 				case \
-					when f.invitor_id = ? then f.recipient_id \
-					else f.invitor_id \
+					when f.inviter_id = ? then f.recipient_id \
+					else f.inviter_id \
 				end \
-			WHERE (invitor_id = ? and status = "accepted") or (recipient_id = ? and status = "accepted") \
+			WHERE (inviter_id = ? and status = "accepted") or (recipient_id = ? and status = "accepted") \
 			ORDER by created_at',
 			[id, id, id],
 			(err, rows) => {
@@ -48,13 +48,13 @@ export const getFriendList = async (id: number): Promise<{online: Friend[], offl
 }
 
 // will be put somewhere else later
-export const addFriendtoDB = async (friendName: string, invitor_id: number): Promise<void> => {
+export const addFriendtoDB = async (friendName: string, inviter_id: number): Promise<void> => {
 	const recipient_id = await findUserIdByUsername(friendName);
-	if (!recipient_id || recipient_id == invitor_id) throw new Error("Friend is not valid to add");
+	if (!recipient_id || recipient_id == inviter_id) throw new Error("Friend is not valid to add");
 	return new Promise((resolve, reject) => {
 		db.run(' \
-			INSERT INTO friends (invitor_id, recipient_id, status) VALUES (?, ?, "pending")',
-			[invitor_id, recipient_id],
+			INSERT INTO friends (inviter_id, recipient_id, status) VALUES (?, ?, "pending")',
+			[inviter_id, recipient_id],
 			(err) => {
 				if (err) {
 					console.log(err);
@@ -72,7 +72,7 @@ export const removeFriend = async (friendName: string, user_id: number): Promise
 	const friend_id = await findUserIdByUsername(friendName);
 	await new Promise<void>((resolve, reject) => {
 		db.run(
-			'DELETE FROM friends WHERE (invitor_id = ? AND recipient_id = ?) or (recipient_id = ? AND invitor_id = ?)',
+			'DELETE FROM friends WHERE (inviter_id = ? AND recipient_id = ?) or (recipient_id = ? AND inviter_id = ?)',
 			[friend_id, user_id, friend_id, user_id],
 			function (err) {
 				if (err) reject(err);
