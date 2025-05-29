@@ -8,7 +8,7 @@ import {
 } from "../../types/user.js"
 import { db } from "../../db/connections.js";
 
-import { getFriendRequests, getFriendList, addFriendtoDB } from "../../db/queries/friends.js";
+import { getFriendRequests, getFriendList, addFriendtoDB, removeFriend } from "../../db/queries/friends.js";
 import { findUserIdByUsername } from "../../services/userService.js";
 
 export const friends = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
@@ -80,17 +80,7 @@ export const friends = async (app: FastifyInstance, opts: FastifyPluginOptions) 
 	app.post('/deleteFriend', async (req, reply) => {
 		try {
 			const friendName = (req.body as { name: string }).name;
-			const friend_id = await findUserIdByUsername(friendName);
-			await new Promise<void>((resolve, reject) => {
-				db.run(
-					'DELETE FROM friends WHERE (invitor_id = ? AND recipient_id = ?) or (recipient_id = ? AND invitor_id = ?)',
-					[friend_id, req.user.id, friend_id, req.user.id],
-					function (err) {
-						if (err) reject(err);
-						else resolve();
-					}
-				);
-			});
+			await removeFriend(friendName, req.user.id);
 			reply.status(200).send;
 		} catch (error) {
 			console.custom("ERROR", error);
@@ -100,7 +90,6 @@ export const friends = async (app: FastifyInstance, opts: FastifyPluginOptions) 
 
 	app.post('/chat', async (req, reply) => {
 		const chatPartner = (req.body as { name: string }).name;
-
 		const answer: ChatInitResponse = {
 			friend: {
 				name: chatPartner,
