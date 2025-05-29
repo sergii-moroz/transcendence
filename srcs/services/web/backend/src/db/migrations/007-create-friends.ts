@@ -14,6 +14,7 @@ export async function up() {
 				FOREIGN KEY (blocked_by) REFERENCES users(id) ON DELETE CASCADE,
 				CHECK (status != 'blocked' OR blocked_by IS NOT NULL),
 				CHECK (invitor_id != recipient_id)
+				UNIQUE(invitor_id, recipient_id)
 			)
 		`, (err) => {
 			if (err) reject(err);

@@ -4,12 +4,9 @@ import {
 } from "fastify"
 import { 
 	HomeResponse,
-	SidebarResponse,
- 	ChatInitResponse
 } from "../../types/user.js"
 
 import { findUserById } from "../../services/userService.js";
-import { getFriendRequests, getFriendList } from "../../db/queries/friends.js";
 
 export const pages = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
 	app.get('/home', async (request, reply) => {
@@ -33,49 +30,4 @@ export const pages = async (app: FastifyInstance, opts: FastifyPluginOptions) =>
 		const userInfo = await findUserById(req.user.id)
 		reply.send(userInfo)
 	});
-
-	app.get('/sidebar', async (req, reply) => {
-		const answer: SidebarResponse = {
-			friends: await getFriendList(req.user.id),
-			FriendRequests: await getFriendRequests(req.user.id)
-		};
-
-
-		const reqests = await getFriendList(req.user.id);
-		console.log(`request: `, reqests);
-		reply.send(answer);
-	});
-
-	app.post('/chat', async (req, reply) => {
-		const chatPartner = (req.body as { name: string }).name;
-
-		const answer: ChatInitResponse = {
-			friend: {
-				name: chatPartner,
-				picture: "../uploads/bernd.jpg",
-				onlineState: 'online'
-			},
-			messages: [
-				{
-					owner: 'you',
-					text: 'hallo',
-					timestamp: '12:12'
-				},
-				{
-					owner: chatPartner,
-					text: 'baumaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-					timestamp: '11:11'
-				},
-				{
-					owner: 'you',
-					text: 'train',
-					timestamp: '10:10'
-				}
-			],
-			gameInvite: true
-		};
-		reply.send(answer);
-	});
-
-	
 }
