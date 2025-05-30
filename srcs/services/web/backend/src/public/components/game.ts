@@ -59,6 +59,7 @@ export class GameRoom extends HTMLElement {
 			}
 
 			if (data.type === 'Error') {
+				this.socket?.send(JSON.stringify({ type: 'exit' }));
 				alert(data.message);
 				console.error('WebSocket error:', data.message);
 				Router.navigateTo('/home');
@@ -72,6 +73,7 @@ export class GameRoom extends HTMLElement {
 				};
 				console.log('Game over:', data.message, data.winner, data.tournamentId);
 				setTimeout(() => {
+					this.socket?.send(JSON.stringify({ type: 'exit' }));
 					if(data.tournamentId !== null) {
 						console.log("Redirecting to tournament:", data.tournamentId);
 						Router.navigateTo(`/tournament/${data.tournamentId}`);
@@ -87,6 +89,7 @@ export class GameRoom extends HTMLElement {
 		};
 
 		this.socket.onerror = (err: Event) => {
+			this.socket?.send(JSON.stringify({ type: 'exit' }));
 			alert(`WebSocket error: ${err}`);
 			console.error('WebSocket error:', err);
 			Router.navigateTo('/home');

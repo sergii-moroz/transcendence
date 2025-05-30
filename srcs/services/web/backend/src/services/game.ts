@@ -35,6 +35,15 @@ export class Game {
 	}
 
 	addPlayer(socket: WebSocket, id: string) {
+		const playerEntry = Array.from(this.players.entries()).find(([_, player]) => player.id === id);
+
+		if (playerEntry) {
+			const [role, player] = playerEntry;
+			player.socket = socket;
+			console.custom('INFO', `${this.gameRoomId}: Player ${id} reconnected as ${role}, socket updated`);
+			return;
+		}
+
 		if (this.players.size === 0) {
 			this.players.set('player1', {socket, id, username: 'bing'});
 			this.state.scores.user1 = this.players.get('player1')!.username;
