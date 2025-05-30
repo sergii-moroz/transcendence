@@ -60,6 +60,18 @@ export const routes: tRoutes = {
 		description: "Game room for 1v1 matches"
 	},
 
+	"/tournament-list": {
+		template: "/templates/tournament-list.html",
+		title: `Tournaments | ${APP_TITLE}`,
+		description: "List of tournaments"
+	},
+
+	"/tournament/:tournamentId": {
+		template: "/templates/tournament.html",
+		title: `Tournament | ${APP_TITLE}`,
+		description: "Tournament page"
+	},
+
 	"/settings": {
 		template: "/templates/settings/index.html",
 		title: `Settings | ${APP_TITLE}`,

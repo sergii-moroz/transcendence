@@ -37,3 +37,14 @@ export interface gameJson {
 	winner?: string;
 	tournamentId?: string | null;
 }
+
+export interface tournamentListJson {
+	type: string;
+	message?: string;
+	tournamentId?: string;
+	tournaments?: {
+		id: string;
+		playerCount: number;
+		maxPlayers: number;
+	}[];
+}
