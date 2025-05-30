@@ -92,6 +92,7 @@ export const friends = async (app: FastifyInstance, opts: FastifyPluginOptions) 
 		try {
 			const friendName = (req.body as { name: string }).name;
 			const friend_id = await findUserIdByUsername(friendName);
+			if (!friend_id) throw new Error("friend does not exist");
 			await new Promise<void>((resolve, reject) => {
 				db.run(
 					'UPDATE friends \
@@ -117,6 +118,7 @@ export const friends = async (app: FastifyInstance, opts: FastifyPluginOptions) 
 		try {
 			const friendName = (req.body as { name: string }).name;
 			const friend_id = await findUserIdByUsername(friendName);
+			if (!friend_id) throw new Error("friend does not exist");
 			await new Promise<void>((resolve, reject) => {
 				db.run(
 					'UPDATE friends \
@@ -137,35 +139,5 @@ export const friends = async (app: FastifyInstance, opts: FastifyPluginOptions) 
 			reply.status(400).send();
 		}
 	});
-
-	app.post('/chat', async (req, reply) => {
-		try {
-			const chatPartner = (req.body as { name: string }).name;
-			const answer: ChatInitResponse = {
-				friend: await getFriendChat(chatPartner, req.user.id),
-				messages: [
-					{
-						owner: 'you',
-						text: 'hallo',
-						timestamp: '12:12'
-					},
-					{
-						owner: chatPartner,
-						text: 'baumaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-						timestamp: '11:11'
-					},
-					{
-						owner: 'you',
-						text: 'train',
-						timestamp: '10:10'
-					}
-				],
-				gameInvite: true
-			};
-			reply.send(answer);
-		} catch (error) {
-			console.custom("ERROR", error);
-			reply.status(400).send();
-		}
-	});
 }
+

@@ -46,14 +46,13 @@ export interface SidebarResponse {
 	FriendRequests: Friend[];
 }
 
-export interface Messages {
+export interface Message {
 	text: string;
-	timestamp: string;
 	owner: string
 }
 
 export interface ChatInitResponse {
-	messages: Messages[];
+	messages: Message[];
 	friend: FriendChat;
 	gameInvite: boolean;
 }

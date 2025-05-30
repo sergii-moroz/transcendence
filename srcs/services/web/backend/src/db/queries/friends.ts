@@ -70,6 +70,7 @@ export const addFriendtoDB = async (friendName: string, inviter_id: number): Pro
 export const removeFriend = async (friendName: string, user_id: number): Promise<void> => {
 	if (friendName == OnlineUsers[0]) throw new Error("Admin Friend cant be deleted");
 	const friend_id = await findUserIdByUsername(friendName);
+	if (!friend_id) throw new Error("friend does not exist");
 	await new Promise<void>((resolve, reject) => {
 		db.run(
 			'DELETE FROM friends WHERE (inviter_id = ? AND recipient_id = ?) or (recipient_id = ? AND inviter_id = ?)',

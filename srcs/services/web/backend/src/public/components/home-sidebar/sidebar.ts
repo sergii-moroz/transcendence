@@ -1,7 +1,7 @@
 import { API } from "../../api-static.js"
 import { Router } from "../../router-static.js";
 
-import { ChatInitResponse, Friend, Messages, SidebarResponse } from "../../../types/user.js";
+import { ChatInitResponse, Friend, Message, SidebarResponse } from "../../../types/user.js";
 
 import {
 	iconFriends,
@@ -21,7 +21,7 @@ import {
 export class Sidebar extends HTMLElement {
 	state: string;
 	openChatwith: string | null;
-	messages: Messages[] | null;
+	messages: Message[] | null;
 
 	constructor() {
 		super()
@@ -140,10 +140,7 @@ export class Sidebar extends HTMLElement {
 		}
 		else if (target.closest('#unblock-btn')) {
 			await API.unblockFriend(this.openChatwith!);
-			const block = this.querySelector('#block-btn') as HTMLElement;
-			const unblock = this.querySelector('#unblock-btn') as HTMLElement;
-			unblock.classList.add("hidden");
-			block.classList.remove("hidden");
+			this.initChat(this.openChatwith!);
 		}
 		else if (target.closest('#send-message-btn')) {
 			const chatInput = document.getElementById('chat-input') as HTMLInputElement;

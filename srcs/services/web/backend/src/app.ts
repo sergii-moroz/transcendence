@@ -21,6 +21,7 @@ import { verifyAccessToken } from "./services/tokenService.js";
 import { twoFARoutes } from "./routes/v1/2fa.routes.js";
 import { normalizeError } from "./errors/error.js";
 import { friends } from "./routes/v1/friends.js";
+import { chat } from "./routes/v1/chat.js";
 
 export const build = async (opts: FastifyServerOptions) => {
 	const app = fastify(opts)
@@ -81,6 +82,7 @@ export const build = async (opts: FastifyServerOptions) => {
 	app.register(routes);
 	app.register(pages, {prefix: "api"});
 	app.register(friends, {prefix: "api"});
+	app.register(chat, {prefix: "api"});
 	app.register(waitingRoomSock, {prefix: "ws"});
 	app.register(gameRoomSock, {prefix: "ws"});
 	app.register(tWaitingRoomSock, {prefix: "ws"});
