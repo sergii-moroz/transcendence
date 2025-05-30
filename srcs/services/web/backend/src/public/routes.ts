@@ -90,5 +90,16 @@ export const routes: tRoutes = {
 		description: "2FA setup is completed"
 	},
 
+	"/settings/2fa/disable-verify": {
+		template: "/templates/settings/2fa/disable-verify.html",
+		title: `2FA Disable | ${APP_TITLE}`,
+		description: "Disable 2FA"
+	},
+
+	"/settings/2fa/disabled/confirmation": {
+		template: "/templates/settings/2fa/disabled-confirmation.html",
+		title: `2FA Disabled | ${APP_TITLE}`,
+		description: "Confirmation of disabling 2FA"
+	},
 
 }

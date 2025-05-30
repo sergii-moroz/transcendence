@@ -1,4 +1,5 @@
 import { TwoFABackupGA } from "./components/2fa/2fa-backup-ga.js";
+import { TwoFADisableVerify } from "./components/2fa/2fa-disable-verify.js";
 import { TwoFALoginVerify } from "./components/2fa/2fa-login-verify.js";
 import { TwoFARegisterGA } from "./components/2fa/2fa-register-ga.js";
 import { TwoFAVerifyGA } from "./components/2fa/2fa-verify-ga.js";
@@ -30,6 +31,7 @@ customElements.define('two-fa-login-verify', TwoFALoginVerify)
 customElements.define('two-fa-register-ga', TwoFARegisterGA)
 customElements.define('two-fa-verify-ga', TwoFAVerifyGA)
 customElements.define('two-fa-backup-ga', TwoFABackupGA)
+customElements.define('two-fa-disable-verify', TwoFADisableVerify)
 
 // Home
 customElements.define('home-header', HomeHeader);
