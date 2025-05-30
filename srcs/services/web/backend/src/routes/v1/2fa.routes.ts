@@ -9,6 +9,7 @@ import {
 } from "../../services/authService.js";
 
 import {
+	disable2FASchema,
 	gaRegisterSchema,
 	generateBackupCodesSchema,
 	is2FAEnabledSchema,
@@ -18,6 +19,7 @@ import {
 } from "../../schemas/2fa.schemas.js";
 
 import {
+	handleDisable2FA,
 	handleGARegister,
 	handleGAVerify,
 	handleGenerateBackupCodes,
@@ -61,6 +63,12 @@ export const twoFARoutes = async (app: FastifyInstance, opts: FastifyPluginOptio
 	app.post('/login/verify', {
 		schema:			loginVerify2FASchema,
 		handler:		handleLoginVerify2FA
+	})
+
+	app.post('/disable', {
+		schema:			disable2FASchema,
+		preHandler:	[authenticate, checkCsrf],
+		handler:		handleDisable2FA
 	})
 
 }

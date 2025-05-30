@@ -128,6 +128,11 @@ export class API {
 		return res.json()
 	}
 
+	static async disable2FA(code: string) {
+		const response = await this.post('/api/2fa/disable', { code }, { includeCSRF: true })
+		return response.json()
+	}
+
 	// ==========================================
 	// PRIVATE: HELPERS
 	// ==========================================
