@@ -5,11 +5,12 @@ import {
 } from "fastify"
 import { GameRoomRequest } from "../../types/game.js";
 
-const disconnectTimeouts = new Map<string, NodeJS.Timeout>();
 
 export const gameRoomSock = async (app: FastifyInstance) => {
 
-    app.get('/game/:gameRoomId', { websocket: true }, (socket, req: GameRoomRequest) => {
+	const disconnectTimeouts = new Map<string, NodeJS.Timeout>();
+	
+	app.get('/game/:gameRoomId', { websocket: true }, (socket, req: GameRoomRequest) => {
 		console.custom("INFO", `New WebSocket connection from ${req.user.id}`);
 		const gameRoomId = req.params.gameRoomId;
 		const game = app.gameInstances.get(gameRoomId);
