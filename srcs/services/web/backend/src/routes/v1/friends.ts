@@ -96,8 +96,8 @@ export const friends = async (app: FastifyInstance, opts: FastifyPluginOptions) 
 				db.run(
 					'UPDATE friends \
 						SET \
-							blocked_by_inviter = CASE WHEN inviter_id = ? THEN true ELSE blocked_by_inviter END, \
-       						blocked_by_recipient = CASE WHEN recipient_id = ? THEN true ELSE blocked_by_recipient END \
+							blocked_by_inviter = CASE WHEN inviter_id = ? THEN CURRENT_TIMESTAMP ELSE blocked_by_inviter END, \
+       						blocked_by_recipient = CASE WHEN recipient_id = ? THEN CURRENT_TIMESTAMP ELSE blocked_by_recipient END \
 						WHERE (inviter_id = ? AND recipient_id = ?) or (inviter_id = ? and recipient_id = ?)',
 					[req.user.id, req.user.id, friend_id, req.user.id, req.user.id, friend_id],
 					function (err) {
@@ -121,8 +121,8 @@ export const friends = async (app: FastifyInstance, opts: FastifyPluginOptions) 
 				db.run(
 					'UPDATE friends \
 						SET \
-							blocked_by_inviter = CASE WHEN inviter_id = ? THEN false ELSE blocked_by_inviter END, \
-       						blocked_by_recipient = CASE WHEN recipient_id = ? THEN false ELSE blocked_by_recipient END \
+							blocked_by_inviter = CASE WHEN inviter_id = ? THEN null ELSE blocked_by_inviter END, \
+       						blocked_by_recipient = CASE WHEN recipient_id = ? THEN null ELSE blocked_by_recipient END \
 						WHERE (inviter_id = ? AND recipient_id = ?) or (inviter_id = ? and recipient_id = ?)',
 					[req.user.id, req.user.id, friend_id, req.user.id, req.user.id, friend_id],
 					function (err) {

@@ -85,8 +85,8 @@ export const removeFriend = async (friendName: string, user_id: number): Promise
 export const getFriendChat = async (friendName: string, user_id: number): Promise<FriendChat> => {
 	const friend_id = await findUserIdByUsername(friendName);
 	if (!friend_id) throw new Error("friend does not exist");
-	const FriendData = await new Promise<Friend & { blocked_by_inviter: boolean, blocked_by_recipient: boolean, inviter_id: number, recipient_id: number }>((resolve, reject) => {
-		db.get<Friend & { blocked_by_inviter: boolean, blocked_by_recipient: boolean, inviter_id: number, recipient_id: number }>(' \
+	const FriendData = await new Promise<Friend & { blocked_by_inviter: string | null, blocked_by_recipient: string | null, inviter_id: number, recipient_id: number }>((resolve, reject) => {
+		db.get<Friend & { blocked_by_inviter: string | null, blocked_by_recipient: string | null, inviter_id: number, recipient_id: number }>(' \
 			SELECT username as name, avatar as picture, blocked_by_inviter, blocked_by_recipient, recipient_id, inviter_id from friends f \
 			JOIN users u on u.id = \
 				case \
@@ -103,7 +103,7 @@ export const getFriendChat = async (friendName: string, user_id: number): Promis
 		})
 	})
 
-	const blockStatus = (FriendData.inviter_id == user_id && FriendData.blocked_by_inviter) || (FriendData.recipient_id == user_id && FriendData.blocked_by_recipient);
+	const blockStatus = (FriendData.inviter_id == user_id ? FriendData.blocked_by_inviter : FriendData.blocked_by_recipient)
 
 	return {
 		name: FriendData.name,

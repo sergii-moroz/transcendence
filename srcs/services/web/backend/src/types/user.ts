@@ -33,7 +33,7 @@ export interface Friend {
 
 export interface FriendChat extends Friend {
 	online: boolean;
-	blocked: boolean;
+	blocked: string | null;
 }
 
 export interface SidebarResponse {

@@ -491,7 +491,7 @@ export class Sidebar extends HTMLElement {
 		});
 	}
 
-	setBlockButton(blocked: boolean) {
+	setBlockButton(blocked: string | null) {
 		const block = this.querySelector('#block-btn') as HTMLElement;
 		const unblock = this.querySelector('#unblock-btn') as HTMLElement;
 		if (blocked)
