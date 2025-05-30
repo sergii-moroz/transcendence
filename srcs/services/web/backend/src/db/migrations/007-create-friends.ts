@@ -7,12 +7,11 @@ export async function up() {
 				inviter_id INTEGER NOT NULL,
 				recipient_id INTEGER NOT NULL,
 				status TEXT NOT NULL CHECK(status IN ('pending', 'accepted', 'blocked')),
-				blocked_by INTEGER DEFAULT NULL,
+				blocked_by_inviter BOOLEAN DEFAULT false,
+				blocked_by_recipient BOOLEAN DEFAULT false,
 				created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 				FOREIGN KEY (inviter_id) REFERENCES users(id) ON DELETE CASCADE,
 				FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE CASCADE,
-				FOREIGN KEY (blocked_by) REFERENCES users(id) ON DELETE CASCADE,
-				CHECK (status != 'blocked' OR blocked_by IS NOT NULL),
 				CHECK (inviter_id != recipient_id)
 				UNIQUE(inviter_id, recipient_id)
 			)

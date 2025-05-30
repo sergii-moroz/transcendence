@@ -8,7 +8,7 @@ import {
 } from "../../types/user.js"
 import { db } from "../../db/connections.js";
 
-import { getFriendRequests, getFriendList, addFriendtoDB, removeFriend } from "../../db/queries/friends.js";
+import { getFriendRequests, getFriendList, addFriendtoDB, removeFriend, getFriendChat } from "../../db/queries/friends.js";
 import { findUserIdByUsername } from "../../services/userService.js";
 
 export const friends = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
@@ -94,8 +94,12 @@ export const friends = async (app: FastifyInstance, opts: FastifyPluginOptions) 
 			const friend_id = await findUserIdByUsername(friendName);
 			await new Promise<void>((resolve, reject) => {
 				db.run(
-					'UPDATE friends SET blocked_by = ? WHERE (inviter_id = ? AND recipient_id = ?) or (inviter_id = ? and recipient_id = ?)',
-					[req.user.id, friend_id, req.user.id, req.user.id, friend_id],
+					'UPDATE friends \
+						SET \
+							blocked_by_inviter = CASE WHEN inviter_id = ? THEN true ELSE blocked_by_inviter END, \
+       						blocked_by_recipient = CASE WHEN recipient_id = ? THEN true ELSE blocked_by_recipient END \
+						WHERE (inviter_id = ? AND recipient_id = ?) or (inviter_id = ? and recipient_id = ?)',
+					[req.user.id, req.user.id, friend_id, req.user.id, req.user.id, friend_id],
 					function (err) {
 						if (err) reject(err);
 						else resolve();
@@ -115,8 +119,12 @@ export const friends = async (app: FastifyInstance, opts: FastifyPluginOptions) 
 			const friend_id = await findUserIdByUsername(friendName);
 			await new Promise<void>((resolve, reject) => {
 				db.run(
-					'UPDATE friends SET blocked_by = ? WHERE (inviter_id = ? AND recipient_id = ?) or (inviter_id = ? and recipient_id = ?)',
-					[null, friend_id, req.user.id, req.user.id, friend_id],
+					'UPDATE friends \
+						SET \
+							blocked_by_inviter = CASE WHEN inviter_id = ? THEN false ELSE blocked_by_inviter END, \
+       						blocked_by_recipient = CASE WHEN recipient_id = ? THEN false ELSE blocked_by_recipient END \
+						WHERE (inviter_id = ? AND recipient_id = ?) or (inviter_id = ? and recipient_id = ?)',
+					[req.user.id, req.user.id, friend_id, req.user.id, req.user.id, friend_id],
 					function (err) {
 						if (err) reject(err);
 						else resolve();
@@ -131,33 +139,33 @@ export const friends = async (app: FastifyInstance, opts: FastifyPluginOptions) 
 	});
 
 	app.post('/chat', async (req, reply) => {
-		const chatPartner = (req.body as { name: string }).name;
-		const answer: ChatInitResponse = {
-			friend: {
-				name: chatPartner,
-				picture: "../uploads/bernd.jpg",
-				onlineState: 'online',
-				blocked: false
-			},
-			messages: [
-				{
-					owner: 'you',
-					text: 'hallo',
-					timestamp: '12:12'
-				},
-				{
-					owner: chatPartner,
-					text: 'baumaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-					timestamp: '11:11'
-				},
-				{
-					owner: 'you',
-					text: 'train',
-					timestamp: '10:10'
-				}
-			],
-			gameInvite: true
-		};
-		reply.send(answer);
+		try {
+			const chatPartner = (req.body as { name: string }).name;
+			const answer: ChatInitResponse = {
+				friend: await getFriendChat(chatPartner, req.user.id),
+				messages: [
+					{
+						owner: 'you',
+						text: 'hallo',
+						timestamp: '12:12'
+					},
+					{
+						owner: chatPartner,
+						text: 'baumaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+						timestamp: '11:11'
+					},
+					{
+						owner: 'you',
+						text: 'train',
+						timestamp: '10:10'
+					}
+				],
+				gameInvite: true
+			};
+			reply.send(answer);
+		} catch (error) {
+			console.custom("ERROR", error);
+			reply.status(400).send();
+		}
 	});
 }

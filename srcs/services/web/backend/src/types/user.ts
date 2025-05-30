@@ -31,6 +31,11 @@ export interface Friend {
 	picture: string;
 }
 
+export interface FriendChat extends Friend {
+	online: boolean;
+	blocked: boolean;
+}
+
 export interface SidebarResponse {
 	friends: {
 		online: Friend[];
@@ -49,6 +54,6 @@ export interface Messages {
 
 export interface ChatInitResponse {
 	messages: Messages[];
-	friend: Friend & {onlineState: string, blocked: boolean};
+	friend: FriendChat;
 	gameInvite: boolean;
 }

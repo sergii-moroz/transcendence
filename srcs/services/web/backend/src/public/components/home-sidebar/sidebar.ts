@@ -373,7 +373,7 @@ export class Sidebar extends HTMLElement {
 							<div class="font-medium">
 								${data.friend.name}
 							</div>
-							<div class="text-xs text-gray-400">${data.friend.onlineState}</div>
+							<div class="text-xs text-gray-400">${data.friend.online ? "online" : "offline"}</div>
 						</div>
 					</div>
 					

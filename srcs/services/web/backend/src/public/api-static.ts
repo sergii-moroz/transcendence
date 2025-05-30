@@ -256,6 +256,11 @@ export class API {
 	static async getChat(name: string) {
 		try {
 			const res = await this.post('/api/chat', {name});
+			if (!res.ok) {
+				console.error("Add Friend API call failed");
+				return null;
+			}
+
 			return res.json();
 		} catch (error) {
 			console.error("Chat Sidebar API call failed:", error);
