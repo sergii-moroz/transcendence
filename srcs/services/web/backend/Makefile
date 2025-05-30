@@ -32,7 +32,7 @@ all:	compile
 	node $(DIST)/$(SERVER_MAIN)
 
 compile:
-	npm run build2
+	npm run build
 
 fclean:
 	rm -rf $(DIST)
