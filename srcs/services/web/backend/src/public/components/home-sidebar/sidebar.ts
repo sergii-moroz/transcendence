@@ -13,7 +13,9 @@ import {
 	iconTrash,
 	iconChatSend,
 	iconSidebarCheck,
-	iconCheck
+	iconCheck,
+	iconLockClose,
+	iconLockOpen
 } from "../icons/icons.js"
 
 export class Sidebar extends HTMLElement {
@@ -379,10 +381,10 @@ export class Sidebar extends HTMLElement {
 					
 					<div class="flex items-center gap-2">
 						<button id="block-btn" class="text-gray-400 hover:text-red-500 p-1" title="Block User">
-							${iconBlock}
+							${iconLockClose}
 						</button>
 						<button id="unblock-btn" class="text-gray-400 hover:text-red-500 p-1" title="Unblock User">
-							${iconCheck}
+							${iconLockOpen}
 						</button>
 						<button id="unfriend-btn" class="text-gray-400 hover:text-red-500 p-1" title="Unfriend">
 							${iconTrash}
