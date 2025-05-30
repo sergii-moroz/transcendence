@@ -54,7 +54,7 @@ export class HomeContent extends HTMLElement {
 			Router.navigateTo('/waiting-room');
 		}
 		else if (target.closest('#tournament-btn')) {
-			alert('not available');
+			Router.navigateTo('/tournament-list');
 		}
 		else if (target.closest('#viewProfile-btn')) {
 			Router.navigateTo('/settings');
