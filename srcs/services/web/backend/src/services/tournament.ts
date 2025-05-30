@@ -11,15 +11,17 @@ export class Tournament {
 	allConnected: boolean;
 	isRunning: boolean;
 	id: string;
+	maxPlayers: number;
 	app: FastifyInstance;
 
-	constructor(app: FastifyInstance) {
+	constructor(app: FastifyInstance, maxPlayers: number) {
 		this.app = app;
 		this.games = new Map();
 		this.players = new Array();
 		this.knownIds = new Map();
 		this.allConnected = false;
 		this.isRunning = false;
+		this.maxPlayers = maxPlayers || 4;
 		this.id = crypto.randomBytes(16).toString('hex');
 	}
 
@@ -70,18 +72,18 @@ export class Tournament {
 				}));
 				console.custom('ERROR', `Tournament: User ${id} tried to join a full tournament`);
 			}
-		} else if(this.players.length !== 4) { // Add player
+		} else if(this.players.length !== this.maxPlayers) { // Add player
 			this.players.push([id, socket]);
 			this.knownIds.set(id, false);
 			console.custom('INFO', `Tournament: Player ${id} joined (${this.players.length}/4)`);
-		} else if (this.players.length === 4) { // Forbid joining if full
+		} else if (this.players.length === this.maxPlayers) { // Forbid joining if full
 			socket.send(JSON.stringify({
 				type: 'Error',
 				message: 'Tournament is full.'
 			}));
 			console.custom('ERROR', `Tournament: User ${id} tried to join a full tournament`);
 		}
-		if(this.players.length === 4 && !this.isRunning) { // Start tournament if 4 players are connected
+		if(this.players.length === this.maxPlayers && !this.isRunning) { // Start tournament if 4 players are connected
 			this.allConnected = true;
 			console.custom('INFO', `Tournament: Starting tournament...`);
 			this.startTournament();
