@@ -82,6 +82,17 @@ export class API {
 	}
 
 	/**
+	 * Sends a logout request to the server with the provided credentials.
+	 * Automatically handles token refresh if the access token is expired or missing.
+	 *
+	 * @returns A Promise resolving to the parsed JSON response from the server.
+	 */
+	static async logout() {
+		const response = await this.post('/api/logout', {}, { includeCSRF: true })
+		return response.json()
+	}
+
+	/**
 	 * Retrieves a QR code and secret for 2FA registration.
 	 * Makes an authenticated POST request to the '/2fa/register-ga' endpoint.
 	 *
