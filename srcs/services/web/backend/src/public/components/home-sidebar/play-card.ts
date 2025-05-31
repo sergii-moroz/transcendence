@@ -1,5 +1,4 @@
 import { Router } from "../../router-static.js"
-import { iconHomeSingleplayer } from "../icons/icons.js"
 
 export class PlayCard extends HTMLElement {
 	private btn: HTMLButtonElement | null = null
@@ -16,7 +15,7 @@ export class PlayCard extends HTMLElement {
 	}
 
 	disconnectedCallback() {
-		//
+		this.btn?.removeEventListener('click', this)
 	}
 
 	handleEvent(event: Event) {
