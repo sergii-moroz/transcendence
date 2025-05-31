@@ -7,9 +7,13 @@ import { Button2FA } from "./components/2fa/button-2fa.js";
 import { ButtonThemeToggle } from "./components/button-theme-toggle.js";
 import { HomeContent } from "./components/home-sidebar/content.js";
 import { HomeHeader } from "./components/home-sidebar/header.js";
+import { PlayCard } from "./components/home-sidebar/play-card.js";
 import { Sidebar } from "./components/home-sidebar/sidebar.js";
 import { IconCheck } from "./components/icons/icon-check.js";
 import { IconChevronLeft } from "./components/icons/icon-chevron-left.js";
+import { IconHomeMultiplayer } from "./components/icons/icon-home-multiplayer.js";
+import { IconHomeSingleplayer } from "./components/icons/icon-home-single-player.js";
+import { IconHomeTournament } from "./components/icons/icon-home-tournament.js";
 import { IconShieldCheck } from "./components/icons/icon-shield-check.js";
 import { IconSquareArrowUpRight } from "./components/icons/icon-square-arrow-up-right.js";
 import { IconUserRound } from "./components/icons/icon-user-round.js";
@@ -25,6 +29,7 @@ customElements.define('btn-2fa', Button2FA)
 // PAGE COMPONENTS
 customElements.define('register-form', RegisterForm)
 customElements.define('login-form', LoginForm)
+customElements.define('play-card', PlayCard)
 
 // 2FA
 customElements.define('two-fa-login-verify', TwoFALoginVerify)
@@ -45,5 +50,8 @@ customElements.define('icon-chevron-left', IconChevronLeft)
 customElements.define('icon-shield-check', IconShieldCheck)
 customElements.define('icon-square-arrow-up-right', IconSquareArrowUpRight)
 customElements.define('icon-user-round', IconUserRound)
+customElements.define('icon-home-single-player', IconHomeSingleplayer)
+customElements.define('icon-home-multiplayer', IconHomeMultiplayer)
+customElements.define('icon-home-tournament', IconHomeTournament)
 
 Router.init()

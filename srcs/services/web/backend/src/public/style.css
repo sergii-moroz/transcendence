@@ -20,18 +20,40 @@
 	}
 
 	@keyframes spin-down {
-	from {
-		transform: rotate(0deg);
-		opacity: 1;
+		from {
+			transform: rotate(0deg);
+			opacity: 1;
+		}
+		to {
+			transform: rotate(360deg);
+			opacity: 0.2;
+		}
 	}
-	to {
-		transform: rotate(360deg);
-		opacity: 0.2;
+
+	@keyframes bg-pulse-1 {
+		50% {
+			top: 40%;
+			transform: translateX(+25%);
+			transform: scale(1.25);
+			opacity: 0.15;
+			background-color: oklch(65.6% 0.241 354.308);
+		}
 	}
-}
+
+	@keyframes bg-pulse-2 {
+		50% {
+			bottom: 40%;
+			transform: translateX(-35%);
+			transform: scale(1.1);
+			opacity: 0.1;
+			background-color: oklch(84.1% 0.238 128.85);
+		}
+	}
 
 	--animate-error-bar: errorBar 4s linear forwards;
 	--animate-spin-down: spin-down 4s linear forwards;
+	--animate-bg-pulse-1: bg-pulse-1 30s infinite;
+	--animate-bg-pulse-2: bg-pulse-2 17s infinite;
 }
 
 @layer base {
