@@ -144,6 +144,11 @@ export class API {
 		return response.json()
 	}
 
+	static async getUserPerformance() {
+		const response = await this.get('/api/stats/user/performance')
+		return response
+	}
+
 	// ==========================================
 	// PRIVATE: HELPERS
 	// ==========================================

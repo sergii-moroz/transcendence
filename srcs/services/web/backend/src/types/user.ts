@@ -11,6 +11,16 @@ export interface User {
 
 export type JwtUserPayload = Pick<User, 'id' | 'username'>
 
+export interface UserStats {
+	id: number,
+	wins: number,
+	losses: number,
+	t_wins: number,
+	t_losses: number,
+	ai_wins: number,
+	ai_losses: number,
+}
+
 interface PlayerStats {
 	wins: number;
 	matches: number;

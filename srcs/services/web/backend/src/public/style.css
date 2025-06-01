@@ -73,8 +73,12 @@
 		@apply bg-gray-50 border border-gray-300 text-gray-900 rounded-md focus:ring-primary focus:border-primary block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500;
 	}
 
-	.tw-card {
+	.tw-card-2 {
 		@apply bg-white rounded-lg shadow dark:border dark:bg-gray-800 dark:border-gray-700
+	}
+
+	.tw-card {
+		@apply bg-white rounded-2xl overflow-hidden border border-gray-200 transition-all duration-700 ease-out hover:scale-[1.005] hover:shadow-lg dark:bg-gray-800 dark:border-gray-700 dark:shadow-purple-600/25
 	}
 
 	.tw-btn {

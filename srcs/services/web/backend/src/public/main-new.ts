@@ -9,6 +9,7 @@ import { HomeContent } from "./components/home-sidebar/content.js";
 import { HomeHeader } from "./components/home-sidebar/header.js";
 import { PlayCard } from "./components/home-sidebar/play-card.js";
 import { Sidebar } from "./components/home-sidebar/sidebar.js";
+import { StatsCard } from "./components/home-sidebar/stats-card.js";
 import { IconCheck } from "./components/icons/icon-check.js";
 import { IconChevronLeft } from "./components/icons/icon-chevron-left.js";
 import { IconHomeMultiplayer } from "./components/icons/icon-home-multiplayer.js";
@@ -30,6 +31,7 @@ customElements.define('btn-2fa', Button2FA)
 customElements.define('register-form', RegisterForm)
 customElements.define('login-form', LoginForm)
 customElements.define('play-card', PlayCard)
+customElements.define('stats-card', StatsCard)
 
 // 2FA
 customElements.define('two-fa-login-verify', TwoFALoginVerify)

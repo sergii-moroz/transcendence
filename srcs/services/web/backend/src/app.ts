@@ -20,6 +20,7 @@ import { Tournament } from "./services/tournament.js";
 import { verifyAccessToken } from "./services/tokenService.js";
 import { twoFARoutes } from "./routes/v1/2fa.routes.js";
 import { normalizeError } from "./errors/error.js";
+import { statsRoutes } from "./routes/v1/stats.routes.js";
 
 export const build = async (opts: FastifyServerOptions) => {
 	const app = fastify(opts)
@@ -85,6 +86,7 @@ export const build = async (opts: FastifyServerOptions) => {
 	app.register(tournamentRoomSock, {prefix: "ws"});
 	app.register(authRoutes, {prefix: "api"});
 	app.register(twoFARoutes, {prefix: 'api/2fa'});
+	app.register(statsRoutes, {prefix: 'api/stats'});
 
 	// GLOBAL ERROR HANDLING
 	app.setErrorHandler( async (error, request, reply) => {
