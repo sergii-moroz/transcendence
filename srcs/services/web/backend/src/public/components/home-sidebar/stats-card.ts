@@ -4,7 +4,7 @@ import { iconHomeStats } from "../icons/icons.js"
 
 export class StatsCard extends HTMLElement {
 	private btn: HTMLButtonElement | null = null
-	private data: UserStats = {id: -1, wins: 0, losses: 0, t_wins: 0, t_losses: 0, ai_wins: 0, ai_losses: 0}
+	private data: UserStats = {id: -1, m_wins: 0, m_losses: 0, t_wins: 0, t_losses: 0, s_wins: 0, s_losses: 0}
 
 	constructor() {
 		super()
@@ -40,18 +40,18 @@ export class StatsCard extends HTMLElement {
 
 					<div class="grid grid-cols-3 gap-4 mb-6">
 						<div class="dark:bg-gray-700/50 bg-gray-100 rounded-lg p-3 text-center dark:hover:bg-gray-700/60 hover:bg-gray-100/60 transition-colors">
-							<div class="text-xl sm:text-2xl font-bold mb-1">${this.data.wins}</div>
+							<div class="text-xl sm:text-2xl font-bold mb-1">${this.data.m_wins}</div>
 							<div class="text-xs dark:text-gray-400 text-gray-500">Wins</div>
 						</div>
 						<div class="dark:bg-gray-700/50 bg-gray-100 rounded-lg p-3 text-center dark:hover:bg-gray-700/60 hover:bg-gray-100/60 transition-colors">
-							<div class="text-xl sm:text-2xl font-bold mb-1">${this.data.wins + this.data.losses}</div>
+							<div class="text-xl sm:text-2xl font-bold mb-1">${this.data.m_wins + this.data.m_losses}</div>
 							<div class="text-xs dark:text-gray-400 text-gray-500">Matches</div>
 						</div>
 						<div class="dark:bg-gray-700/50 bg-gray-100 rounded-lg p-3 text-center dark:hover:bg-gray-700/60 hover:bg-gray-100/60 transition-colors">
 							<div class="text-xl sm:text-2xl font-bold text-green-400 mb-1">
 								${
-									(this.data.wins + this.data.losses)
-										? (this.data.wins / (this.data.wins + this.data.losses) * 100).toFixed(1)
+									(this.data.m_wins + this.data.m_losses)
+										? (this.data.m_wins / (this.data.m_wins + this.data.m_losses) * 100).toFixed(1)
 										: 0
 								}%
 							</div>

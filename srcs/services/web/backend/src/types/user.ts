@@ -13,12 +13,12 @@ export type JwtUserPayload = Pick<User, 'id' | 'username'>
 
 export interface UserStats {
 	id: number,
-	wins: number,
-	losses: number,
+	m_wins: number,
+	m_losses: number,
 	t_wins: number,
 	t_losses: number,
-	ai_wins: number,
-	ai_losses: number,
+	s_wins: number,
+	s_losses: number,
 }
 
 interface PlayerStats {
