@@ -13,6 +13,7 @@ export class Tournament {
 	id: string;
 	maxPlayers: number;
 	app: FastifyInstance;
+	deleteTimeout: NodeJS.Timeout | null = null;
 
 	constructor(app: FastifyInstance, maxPlayers: number) {
 		this.app = app;
@@ -73,6 +74,7 @@ export class Tournament {
 				console.custom('ERROR', `Tournament: User ${id} tried to join a full tournament`);
 			}
 		} else if(this.players.length !== this.maxPlayers) { // Add player
+			this.players = this.players.filter(([pid]) => pid !== id);
 			this.players.push([id, socket]);
 			this.knownIds.set(id, false);
 			console.custom('INFO', `Tournament: Player ${id} joined (${this.players.length}/4)`);
