@@ -4,7 +4,7 @@ import { iconHomeStats } from "../icons/icons.js"
 
 export class StatsCard extends HTMLElement {
 	private btn: HTMLButtonElement | null = null
-	private data: UserStats = {id: -1, m_wins: 0, m_losses: 0, t_wins: 0, t_losses: 0, s_wins: 0, s_losses: 0}
+	private data: UserStats = {m_wins: 0, m_losses: 0, t_wins: 0, t_losses: 0, s_wins: 0, s_losses: 0}
 
 	constructor() {
 		super()

@@ -149,6 +149,11 @@ export class API {
 		return response
 	}
 
+	static async getTopPlayers() {
+		const response = await this.get('/api/stats/top-players')
+		return response
+	}
+
 	// ==========================================
 	// PRIVATE: HELPERS
 	// ==========================================

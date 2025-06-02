@@ -12,7 +12,6 @@ export interface User {
 export type JwtUserPayload = Pick<User, 'id' | 'username'>
 
 export interface UserStats {
-	id: number,
 	m_wins: number,
 	m_losses: number,
 	t_wins: number,
@@ -21,20 +20,30 @@ export interface UserStats {
 	s_losses: number,
 }
 
-interface PlayerStats {
-	wins: number;
-	matches: number;
-	percentage: number;
+export type SinglePlayerStats = Pick<UserStats, 's_wins' | 's_losses'> & { username: string }
+export type MultiPlayerStats = Pick<UserStats, 'm_wins' | 'm_losses'> & { username: string }
+export type TournamentStats = Pick<UserStats, 't_wins' | 't_losses'> & { username: string }
+
+export type TopPlayers = {
+	singleplayer: SinglePlayerStats[] | null;
+	multiplayer: MultiPlayerStats[] | null;
+	tournament: TournamentStats[] | null;
 }
 
-interface TopPlayer extends PlayerStats {
-	name: string;
-}
+// interface PlayerStats {
+// 	wins: number;
+// 	matches: number;
+// 	percentage: number;
+// }
 
-export interface HomeResponse {
-	stats: PlayerStats;
-	topPlayer: TopPlayer;
-}
+// interface TopPlayer extends PlayerStats {
+// 	name: string;
+// }
+
+// export interface HomeResponse {
+// 	stats: PlayerStats;
+// 	topPlayer: TopPlayer;
+// }
 
 export interface Friend {
 	name: string;
