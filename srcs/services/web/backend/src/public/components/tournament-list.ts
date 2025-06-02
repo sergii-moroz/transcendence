@@ -24,8 +24,10 @@ export class TournamentList extends HTMLElement {
 
 	render = () => {
 		this.innerHTML = `
-			<h2 class="text-xl font-bold mb-4 text-white">Active tournaments:</h2>
-			<button id="create-tournament" class="tw-btn mb-4">Create Tournament</button>
+			<div class="flex items-center justify-between mb-4 mt-6">
+				<h2 class="text-xl font-bold">Active tournaments</h2>
+				<button id="create-tournament" class="tw-btn w-20 mt-6">New</button>
+			</div>
 			<ul id="tournament-list"></ul>
 		`;
 	}
@@ -91,7 +93,7 @@ export class TournamentList extends HTMLElement {
 				card.innerHTML = `
 					<div>
 						<strong>Tournament ID:</strong> ${tournament.id}<br>
-						<strong>Players:</strong> ${tournament.playerCount || 1} / ${tournament.maxPlayers}
+						<strong>Players:</strong> ${tournament.playerCount} / ${tournament.maxPlayers}
 					</div>
 					<button
 						id="join-tournament-${tournament.id}"
