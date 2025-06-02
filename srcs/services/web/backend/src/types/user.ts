@@ -51,6 +51,12 @@ export interface Message {
 	owner: string
 }
 
+export interface MessageToServer {
+	text: string;
+	to: string
+}
+
+
 export interface ChatInitResponse {
 	messages: Message[];
 	friend: FriendChat;
