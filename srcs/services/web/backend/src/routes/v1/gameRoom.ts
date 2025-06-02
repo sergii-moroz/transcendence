@@ -15,6 +15,7 @@ export const gameRoomSock = async (app: FastifyInstance) => {
 		const gameRoomId = req.params.gameRoomId;
 		const game = app.gameInstances.get(gameRoomId);
 		const userId = req.user.id.toString();
+		const userName = req.user.username;
 
 		if (!game) {
 			console.custom("WARN", 'User: ' + req.user.username + ' tried to connect to a non-existing game room: ' + gameRoomId);
@@ -26,7 +27,7 @@ export const gameRoomSock = async (app: FastifyInstance) => {
 			clearTimeout(disconnectTimeouts.get(userId)!);
 			disconnectTimeouts.delete(userId);
 		}
-		game.addPlayer(socket, req.user.id);
+		game.addPlayer(socket, userId, userName);
 		console.custom('INFO', `User: ${req.user.username} connected to game room: ${gameRoomId}`);
 
 		socket.on('message', (messageBuffer: Event) => {

@@ -34,7 +34,7 @@ export class Game {
 		this.gameRunning = false;
 	}
 
-	addPlayer(socket: WebSocket, id: string) {
+	addPlayer(socket: WebSocket, id: string, username: string) {
 		const playerEntry = Array.from(this.players.entries()).find(([_, player]) => player.id === id);
 
 		if (playerEntry) {
@@ -45,12 +45,12 @@ export class Game {
 		}
 
 		if (this.players.size === 0) {
-			this.players.set('player1', {socket, id, username: 'bing'});
+			this.players.set('player1', {socket, id, username});
 			this.state.scores.user1 = this.players.get('player1')!.username;
 			console.custom('INFO', `${this.gameRoomId}: Player 1 joined`);
 		}
 		else if (this.players.size === 1) {
-			this.players.set('player2', {socket, id, username: 'bong'});
+			this.players.set('player2', {socket, id, username});
 			this.state.scores.user2 = this.players.get('player2')!.username;
 			this.startLoop();
 			console.custom('INFO', `${this.gameRoomId}: Player 2 joined`);
@@ -73,7 +73,7 @@ export class Game {
 			} else {
 				user.socket.send(JSON.stringify({
 					type: 'gameOver',
-					message: 'Game ended, other player left, you win!',
+					message: `${user.username} wins!`,
 					winner: role,
 					tournamentId: this.tournamentId,
 				}));
