@@ -1,6 +1,15 @@
 import { API } from "../../api-static.js"
-import { GameMode, PlayerStats, TopPlayers } from "../../../types/user.js"
-import { iconHomeRocket, iconHomeTrophy } from "../icons/icons.js"
+
+import {
+	iconHomeRocket,
+	iconHomeTrophy
+} from "../icons/icons.js"
+
+import {
+	GameMode,
+	PlayerStats,
+	TopPlayers
+} from "../../../types/user.js"
 
 export class TopPlayerCard extends HTMLElement {
 	private btn: HTMLButtonElement | null = null

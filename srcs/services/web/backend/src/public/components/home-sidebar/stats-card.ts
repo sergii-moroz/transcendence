@@ -1,10 +1,20 @@
 import { API } from "../../api-static.js"
-import { UserStats } from "../../../types/user.js"
 import { iconHomeStats } from "../icons/icons.js"
+
+import {
+	GameMode,
+	UserStats
+} from "../../../types/user.js"
 
 export class StatsCard extends HTMLElement {
 	private btn: HTMLButtonElement | null = null
 	private data: UserStats = {m_wins: 0, m_losses: 0, t_wins: 0, t_losses: 0, s_wins: 0, s_losses: 0}
+	private modes: GameMode[] = ['singleplayer', 'multiplayer', 'tournament']
+	private data2 = {
+		singleplayer: {wins: 0, losses: 0},
+		multiplayer: {wins: 0, losses: 0},
+		tournament: {wins: 0, losses: 0}
+	}
 
 	constructor() {
 		super()
@@ -12,6 +22,11 @@ export class StatsCard extends HTMLElement {
 
 	async connectedCallback() {
 		this.data = await API.getUserPerformance()
+		this.data2 = {
+			singleplayer: {wins: this.data.s_wins, losses: this.data.s_losses},
+			multiplayer: {wins: this.data.m_wins, losses: this.data.m_losses},
+			tournament: {wins: this.data.t_wins, losses: this.data.t_losses},
+		}
 		this.render()
 
 		this.btn = this.querySelector('button')
@@ -28,6 +43,9 @@ export class StatsCard extends HTMLElement {
 	}
 
 	private render() {
+		const tabs = this.renderTabButtons()
+		const sections = this.renderSections()
+
 		this.innerHTML = `
 			<div class="tw-card">
 				<div class="p-6 flex-1">
@@ -38,26 +56,9 @@ export class StatsCard extends HTMLElement {
 						<h3 class="text-xl font-bold text-white">Your Stats</h3>
 					</div>
 
-					<div class="grid grid-cols-3 gap-4 mb-6">
-						<div class="dark:bg-gray-700/50 bg-gray-100 rounded-lg p-3 text-center dark:hover:bg-gray-700/60 hover:bg-gray-100/60 transition-colors">
-							<div class="text-xl sm:text-2xl font-bold mb-1">${this.data.m_wins}</div>
-							<div class="text-xs dark:text-gray-400 text-gray-500">Wins</div>
-						</div>
-						<div class="dark:bg-gray-700/50 bg-gray-100 rounded-lg p-3 text-center dark:hover:bg-gray-700/60 hover:bg-gray-100/60 transition-colors">
-							<div class="text-xl sm:text-2xl font-bold mb-1">${this.data.m_wins + this.data.m_losses}</div>
-							<div class="text-xs dark:text-gray-400 text-gray-500">Matches</div>
-						</div>
-						<div class="dark:bg-gray-700/50 bg-gray-100 rounded-lg p-3 text-center dark:hover:bg-gray-700/60 hover:bg-gray-100/60 transition-colors">
-							<div class="text-xl sm:text-2xl font-bold text-green-400 mb-1">
-								${
-									(this.data.m_wins + this.data.m_losses)
-										? (this.data.m_wins / (this.data.m_wins + this.data.m_losses) * 100).toFixed(1)
-										: 0
-								}%
-							</div>
-							<div class="text-xs dark:text-gray-400 text-gray-500">Win Rate</div>
-						</div>
-					</div>
+					<!-- Tabs -->
+					${tabs}
+					${sections}
 				</div>
 
 				<div class="p-6 pt-0">
@@ -68,4 +69,70 @@ export class StatsCard extends HTMLElement {
 			</div>
 		`
 	}
+
+	private renderTabButtons() {
+		return this.modes.map((mode, index) => `
+			<input type="radio" id="tab-stats-${mode}" name="stats-tabs" class="hidden peer/${mode}" ${index === 0 ? "checked" : ""}>
+			<label for="tab-stats-${mode}" class="inline-block px-4 py-2 mb-2 rounded-full text-xs cursor-pointer hover:bg-gray-500/20
+				peer-checked/${mode}:bg-blue-500/10
+				peer-checked/${mode}:hover:bg-blue-500/20
+				peer-checked/${mode}:text-blue-500
+				"
+			>
+				${mode.charAt(0).toUpperCase() + mode.slice(1)}
+			</label>
+		`).join('')
+	}
+
+	private renderModeStats(item: {wins: number, losses: number}) {
+		const total = item.wins + item.losses
+		const winRate = total > 0 ? (item.wins / total * 100).toFixed(1) : "0.0"
+
+		return `
+			<div class="dark:bg-gray-700/50 bg-gray-100 rounded-lg p-3 text-center dark:hover:bg-gray-700/60 hover:bg-gray-100/60 transition-colors">
+				<div class="text-xl sm:text-2xl font-bold mb-1">${item.wins}</div>
+				<div class="text-xs dark:text-gray-400 text-gray-500">Wins</div>
+			</div>
+			<div class="dark:bg-gray-700/50 bg-gray-100 rounded-lg p-3 text-center dark:hover:bg-gray-700/60 hover:bg-gray-100/60 transition-colors">
+				<div class="text-xl sm:text-2xl font-bold mb-1">${total}</div>
+				<div class="text-xs dark:text-gray-400 text-gray-500">Matches</div>
+			</div>
+			<div class="dark:bg-gray-700/50 bg-gray-100 rounded-lg p-3 text-center dark:hover:bg-gray-700/60 hover:bg-gray-100/60 transition-colors">
+				<div class="text-xl sm:text-2xl font-bold text-green-400 mb-1">
+					${winRate}%
+				</div>
+				<div class="text-xs dark:text-gray-400 text-gray-500">Win Rate</div>
+			</div>
+		`
+	}
+
+	private renderSections() {
+		return this.modes.map(mode => {
+			const block = this.renderModeStats(this.data2[mode])
+
+			return `
+				<div class="grid grid-cols-3 gap-4 mb-6 hidden peer-checked/${mode}:grid" data-section="${mode}">
+					${block}
+				</div>
+			`
+		}).join('')
+	}
 }
+
+// DO NOT DELETE
+// NEEDED FOR TAILWINDCSS
+
+// peer-checked/singleplayer:grid
+// peer-checked/singleplayer:text-blue-500
+// peer-checked/singleplayer:bg-blue-500/10
+// peer-checked/singleplayer:hover:bg-blue-500/20
+
+// peer-checked/multiplayer:grid
+// peer-checked/multiplayer:text-blue-500
+// peer-checked/multiplayer:bg-blue-500/10
+// peer-checked/multiplayer:hover:bg-blue-500/20
+
+// peer-checked/tournament:grid
+// peer-checked/tournament:text-blue-500
+// peer-checked/tournament:bg-blue-500/10
+// peer-checked/tournament:hoer:bg-blue-500/20
