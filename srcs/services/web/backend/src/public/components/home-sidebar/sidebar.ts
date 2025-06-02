@@ -1,5 +1,6 @@
 import { API } from "../../api-static.js"
 import { Router } from "../../router-static.js";
+import { socialSocketManager } from "../../SocialWebSocket.js";
 
 import { ChatInitResponse, Friend, Message, SidebarResponse } from "../../../types/user.js";
 
@@ -21,13 +22,13 @@ import {
 export class Sidebar extends HTMLElement {
 	state: string;
 	openChatwith: string | null;
-	messages: Message[] | null;
+	// messages: Message[];
 
 	constructor() {
 		super()
 		this.state = 'collapsed'
 		this.openChatwith = null;
-		this.messages = null;
+		// this.messages = [];
 	}
 
 	
@@ -53,6 +54,10 @@ export class Sidebar extends HTMLElement {
 	}
 	
 	disconnectedCallback() {
+		if (this.openChatwith) {
+				socialSocketManager.removeMessageCallback();
+				this.openChatwith = null;
+		}
 		this.removeEventListener('click', this.handleClick);
 		this.removeEventListener('keydown', this.handleKeyPress);
 	}
@@ -68,6 +73,8 @@ export class Sidebar extends HTMLElement {
 				const message = chatInput.value.trim();
 				if (message) {
 					console.log(`Chat message: ${message}`);
+					socialSocketManager.send({text: message, to: this.openChatwith!});
+					this.addMessages({text: message, owner: "you"});
 					chatInput.value = '';
 				}
 			}
@@ -87,7 +94,10 @@ export class Sidebar extends HTMLElement {
 
 		if (target.closest('#sideBar-collapsed') || target.closest('#back-to-friends-btn')) {
 			this.state = 'friendList';
-			this.openChatwith = null;
+			if (this.openChatwith) {
+				socialSocketManager.removeMessageCallback();
+				this.openChatwith = null;
+			}
 			this.renderOpen();
 			this.initFriends();
 		}
@@ -116,7 +126,13 @@ export class Sidebar extends HTMLElement {
 		else if (target.closest('.friend-item')) {
 			const name = (target.closest('.friend-item') as HTMLElement).dataset.friendName;
 			this.state = 'chat';
-			this.initChat(name!);
+			this.openChatwith = name!;
+			socialSocketManager.setMessageCallback((data: Message) => {
+				if (data.owner != this.openChatwith)
+					return socialSocketManager.addPopup(data);
+				this.addMessages(data);
+			});
+			this.initChat();
 		}
 		else if (target.closest('#unfriend-btn')) {
 			if (this.openChatwith == "admin")
@@ -140,13 +156,15 @@ export class Sidebar extends HTMLElement {
 		}
 		else if (target.closest('#unblock-btn')) {
 			await API.unblockFriend(this.openChatwith!);
-			this.initChat(this.openChatwith!);
+			this.initChat();
 		}
 		else if (target.closest('#send-message-btn')) {
 			const chatInput = document.getElementById('chat-input') as HTMLInputElement;
 			const message = chatInput.value.trim();
 			if (message) {
 				console.log(`Chat message: ${message}`);
+				socialSocketManager.send({text: message, to: this.openChatwith!});
+				this.addMessages({text: message, owner: "you"});
 				chatInput.value = '';
 			}
 		}
@@ -449,9 +467,9 @@ export class Sidebar extends HTMLElement {
 		root.append(invitation)
 	}
 
-	async initChat(name: string) {
+	async initChat() {
 		try {
-			const data = await API.getChat(name) as ChatInitResponse;
+			const data = await API.getChat(this.openChatwith!) as ChatInitResponse;
 			if (!data) {
 				console.error("Error fetching chat init data");
 				return this.showErrorState(this.querySelector('#sidebar-chat'));
@@ -460,29 +478,26 @@ export class Sidebar extends HTMLElement {
 			this.setBlockButton(data.friend.blocked);
 			if (data.gameInvite)
 				this.addGameInvitation();
-			this.messages = data.messages;
-			this.addMessages(name);
-			this.openChatwith = name;
+			data.messages.forEach(message => this.addMessages(message));
 		} catch (error) {
 			console.error("Error fetching chat init data:", error);
 			this.showErrorState(this.querySelector('#sidebar-chat'));
 		}
 	}
 
-	addMessages(name: string) {
+	addMessages(message: Message) {
 		const root = this.querySelector('#friend-chat-messages');
-		if (!root || !this.messages || !name) return;
-		this.messages.forEach(message => {
-			const messageElement = document.createElement('div');
-			if (message.owner == name)
-				messageElement.classList = "w-fit max-w-[70%] rounded-2xl rounded-bl-none dark:bg-blue-200 bg-blue-100 border border-blue-200 text-blue-800 p-2";
-			else
-				messageElement.classList = "ml-auto w-fit max-w-[70%] rounded-2xl rounded-br-none bg-blue-600 border border-blue-700 text-white p-2";
-			messageElement.innerHTML = `
-				<p class="text-sm text-left break-all">${message.text}</p>
-			`
-			root.append(messageElement);
-		})
+		if (!root || !this.openChatwith) return;
+
+		const messageElement = document.createElement('div');
+		if (message.owner == this.openChatwith)
+			messageElement.classList = "w-fit max-w-[70%] rounded-2xl rounded-bl-none dark:bg-blue-200 bg-blue-100 border border-blue-200 text-blue-800 p-2";
+		else
+			messageElement.classList = "ml-auto w-fit max-w-[70%] rounded-2xl rounded-br-none bg-blue-600 border border-blue-700 text-white p-2";
+		messageElement.innerHTML = `
+			<p class="text-sm text-left break-all">${message.text}</p>
+		`
+		root.append(messageElement);
 
 
 		requestAnimationFrame(() => {
