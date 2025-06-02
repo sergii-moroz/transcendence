@@ -20,30 +20,20 @@ export interface UserStats {
 	s_losses: number,
 }
 
-export type SinglePlayerStats = Pick<UserStats, 's_wins' | 's_losses'> & { username: string }
-export type MultiPlayerStats = Pick<UserStats, 'm_wins' | 'm_losses'> & { username: string }
-export type TournamentStats = Pick<UserStats, 't_wins' | 't_losses'> & { username: string }
+export type GameMode = 'singleplayer' | 'multiplayer' | 'tournament'
 
-export type TopPlayers = {
-	singleplayer: SinglePlayerStats[] | null;
-	multiplayer: MultiPlayerStats[] | null;
-	tournament: TournamentStats[] | null;
+export interface PlayerStats {
+	username: string,
+	wins: number,
+	losses: number,
+	win_rate: number,
 }
 
-// interface PlayerStats {
-// 	wins: number;
-// 	matches: number;
-// 	percentage: number;
-// }
-
-// interface TopPlayer extends PlayerStats {
-// 	name: string;
-// }
-
-// export interface HomeResponse {
-// 	stats: PlayerStats;
-// 	topPlayer: TopPlayer;
-// }
+export type TopPlayers = {
+	singleplayer: PlayerStats[] | null;
+	multiplayer: PlayerStats[] | null;
+	tournament: PlayerStats[] | null;
+}
 
 export interface Friend {
 	name: string;
