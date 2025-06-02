@@ -23,3 +23,16 @@ export const getOldMessages = async (friendName: string, user_id: number, blocke
 		})
 	})
 }
+
+export const addMessage = async (sender_id: number, receiver_id: number, text: string): Promise<void> => {
+	return new Promise((resolve, reject) => {
+		db.run(
+			`INSERT INTO messages (sender_id, receiver_id, text) VALUES (?, ?, ?)`,
+			[sender_id, receiver_id, text],
+			(err) => {
+				if (err) reject(err);
+				else resolve();
+			}
+		);
+	})
+}

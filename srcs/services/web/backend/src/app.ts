@@ -1,7 +1,7 @@
 import fastify, { FastifyReply, FastifyRequest, FastifyServerOptions } from "fastify"
 import fastifyStatic from "@fastify/static";
 import fastifyCookie from "@fastify/cookie";
-import fastifyWebsocket from '@fastify/websocket';
+import fastifyWebsocket, { WebSocket } from '@fastify/websocket';
 import { fileURLToPath } from "url";
 import path from "path";
 import fs from 'fs';
@@ -31,7 +31,8 @@ export const build = async (opts: FastifyServerOptions) => {
 
 	app.decorate("gameInstances", gameInstances);
 	app.decorate("tournaments", tournaments);
-	app.decorate("db", db)
+	app.decorate("db", db);
+	app.decorate("onlineUsers", new Map<string, WebSocket>());
 
 	app.register(fastifyCookie, {
 		secret: 'cookiesecret-key-cookiesecret-key',
@@ -82,7 +83,7 @@ export const build = async (opts: FastifyServerOptions) => {
 	app.register(routes);
 	app.register(pages, {prefix: "api"});
 	app.register(friends, {prefix: "api"});
-	app.register(chat, {prefix: "api"});
+	app.register(chat);
 	app.register(waitingRoomSock, {prefix: "ws"});
 	app.register(gameRoomSock, {prefix: "ws"});
 	app.register(tWaitingRoomSock, {prefix: "ws"});
