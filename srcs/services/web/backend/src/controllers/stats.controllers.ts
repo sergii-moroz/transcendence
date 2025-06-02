@@ -2,8 +2,7 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { JwtUserPayload } from "../types/user.js";
 
 import {
-	getMultiTopPlayers,
-	getTournamentTopPlayers,
+	getTopPlayers,
 	getUserPerformance
 } from "../services/stats.services.js";
 
@@ -25,10 +24,10 @@ export const handleGetTopPlayers = async (
 	reply:	FastifyReply
 ) => {
 	try {
-		const user = req.user as JwtUserPayload
-		const m_topPlayers = await getMultiTopPlayers()
-		const t_topPlayers = await getTournamentTopPlayers()
-		reply.send({ "singleplayer": null, "multiplayer": m_topPlayers, "tournament": t_topPlayers })
+		const s_topPlayers = await getTopPlayers('singleplayer')
+		const m_topPlayers = await getTopPlayers('multiplayer')
+		const t_topPlayers = await getTopPlayers('tournament')
+		reply.send({ singleplayer: s_topPlayers, multiplayer: m_topPlayers, tournament: t_topPlayers })
 	} catch (err) {
 		throw err
 	}
