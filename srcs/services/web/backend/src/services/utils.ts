@@ -1,3 +1,6 @@
+import { WebSocket } from "@fastify/websocket";
+import { Message } from "../types/user.js";
+
 const COLORS: Record<string, string> = {
 	INFO: '\x1b[32m',    // green
 	ERROR: '\x1b[31m',   // red
@@ -16,3 +19,17 @@ console.custom = function (prefix: string, ...args: any[]) {
 
 	console.log(`[${formattedTime}] ${color}${prefix}${reset}:`, ...args);
 };
+
+export const sendMessage = (text: string, owner: string, socket: WebSocket) => {
+	try {
+		const message: Message & { type: string} = {
+			type: 'message',
+			owner,
+			text
+		}
+		socket.send(JSON.stringify(message));
+	} catch (error) {
+		console.custom("ERROR", error);
+		socket.send({type: "error", text: "Message processing on the server failed"});
+	}
+}
