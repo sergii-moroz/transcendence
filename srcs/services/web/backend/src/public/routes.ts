@@ -102,4 +102,16 @@ export const routes: tRoutes = {
 		description: "Confirmation of disabling 2FA"
 	},
 
+	"/leaderboard": {
+		template: "/templates/leaderboard.html",
+		title: `Leaderboard | ${APP_TITLE}`,
+		description: "Leaderboard"
+	},
+
+	"/history": {
+		template: "/templates/history.html",
+		title: `Play History | ${APP_TITLE}`,
+		description: "User's play history"
+	},
+
 }

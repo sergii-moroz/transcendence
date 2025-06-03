@@ -5,6 +5,7 @@ import {
 	GameMode,
 	UserStats
 } from "../../../types/user.js"
+import { Router } from "../../router-static.js"
 
 export class StatsCard extends HTMLElement {
 	private btn: HTMLButtonElement | null = null
@@ -39,7 +40,8 @@ export class StatsCard extends HTMLElement {
 
 	handleEvent(event: Event) {
 		event.preventDefault()
-		console.log('Stats Card: button clicked')
+		// console.log('Stats Card: button clicked')
+		Router.navigateTo('/history')
 	}
 
 	private render() {

@@ -10,6 +10,7 @@ import {
 	PlayerStats,
 	TopPlayers
 } from "../../../types/user.js"
+import { Router } from "../../router-static.js"
 
 export class TopPlayerCard extends HTMLElement {
 	private btn: HTMLButtonElement | null = null
@@ -35,7 +36,8 @@ export class TopPlayerCard extends HTMLElement {
 
 	handleEvent(event: Event) {
 		event.preventDefault()
-		console.log("Top Player: view leaderboard button clicked")
+		// console.log("Top Player: view leaderboard button clicked")
+		Router.navigateTo('/leaderboard')
 	}
 
 	private render() {

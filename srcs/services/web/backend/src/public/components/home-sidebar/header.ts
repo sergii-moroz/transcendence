@@ -29,7 +29,7 @@ export class HomeHeader extends HTMLElement {
 			Router.navigateTo('/settings');
 		}
 		else if (target.closest('#leaderboard-btn')) {
-			Router.navigateTo('/about');
+			Router.navigateTo('/leaderboard');
 		}
 		else if (target.closest('#logout-btn')) {
 			await API.logout();
