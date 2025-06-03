@@ -1,5 +1,6 @@
 import { API } from "../../api-static.js";
 import { Router } from "../../router-static.js"
+import { socialSocketManager } from "../../SocialWebSocket.js";
 
 import {
 	iconHomeProfile,
@@ -33,6 +34,7 @@ export class HomeHeader extends HTMLElement {
 		else if (target.closest('#logout-btn')) {
 			// await API.logout();
 			// Router.currentUser = null;
+			socialSocketManager.disconnect();
 			Router.navigateTo('/login');
 		}
 	}

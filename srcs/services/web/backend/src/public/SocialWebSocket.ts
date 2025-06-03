@@ -10,6 +10,7 @@ class SocialSocketHandler {
 	private messageCallback: ((data: any) => void) | null = null;
 
 	init() {
+		if (this.socket) return;
 		this.socket = new WebSocket("/ws/chat");
 
 		this.socket.onopen = () => {
@@ -35,19 +36,27 @@ class SocialSocketHandler {
 				alert('User is already signed in!');
 			console.log('social Socket closed');
 			this.socket = null;
-			Router.navigateTo('/login');
+			// Router.navigateTo('/login');
 		}
 
 		this.socket.onerror = (error: Event) => {
 			console.error('social socket had an error!: ', error);
+			alert(`social socket had an error!: ${error}`)
 			this.socket = null;
-			Router.navigateTo('/login');
+			// Router.navigateTo('/login');
 		}
+	}
+
+	disconnect() {
+		if (!this.socket) return;
+		this.socket.close();
+		this.socket = null;
+		console.log('disconnecting social socket')
 	}
 
 	addPopup = (message: Message) => {
 		// something
-		console.log(`new message from ${message.owner}: ${message.text}`);
+		console.log(`new message from ${message.owner}: ${message.text}, popup`);
 	}
 
 	setMessageCallback(func: (data: any) => void) {
