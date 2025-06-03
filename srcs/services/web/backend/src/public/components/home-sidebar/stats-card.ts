@@ -53,7 +53,7 @@ export class StatsCard extends HTMLElement {
 						<div class="size-12 rounded-lg bg-blue-500/10 flex items-center justify-center mr-4">
 							${iconHomeStats}
 						</div>
-						<h3 class="text-xl font-bold text-white">Your Stats</h3>
+						<h3 class="text-xl font-bold">Your Stats</h3>
 					</div>
 
 					<!-- Tabs -->
