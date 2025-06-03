@@ -97,17 +97,32 @@ export class TopPlayerCard extends HTMLElement {
 	}
 
 	private renderTabButtons() {
-		return this.modes.map((mode, index) => `
-			<input type="radio" id="tab-${mode}" name="tabs" class="hidden peer/${mode}" ${index === 0 ? "checked" : ""}>
-			<label for="tab-${mode}" class="inline-block px-4 py-2 mb-2 rounded-full text-xs cursor-pointer hover:bg-gray-500/20
-				peer-checked/${mode}:bg-yellow-500/10
-				peer-checked/${mode}:hover:bg-yellow-500/20
-				peer-checked/${mode}:text-yellow-500
-				"
-			>
-				${mode.charAt(0).toUpperCase() + mode.slice(1)}
-			</label>
-		`).join('')
+		const icons = ['icon-home-single-player', 'icon-home-multiplayer', 'icon-home-tournament']
+
+		return this.modes.map((mode, index) => {
+			const iconElm = icons[index] || 'i'
+
+			return `
+				<input type="radio"
+					id="tab-top-${mode}"
+					name="top-tabs"
+					class="hidden peer/${mode}" ${index === 0 ? "checked" : ""}
+				>
+				<label for="tab-top-${mode}"
+					class="inline-block w-fit px-2 xl:px-4 py-2 mb-2 sm:mb-3 rounded-full cursor-pointer hover:bg-gray-500/20
+						peer-checked/${mode}:bg-yellow-500/10
+						peer-checked/${mode}:hover:bg-yellow-500/20
+						peer-checked/${mode}:text-yellow-500
+						peer-checked/${mode}:px-3
+						peer-checked/${mode}:[&>div>span]:inline-block"
+				>
+					<div class="flex items-center gap-2">
+						<${iconElm} class="xl:hidden [&>svg]:size-4 sm:[&>svg]:size-5"></${iconElm}>
+						<span class="hidden text-xs sm:text-sm xl:block">${mode.charAt(0).toUpperCase() + mode.slice(1)}</span>
+					</div>
+				</label>
+			`
+		}).join('')
 	}
 
 	private renderTabSections() {
@@ -134,13 +149,16 @@ export class TopPlayerCard extends HTMLElement {
 // peer-checked/singleplayer:text-yellow-500
 // peer-checked/singleplayer:bg-yellow-500/10
 // peer-checked/singleplayer:hover:bg-yellow-500/20
+// peer-checked/singleplayer:px-3
 
 // peer-checked/multiplayer:block
 // peer-checked/multiplayer:text-yellow-500
 // peer-checked/multiplayer:bg-yellow-500/10
 // peer-checked/multiplayer:hover:bg-yellow-500/20
+// peer-checked/multiplayer:px-3
 
 // peer-checked/tournament:block
 // peer-checked/tournament:text-yellow-500
 // peer-checked/tournament:bg-yellow-500/10
-// peer-checked/tournament:hoer:bg-yellow-500/20
+// peer-checked/tournament:hover:bg-yellow-500/20
+// peer-checked/tournament:px-3

@@ -71,17 +71,32 @@ export class StatsCard extends HTMLElement {
 	}
 
 	private renderTabButtons() {
-		return this.modes.map((mode, index) => `
-			<input type="radio" id="tab-stats-${mode}" name="stats-tabs" class="hidden peer/${mode}" ${index === 0 ? "checked" : ""}>
-			<label for="tab-stats-${mode}" class="inline-block px-4 py-2 mb-2 rounded-full text-xs cursor-pointer hover:bg-gray-500/20
-				peer-checked/${mode}:bg-blue-500/10
-				peer-checked/${mode}:hover:bg-blue-500/20
-				peer-checked/${mode}:text-blue-500
-				"
-			>
-				${mode.charAt(0).toUpperCase() + mode.slice(1)}
-			</label>
-		`).join('')
+		const icons = ['icon-home-single-player', 'icon-home-multiplayer', 'icon-home-tournament']
+
+		return this.modes.map((mode, index) => {
+			const iconElm = icons[index] || 'i'
+
+			return `
+				<input type="radio"
+					id="tab-stats-${mode}"
+					name="stats-tabs"
+					class="hidden peer/${mode}" ${index === 0 ? "checked" : ""}
+				>
+				<label for="tab-stats-${mode}"
+					class="inline-block w-fit px-2 xl:px-4 py-2 mb-2 sm:mb-3 rounded-full cursor-pointer hover:bg-gray-500/20
+						peer-checked/${mode}:bg-blue-500/10
+						peer-checked/${mode}:hover:bg-blue-500/20
+						peer-checked/${mode}:text-blue-500
+						peer-checked/${mode}:px-3
+						peer-checked/${mode}:[&>div>span]:inline-block"
+				>
+					<div class="flex items-center gap-2">
+						<${iconElm} class="xl:hidden [&>svg]:size-4 sm:[&>svg]:size-5"></${iconElm}>
+						<span class="hidden text-xs sm:text-sm xl:block">${mode.charAt(0).toUpperCase() + mode.slice(1)}</span>
+					</div>
+				</label>
+			`
+		}).join('')
 	}
 
 	private renderModeStats(item: {wins: number, losses: number}) {
@@ -126,13 +141,20 @@ export class StatsCard extends HTMLElement {
 // peer-checked/singleplayer:text-blue-500
 // peer-checked/singleplayer:bg-blue-500/10
 // peer-checked/singleplayer:hover:bg-blue-500/20
+// peer-checked/singleplayer:px-3
 
 // peer-checked/multiplayer:grid
 // peer-checked/multiplayer:text-blue-500
 // peer-checked/multiplayer:bg-blue-500/10
 // peer-checked/multiplayer:hover:bg-blue-500/20
+// peer-checked/multiplayer:px-3
 
 // peer-checked/tournament:grid
 // peer-checked/tournament:text-blue-500
 // peer-checked/tournament:bg-blue-500/10
-// peer-checked/tournament:hoer:bg-blue-500/20
+// peer-checked/tournament:hover:bg-blue-500/20
+// peer-checked/tournament:px-3
+
+// peer-checked/singleplayer:[&>div>span]:inline-block
+// peer-checked/multiplayer:[&>div>span]:inline-block
+// peer-checked/tournament:[&>div>span]:inline-block
