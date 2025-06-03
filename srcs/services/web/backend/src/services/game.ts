@@ -179,7 +179,7 @@ export class Game {
 				if (winner) {
 					if(!this.tournamentId) {
 						db.run(
-							`UPDATE user_stats SET wins = wins + 1 WHERE user_id = ?`, [winner.id]
+							`UPDATE user_stats SET m_wins = m_wins + 1 WHERE user_id = ?`, [winner.id]
 						);
 					}
 				}
@@ -190,7 +190,7 @@ export class Game {
 						);
 					} else {
 						db.run(
-							`UPDATE user_stats SET losses = losses + 1 WHERE user_id = ?`, [loser.id]
+							`UPDATE user_stats SET m_losses = m_losses + 1 WHERE user_id = ?`, [loser.id]
 						);
 					}
 				}
