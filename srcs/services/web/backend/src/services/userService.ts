@@ -24,6 +24,15 @@ export async function findUserByUsername(username: string): Promise<User | undef
 	});
 }
 
+export async function findUserIdByUsername(username: string): Promise<number | undefined> {
+	return new Promise((resolve, reject) => {
+		db.get<{id: number}>('SELECT id FROM users WHERE username = ?', [username], (err, row) => {
+			if (err) reject(err);
+			else resolve(row ? row.id : undefined);
+		});
+	});
+}
+
 export async function verifyPassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
 	return bcrypt.compare(plainPassword, hashedPassword);
 }

@@ -40,22 +40,34 @@ export interface Friend {
 	picture: string;
 }
 
+export interface FriendChat extends Friend {
+	online: boolean;
+	blocked: string | null;
+}
+
 export interface SidebarResponse {
 	friends: {
-		online: (Friend & { unreadMessages: boolean})[];
-		offline: (Friend & { unreadMessages: boolean})[];
+		online: Friend[];
+		offline: Friend[];
+		// online: (Friend & { unreadMessages: boolean})[];
+		// offline: (Friend & { unreadMessages: boolean})[];
 	}
 	FriendRequests: Friend[];
 }
 
-export interface Messages {
+export interface Message {
 	text: string;
-	timestamp: string;
 	owner: string
 }
 
+export interface MessageToServer {
+	text: string;
+	to: string
+}
+
+
 export interface ChatInitResponse {
-	messages: Messages[];
-	friend: Friend & {onlineState: string};
+	messages: Message[];
+	friend: FriendChat;
 	gameInvite: boolean;
 }
