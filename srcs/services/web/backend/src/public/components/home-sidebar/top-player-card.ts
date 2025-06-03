@@ -127,10 +127,14 @@ export class TopPlayerCard extends HTMLElement {
 
 	private renderTabSections() {
 		return this.modes.map(mode => {
-			const players = (this.data[mode] || [])
-				.slice(0, 3)
-				.map((item, index) => this.renderPlayerItem(item, index))
-				.join('')
+			const items = (this.data[mode] || []).slice(0, 3)
+
+			const players = items.length
+				? items.map((item, index) => this.renderPlayerItem(item, index)).join('')
+				: `<div class="dark:bg-gray-700/50 bg-gray-100 rounded-lg p-3 text-center dark:hover:bg-gray-700/60 hover:bg-gray-100/60 transition-colors">
+						<span>Take actions</span>
+						<span class="block text-xs text-gray-500">be the first</span>
+					</div>`
 
 			return `
 				<div class="leaderboard-section space-y-4 hidden peer-checked/${mode}:block" data-section="${mode}">
