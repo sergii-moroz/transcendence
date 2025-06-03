@@ -14,11 +14,12 @@ import {
 
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import bcrypt from 'bcrypt'
-import { loginSchema, registerSchema } from "../../schemas/auth.js";
-import { checkCsrf, validateRegisterInput } from "../../services/authService.js";
+import { loginSchema, logoutSchema, registerSchema } from "../../schemas/auth.js";
+import { authenticate, checkCsrf, validateRegisterInput } from "../../services/authService.js";
 import { RegisterInputProps } from "../../types/registration.js";
 import { InvalidCredentialsError, UserNotFoundError } from "../../errors/login.errors.js";
 import { NoRefreshTokenError } from "../../errors/middleware.errors.js";
+import { handleLogout } from "../../controllers/auth.controllers.js";
 
 export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
 
@@ -109,13 +110,11 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 		}
 	});
 
-	app.post('/logout', { preHandler: [checkCsrf] }, (req, reply) => {
-		reply
-			.clearCookie('token', { path: '/' })
-			.clearCookie('refreshToken', { path: '/' })
-			.clearCookie('csrf_token', { path: '/' })
-			.send({ success: true });
-	});
+	app.post('/logout', {
+		schema:			logoutSchema,
+		preHandler:	[authenticate, checkCsrf],
+		handler:		handleLogout
+	})
 
 	app.get('/user', (req, reply) => {
 		reply.send(req.user);

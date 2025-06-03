@@ -183,3 +183,30 @@ export const loginVerify2FAService = async (token: string, code: string) => {
 
 	return user
 }
+
+export const disable2FAService = async (id: number, code: string) => {
+	const user = await findUserById(id)
+
+	if (!user) throw new UserNotFoundError()
+	if (!user.two_factor_enabled) throw new TwoFANotEnabledError()
+	if (!user.two_factor_secret) throw new SecretNotFoundError()
+
+	const isValid = authenticator.check(code, user.two_factor_secret)
+	if (!isValid) throw new Invalid2FACodeError()
+
+	await disable2FA(user.id)
+}
+
+export const disable2FA = async (id: number): Promise<void> => {
+	return new Promise((resolve, reject) => {
+		db.run(
+			'UPDATE users SET two_factor_enabled = ?, two_factor_verified = ?, two_factor_secret = ?, two_factor_backup_codes = ?, two_factor_backup_at = ? WHERE id = ?',
+			[false, false, null, null, null, id],
+			function (err) {
+				if (err) return reject(err);
+				if (this.changes === 0) return reject(new UserNotFoundError())
+				resolve();
+			}
+		)
+	})
+}
