@@ -8,32 +8,32 @@ export class HomeContent extends HTMLElement {
 	}
 
 	connectedCallback() {
-		this.addEventListener('click', this.handleClick);
+		// this.addEventListener('click', this.handleClick);
 	}
 
 	disconnectedCallback() {
-		this.removeEventListener('click', this.handleClick);
+		// this.removeEventListener('click', this.handleClick);
 	}
 
-	async handleClick(event: Event) {
-		const target = event.target as HTMLElement;
+	// async handleClick(event: Event) {
+	// 	const target = event.target as HTMLElement;
 
-		if (target.closest('#singleplayer-btn')) {
-			alert('not available');
-		}
-		else if (target.closest('#multiplayer-btn')) {
-			Router.navigateTo('/waiting-room');
-		}
-		else if (target.closest('#tournament-btn')) {
-			Router.navigateTo('/tournament-list');
-		}
-		else if (target.closest('#viewProfile-btn')) {
-			Router.navigateTo('/settings');
-		}
-		else if (target.closest('#viewLeaderboard-btn')) {
-			Router.navigateTo('/about');
-		}
-	}
+	// 	if (target.closest('#singleplayer-btn')) {
+	// 		alert('not available');
+	// 	}
+	// 	else if (target.closest('#multiplayer-btn')) {
+	// 		Router.navigateTo('/waiting-room');
+	// 	}
+	// 	else if (target.closest('#tournament-btn')) {
+	// 		Router.navigateTo('/tournament-list');
+	// 	}
+	// 	else if (target.closest('#viewProfile-btn')) {
+	// 		Router.navigateTo('/settings');
+	// 	}
+	// 	else if (target.closest('#viewLeaderboard-btn')) {
+	// 		Router.navigateTo('/about');
+	// 	}
+	// }
 
 	render() {
 		this.innerHTML = `
@@ -67,7 +67,7 @@ export class HomeContent extends HTMLElement {
 						title="Tournament"
 						description="Compete in elimination brackets with 4 players"
 						button-text="Join"
-						href="/tournament-room"
+						href="/tournament-list"
 						icon="icon-home-tournament"
 						accent-color="purple"
 					></play-card>
