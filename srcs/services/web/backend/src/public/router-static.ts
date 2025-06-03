@@ -4,7 +4,7 @@ import { socialSocketManager } from "./SocialWebSocket.js";
 
 export class Router {
 	private static currentRoute: tRoute | null = null;
-	private static initSocket: boolean = false;
+	static initSocket: boolean = false;
 
 	static async init() {
 		window.addEventListener("popstate", () => this.handleRouteChange());

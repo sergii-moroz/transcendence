@@ -35,6 +35,7 @@ export class HomeHeader extends HTMLElement {
 			// await API.logout();
 			// Router.currentUser = null;
 			socialSocketManager.disconnect();
+			Router.initSocket = false;
 			Router.navigateTo('/login');
 		}
 	}
