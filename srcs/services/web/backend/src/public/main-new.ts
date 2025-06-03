@@ -22,6 +22,10 @@ import { IconUserRound } from "./components/icons/icon-user-round.js";
 import { LoginForm } from "./components/login-form.js";
 import { ModalLoginMenu } from "./components/modal-login-menu.js";
 import { RegisterForm } from "./components/register-form.js";
+import { WaitingRoom } from "./components/waiting-room.js";
+import { GameRoom } from "./components/game.js";
+import { TournamentList } from "./components/tournament-list.js";
+import { Tournament } from "./components/tournament.js";
 import { Router } from "./router-static.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
@@ -57,5 +61,15 @@ customElements.define('icon-user-round', IconUserRound)
 customElements.define('icon-home-single-player', IconHomeSingleplayer)
 customElements.define('icon-home-multiplayer', IconHomeMultiplayer)
 customElements.define('icon-home-tournament', IconHomeTournament)
+
+// Waiting Room
+customElements.define('waiting-room', WaitingRoom)
+
+// Game
+customElements.define('game-room', GameRoom)
+
+// Tournament
+customElements.define('tournament-list', TournamentList)
+customElements.define('tournament-room', Tournament)
 
 Router.init()

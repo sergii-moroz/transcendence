@@ -18,7 +18,16 @@ export class HomeContent extends HTMLElement {
 	async handleClick(event: Event) {
 		const target = event.target as HTMLElement;
 
-		if (target.closest('#viewProfile-btn')) {
+		if (target.closest('#singleplayer-btn')) {
+			alert('not available');
+		}
+		else if (target.closest('#multiplayer-btn')) {
+			Router.navigateTo('/waiting-room');
+		}
+		else if (target.closest('#tournament-btn')) {
+			Router.navigateTo('/tournament-list');
+		}
+		else if (target.closest('#viewProfile-btn')) {
 			Router.navigateTo('/settings');
 		}
 		else if (target.closest('#viewLeaderboard-btn')) {

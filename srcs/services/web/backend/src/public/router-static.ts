@@ -24,13 +24,20 @@ export class Router {
 
 	static async handleRouteChange() {
 		const path = this.getSanitizedPath()
+		let route
 
-		const route = routes[path] ?? routes["404"]
+		if (path.startsWith('/game/')) {
+			route = routes['/game/:gameRoomId'];
+		} else if (path.startsWith('/tournament/')) {
+			route = routes['/tournament/:tournamentId'];
+		} else {
+			route = routes[path] ?? routes["404"]
+		}
 		if (!this.initSocket && route.description == 'Home page') {
 			socialSocketManager.init();
 			this.initSocket = true;
 		}
-
+    
 		try {
 			const html = await this.loadTemplate(route.template)
 			this.updateDOM(route, html)

@@ -11,7 +11,7 @@ import { routes } from "./routes/v1/routes.js";
 import { pages } from "./routes/v1/pages.js";
 import { gameRoomSock } from "./routes/v1/gameRoom.js";
 import { waitingRoomSock } from "./routes/v1/waitingRoom.js";
-import { tWaitingRoomSock } from "./routes/v1/tWaitingRoom.js";
+import { tWaitingRoomSock } from "./routes/v1/tournamentList.js";
 import { tournamentRoomSock } from "./routes/v1/tournamentRoom.js";
 import { initializeDB } from "./db/init.js";
 import { db } from "./db/connections.js"

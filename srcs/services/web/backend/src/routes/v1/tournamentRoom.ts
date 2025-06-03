@@ -8,7 +8,7 @@ import { Tournament } from "../../services/tournament.js";
 
 export const tournamentRoomSock = async (app: FastifyInstance) => {
 
-    app.get('/tournament/:tournamentId', { websocket: true }, (socket, req: TournamentRoomRequest) => {
+	app.get('/tournament/:tournamentId', { websocket: true }, (socket, req: TournamentRoomRequest) => {
 		console.custom("INFO",`New WebSocket connection from ${req.user.id}`);
 		const userId = req.user.id.toString();
 		const userName = req.user.username;
@@ -29,6 +29,10 @@ export const tournamentRoomSock = async (app: FastifyInstance) => {
 			const message = JSON.parse(messageBuffer.toString());
 			
 			if(message.type === 'joinRoom') {
+				if (tournament.deleteTimeout) {
+					clearTimeout(tournament.deleteTimeout);
+					tournament.deleteTimeout = null;
+				}
 				console.custom('INFO', `User: ${req.user.username} connected to tournament: ${tournamentId}`);
 				tournament.addPlayer(socket, userId);
 				socket.send(JSON.stringify({
@@ -41,6 +45,19 @@ export const tournamentRoomSock = async (app: FastifyInstance) => {
 
 		socket.on('close', () => {
 			console.custom('INFO', `User: ${userName} disconnected from tournament room: ${tournamentId}`);
+			if (tournament.players.some(([id]) => id === userId)) {
+				tournament.players = tournament.players.filter(([id]) => id !== userId);
+			}
+			if (!tournament.deleteTimeout) {
+				tournament.deleteTimeout = setTimeout(() => {
+					// Check again before deleting
+					if (tournament.players.length === 0) {
+						app.tournaments.delete(tournamentId);
+						console.custom('INFO', `Tournament room ${tournamentId} closed due to inactivity`);
+					}
+					tournament.deleteTimeout = null;
+				}, 10000);
+			}
 		})
 
 		socket.on('error', (err: Event) => {
