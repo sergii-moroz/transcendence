@@ -3,8 +3,8 @@ import {
 	FastifyPluginOptions,
 } from "fastify"
 
-import { 
-	HomeResponse,
+import {
+	// HomeResponse,
 	SidebarResponse,
  	ChatInitResponse
 } from "../../types/user.js"
