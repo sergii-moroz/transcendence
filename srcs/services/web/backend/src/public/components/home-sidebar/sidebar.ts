@@ -1,7 +1,8 @@
 import { API } from "../../api-static.js"
 import { Router } from "../../router-static.js";
+import { socialSocketManager } from "../../SocialWebSocket.js";
 
-import { ChatInitResponse, Friend, Messages, SidebarResponse } from "../../../types/user.js";
+import { ChatInitResponse, Friend, Message, SidebarResponse } from "../../../types/user.js";
 
 import {
 	iconFriends,
@@ -12,19 +13,22 @@ import {
 	iconBlock,
 	iconTrash,
 	iconChatSend,
-	iconSidebarCheck
+	iconSidebarCheck,
+	iconCheck,
+	iconLockClose,
+	iconLockOpen
 } from "../icons/icons.js"
 
 export class Sidebar extends HTMLElement {
 	state: string;
 	openChatwith: string | null;
-	messages: Messages[] | null;
+	// messages: Message[];
 
 	constructor() {
 		super()
 		this.state = 'collapsed'
 		this.openChatwith = null;
-		this.messages = null;
+		// this.messages = [];
 	}
 
 	
@@ -50,6 +54,10 @@ export class Sidebar extends HTMLElement {
 	}
 	
 	disconnectedCallback() {
+		if (this.openChatwith) {
+				socialSocketManager.removeMessageCallback();
+				this.openChatwith = null;
+		}
 		this.removeEventListener('click', this.handleClick);
 		this.removeEventListener('keydown', this.handleKeyPress);
 	}
@@ -60,20 +68,24 @@ export class Sidebar extends HTMLElement {
 		if (key === 'Enter') {
 			const addFriendinput = document.getElementById('addFriendInput') as HTMLInputElement;
 			const chatInput = document.getElementById('chat-input') as HTMLInputElement;
-			if (addFriendinput) {
-				const name = addFriendinput.value.trim();
-				if (name) {
-					console.log(`name: ${name}`);
-					addFriendinput.value = '';
-				}
-			}
+			if (addFriendinput) this.addFriend(addFriendinput);
 			else if (chatInput) {
 				const message = chatInput.value.trim();
 				if (message) {
 					console.log(`Chat message: ${message}`);
+					socialSocketManager.send({text: message, to: this.openChatwith!});
+					this.addMessages({text: message, owner: "you"});
 					chatInput.value = '';
 				}
 			}
+		}
+	}
+
+	addFriend(input: HTMLInputElement) {
+		const name = input.value.trim();
+		if (name) {
+			API.addFriend(name);
+			input.value = '';
 		}
 	}
 
@@ -82,7 +94,10 @@ export class Sidebar extends HTMLElement {
 
 		if (target.closest('#sideBar-collapsed') || target.closest('#back-to-friends-btn')) {
 			this.state = 'friendList';
-			this.openChatwith = null;
+			if (this.openChatwith) {
+				socialSocketManager.removeMessageCallback();
+				this.openChatwith = null;
+			}
 			this.renderOpen();
 			this.initFriends();
 		}
@@ -95,36 +110,61 @@ export class Sidebar extends HTMLElement {
 		}
 		else if (target.closest('#addFriendBTN')) {
 			const input = document.getElementById('addFriendInput') as HTMLInputElement;
-			const name = input!.value.trim();
-			if (name) {
-				console.log(name);
-				input.value = '';
-			}
+			if (input) this.addFriend(input);
 		}
 		else if (target.closest('#acceptFriendReq')) {
-			alert('accept friend request');
+			const name = (target.closest('#acceptFriendReq') as HTMLElement).dataset.friendName;
+			await API.acceptFriend(name!);
+			this.initFriends();
 		}
-		else if (target.closest('#declineFriendReq')) {
-			alert('decline friend request');
+		else if (target.closest('#rejectFriendReq')) {
+			const name = (target.closest('#rejectFriendReq') as HTMLElement).dataset.friendName;
+			console.log(name);
+			await API.rejectFriend(name!);
+			this.initFriends();
 		}
 		else if (target.closest('.friend-item')) {
-			const friendField = target.closest('.friend-item') as HTMLElement;
-			const name = friendField.dataset.friendName!;
-
+			const name = (target.closest('.friend-item') as HTMLElement).dataset.friendName;
 			this.state = 'chat';
-			this.initChat(name);
+			this.openChatwith = name!;
+			socialSocketManager.setMessageCallback((data: Message) => {
+				if (data.owner != this.openChatwith)
+					return socialSocketManager.addPopup(data);
+				this.addMessages(data);
+			});
+			this.initChat();
 		}
 		else if (target.closest('#unfriend-btn')) {
-			alert('delete friend');
+			if (this.openChatwith == "admin")
+				return alert("cant delete admin user from friends!");
+			if (confirm("Are you sure you want to delete this friend?")) {
+				await API.deleteFriend(this.openChatwith!);
+				this.state = 'friendList';
+				this.openChatwith = null;
+				this.renderOpen();
+				this.initFriends();
+			}
 		}
 		else if (target.closest('#block-btn')) {
-			alert('block friend');
+			if (this.openChatwith == "admin")
+				return alert("cant block admin user!");
+			await API.blockFriend(this.openChatwith!);
+			const block = this.querySelector('#block-btn') as HTMLElement;
+			const unblock = this.querySelector('#unblock-btn') as HTMLElement;
+			block.classList.add("hidden");
+			unblock.classList.remove("hidden");
+		}
+		else if (target.closest('#unblock-btn')) {
+			await API.unblockFriend(this.openChatwith!);
+			this.initChat();
 		}
 		else if (target.closest('#send-message-btn')) {
 			const chatInput = document.getElementById('chat-input') as HTMLInputElement;
 			const message = chatInput.value.trim();
 			if (message) {
 				console.log(`Chat message: ${message}`);
+				socialSocketManager.send({text: message, to: this.openChatwith!});
+				this.addMessages({text: message, owner: "you"});
 				chatInput.value = '';
 			}
 		}
@@ -138,8 +178,8 @@ export class Sidebar extends HTMLElement {
 		else if (target.closest('#acceptGameInvite-btn')) {
 			alert('accept game invite');
 		}
-		else if (target.closest('#declineGameInvite-btn')) {
-			alert('decline game invite');
+		else if (target.closest('#rejectGameInvite-btn')) {
+			alert('reject game invite');
 		}
 		else if (target.closest('#chatProfile-btn')) {
 			alert('show friend profile');
@@ -240,16 +280,16 @@ export class Sidebar extends HTMLElement {
 						<div id="friendRequestProfile" class="flex items-center gap-2 cursor-pointer">
 							<img 
 								src="${request.picture}"
-								onerror="this.src='../uploads/default.jpg'"
+								onerror="this.src='/uploads/default.jpg'"
 								class="w-10 h-10 rounded-full object-cover"
 							>
 							<span class="font-medium">${request.name}</span>
 						</div>
 						<div class="flex gap-2">
-							<button id="acceptFriendReq" class="p-1.5 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors">
+							<button id="acceptFriendReq" class="p-1.5 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors" data-friend-name=${request.name}>
 								${iconSidebarCheck}
 							</button>
-							<button id="declineFriendReq" class="p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors">
+							<button id="rejectFriendReq" class="p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors" data-friend-name=${request.name}>
 								${iconX}
 							</button>
 						</div>
@@ -272,7 +312,8 @@ export class Sidebar extends HTMLElement {
 	
 		const requestsContainer = online.querySelector('#insertContainer');
 	
-		data.friends.online.forEach((friend: Friend & {unreadMessages: boolean}) => {
+		data.friends.online.forEach((friend: Friend) => {
+		// data.friends.online.forEach((friend: Friend & {unreadMessages: boolean}) => {
 			const requestElement = document.createElement('div');
 			requestElement.className = "friend-item flex items-center p-2 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg";
 			requestElement.dataset.friendName = friend.name;
@@ -280,14 +321,14 @@ export class Sidebar extends HTMLElement {
 				<div class="relative mr-3">
 					<img 
 						src=${friend.picture}
-						onerror="this.src='../uploads/default.jpg'"
+						onerror="this.src='/uploads/default.jpg'"
 						class="w-10 h-10 rounded-full"
 					>
 					<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
 				</div>
 				<span class="font-medium">${friend.name}</span>
-				${friend.unreadMessages ? '  <div class="w-2 h-2 ml-3 bg-blue-500 rounded-full" title="unread Messages"></div>' : ''}
 			`;
+			// <!-- ${friend.unreadMessages ? '  <div class="w-2 h-2 ml-3 bg-blue-500 rounded-full" title="unread Messages"></div>' : ''} -->
 			requestsContainer!.appendChild(requestElement);
 		})
 		root.append(online);
@@ -303,21 +344,23 @@ export class Sidebar extends HTMLElement {
 		`;
 	
 		const requestsContainer = offline.querySelector('#insertContainer');
-		data.friends.offline.forEach((friend: Friend & {unreadMessages: boolean}) => {
+		data.friends.offline.forEach((friend: Friend) => {
+		// data.friends.offline.forEach((friend: Friend & {unreadMessages: boolean}) => {
 			const requestElement = document.createElement('div');
 			requestElement.className = "friend-item flex items-center p-2 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg";
+			requestElement.dataset.friendName = friend.name;
 			requestElement.innerHTML = `
-					<div class="relative mr-3">
-						<img 
-							src=${friend.picture}
-							onerror="this.src='../uploads/default.jpg'"
-							class="w-10 h-10 rounded-full"
-						>
-						<div class="absolute bottom-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
-					</div>
-					<span class="font-medium">${friend.name}</span>
-					${friend.unreadMessages ? '  <div class="w-2 h-2 ml-3 bg-blue-500 rounded-full" title="unread Messages"></div>' : ''}
+				<div class="relative mr-3">
+					<img 
+						src=${friend.picture}
+						onerror="this.src='/uploads/default.jpg'"
+						class="w-10 h-10 rounded-full"
+					>
+					<div class="absolute bottom-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
+				</div>
+				<span class="font-medium">${friend.name}</span>
 			`;
+			// ${friend.unreadMessages ? '  <div class="w-2 h-2 ml-3 bg-blue-500 rounded-full" title="unread Messages"></div>' : ''}
 			requestsContainer!.appendChild(requestElement);
 		});
 		root.append(offline);
@@ -340,20 +383,23 @@ export class Sidebar extends HTMLElement {
 					<div id='chatProfile-btn' class="flex items-center cursor-pointer">
 						<img 
 							src=${data.friend.picture}
-							onerror="this.src='../uploads/default.jpg'"
+							onerror="this.src='/uploads/default.jpg'"
 							class="w-10 h-10 rounded-full mr-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
 						>
 						<div>
 							<div class="font-medium">
 								${data.friend.name}
 							</div>
-							<div class="text-xs text-gray-400">${data.friend.onlineState}</div>
+							<div class="text-xs text-gray-400">${data.friend.online ? "online" : "offline"}</div>
 						</div>
 					</div>
 					
 					<div class="flex items-center gap-2">
 						<button id="block-btn" class="text-gray-400 hover:text-red-500 p-1" title="Block User">
-							${iconBlock}
+							${iconLockClose}
+						</button>
+						<button id="unblock-btn" class="text-gray-400 hover:text-red-500 p-1" title="Unblock User">
+							${iconLockOpen}
 						</button>
 						<button id="unfriend-btn" class="text-gray-400 hover:text-red-500 p-1" title="Unfriend">
 							${iconTrash}
@@ -410,7 +456,7 @@ export class Sidebar extends HTMLElement {
 							<button id="acceptGameInvite-btn" class="p-1.5 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors">
 								${iconSidebarCheck}
 							</button>
-							<button id="declineGameInvite-btn" class="p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors">
+							<button id="rejectGameInvite-btn" class="p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors">
 								${iconX}
 							</button>
 						</div>
@@ -421,43 +467,50 @@ export class Sidebar extends HTMLElement {
 		root.append(invitation)
 	}
 
-	async initChat(name: string) {
+	async initChat() {
 		try {
-			const data = await API.getChat(name) as ChatInitResponse;
+			const data = await API.getChat(this.openChatwith!) as ChatInitResponse;
 			if (!data) {
 				console.error("Error fetching chat init data");
 				return this.showErrorState(this.querySelector('#sidebar-chat'));
 			}
 			this.renderChat(data);
+			this.setBlockButton(data.friend.blocked);
 			if (data.gameInvite)
 				this.addGameInvitation();
-			this.messages = data.messages;
-			this.addMessages(name);
-			this.openChatwith = name;
+			data.messages.forEach(message => this.addMessages(message));
 		} catch (error) {
 			console.error("Error fetching chat init data:", error);
 			this.showErrorState(this.querySelector('#sidebar-chat'));
 		}
 	}
 
-	addMessages(name: string) {
+	addMessages(message: Message) {
 		const root = this.querySelector('#friend-chat-messages');
-		if (!root || !this.messages || !name) return;
-		this.messages.forEach(message => {
-			const messageElement = document.createElement('div');
-			if (message.owner == name)
-				messageElement.classList = "w-fit max-w-[70%] rounded-2xl rounded-bl-none dark:bg-blue-200 bg-blue-100 border border-blue-200 text-blue-800 p-2";
-			else
-				messageElement.classList = "ml-auto w-fit max-w-[70%] rounded-2xl rounded-br-none bg-blue-600 border border-blue-700 text-white p-2";
-			messageElement.innerHTML = `
-				<p class="text-sm text-left break-all">${message.text}</p>
-			`
-			root.append(messageElement);
-		})
+		if (!root || !this.openChatwith) return;
+
+		const messageElement = document.createElement('div');
+		if (message.owner == this.openChatwith)
+			messageElement.classList = "w-fit max-w-[70%] rounded-2xl rounded-bl-none dark:bg-blue-200 bg-blue-100 border border-blue-200 text-blue-800 p-2";
+		else
+			messageElement.classList = "ml-auto w-fit max-w-[70%] rounded-2xl rounded-br-none bg-blue-600 border border-blue-700 text-white p-2";
+		messageElement.innerHTML = `
+			<p class="text-sm text-left break-all">${message.text}</p>
+		`
+		root.append(messageElement);
 
 
 		requestAnimationFrame(() => {
 			root.lastElementChild!.scrollIntoView({ behavior: 'smooth' });
 		});
+	}
+
+	setBlockButton(blocked: string | null) {
+		const block = this.querySelector('#block-btn') as HTMLElement;
+		const unblock = this.querySelector('#unblock-btn') as HTMLElement;
+		if (blocked)
+			block.classList.add("hidden");
+		else
+			unblock.classList.add("hidden");
 	}
 }

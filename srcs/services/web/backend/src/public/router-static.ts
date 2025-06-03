@@ -1,11 +1,13 @@
+import { WebSocket } from "@fastify/websocket";
 import { routes, tRoute } from "./routes.js";
+import { socialSocketManager } from "./SocialWebSocket.js";
 
 export class Router {
 	private static currentRoute: tRoute | null = null;
+	static initSocket: boolean = false;
 
 	static async init() {
 		window.addEventListener("popstate", () => this.handleRouteChange());
-
 		document.addEventListener("click", (e: Event) => {
 			const target = e.target as HTMLElement;
 			if (target.matches("[data-link]")) {
@@ -31,6 +33,11 @@ export class Router {
 		} else {
 			route = routes[path] ?? routes["404"]
 		}
+		if (!this.initSocket && route.description == 'Home page') {
+			socialSocketManager.init();
+			this.initSocket = true;
+		}
+    
 		try {
 			const html = await this.loadTemplate(route.template)
 			this.updateDOM(route, html)
@@ -73,7 +80,6 @@ export class Router {
 		}
 		meta.setAttribute("content", route.description);
 	}
-
 }
 
 Router.init()

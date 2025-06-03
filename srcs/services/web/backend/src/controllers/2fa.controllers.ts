@@ -1,4 +1,5 @@
 import {
+	disable2FAService,
 	generate2FASecretAndQRCode,
 	generateBackupCodesService,
 	is2FAEnabled,
@@ -21,8 +22,9 @@ import {
 import { FastifyReply, FastifyRequest } from "fastify";
 
 import { JwtUserPayload } from "../types/user.js";
-import { TwoFAAlreadyEnabledError } from "../errors/2fa.errors.js";
+import { TwoFAAlreadyEnabledError, TwoFANotEnabledError } from "../errors/2fa.errors.js";
 import jwt from "jsonwebtoken";
+import { findUserById } from "../services/userService.js";
 
 export const handleGARegister = async (
 	req:		FastifyRequest,
@@ -131,6 +133,21 @@ export const handleLoginVerify2FA = async (
 				maxAge: 60 * 15
 			})
 			.send({ success: true });
+	} catch (err) {
+		throw err
+	}
+}
+
+export const handleDisable2FA = async (
+	req:		FastifyRequest,
+	reply:	FastifyReply
+) => {
+	try {
+		const user = req.user as JwtUserPayload
+		const { code } = req.body as { code: string };
+
+		await disable2FAService(user.id, code)
+		reply.send({ success: true })
 	} catch (err) {
 		throw err
 	}

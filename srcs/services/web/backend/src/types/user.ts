@@ -11,19 +11,28 @@ export interface User {
 
 export type JwtUserPayload = Pick<User, 'id' | 'username'>
 
-interface PlayerStats {
-	wins: number;
-	matches: number;
-	percentage: number;
+export interface UserStats {
+	m_wins: number,
+	m_losses: number,
+	t_wins: number,
+	t_losses: number,
+	s_wins: number,
+	s_losses: number,
 }
 
-interface TopPlayer extends PlayerStats {
-	name: string;
+export type GameMode = 'singleplayer' | 'multiplayer' | 'tournament'
+
+export interface PlayerStats {
+	username: string,
+	wins: number,
+	losses: number,
+	win_rate: number,
 }
 
-export interface HomeResponse {
-	stats: PlayerStats;
-	topPlayer: TopPlayer;
+export type TopPlayers = {
+	singleplayer: PlayerStats[] | null;
+	multiplayer: PlayerStats[] | null;
+	tournament: PlayerStats[] | null;
 }
 
 export interface Friend {
@@ -31,22 +40,34 @@ export interface Friend {
 	picture: string;
 }
 
+export interface FriendChat extends Friend {
+	online: boolean;
+	blocked: string | null;
+}
+
 export interface SidebarResponse {
 	friends: {
-		online: (Friend & { unreadMessages: boolean})[];
-		offline: (Friend & { unreadMessages: boolean})[];
+		online: Friend[];
+		offline: Friend[];
+		// online: (Friend & { unreadMessages: boolean})[];
+		// offline: (Friend & { unreadMessages: boolean})[];
 	}
 	FriendRequests: Friend[];
 }
 
-export interface Messages {
+export interface Message {
 	text: string;
-	timestamp: string;
 	owner: string
 }
 
+export interface MessageToServer {
+	text: string;
+	to: string
+}
+
+
 export interface ChatInitResponse {
-	messages: Messages[];
-	friend: Friend & {onlineState: string};
+	messages: Message[];
+	friend: FriendChat;
 	gameInvite: boolean;
 }

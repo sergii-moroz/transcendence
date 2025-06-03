@@ -1,7 +1,7 @@
 import fastify, { FastifyReply, FastifyRequest, FastifyServerOptions } from "fastify"
 import fastifyStatic from "@fastify/static";
 import fastifyCookie from "@fastify/cookie";
-import fastifyWebsocket from '@fastify/websocket';
+import fastifyWebsocket, { WebSocket } from '@fastify/websocket';
 import { fileURLToPath } from "url";
 import path from "path";
 import fs from 'fs';
@@ -20,6 +20,9 @@ import { Tournament } from "./services/tournament.js";
 import { verifyAccessToken } from "./services/tokenService.js";
 import { twoFARoutes } from "./routes/v1/2fa.routes.js";
 import { normalizeError } from "./errors/error.js";
+import { friends } from "./routes/v1/friends.js";
+import { chat } from "./routes/v1/chat.js";
+import { statsRoutes } from "./routes/v1/stats.routes.js";
 
 export const build = async (opts: FastifyServerOptions) => {
 	const app = fastify(opts)
@@ -29,7 +32,8 @@ export const build = async (opts: FastifyServerOptions) => {
 
 	app.decorate("gameInstances", gameInstances);
 	app.decorate("tournaments", tournaments);
-	app.decorate("db", db)
+	app.decorate("db", db);
+	app.decorate("onlineUsers", new Map<string, WebSocket>());
 
 	app.register(fastifyCookie, {
 		secret: 'cookiesecret-key-cookiesecret-key',
@@ -79,12 +83,15 @@ export const build = async (opts: FastifyServerOptions) => {
 
 	app.register(routes);
 	app.register(pages, {prefix: "api"});
+	app.register(friends, {prefix: "api"});
+	app.register(chat);
 	app.register(waitingRoomSock, {prefix: "ws"});
 	app.register(gameRoomSock, {prefix: "ws"});
 	app.register(tWaitingRoomSock, {prefix: "ws"});
 	app.register(tournamentRoomSock, {prefix: "ws"});
 	app.register(authRoutes, {prefix: "api"});
 	app.register(twoFARoutes, {prefix: 'api/2fa'});
+	app.register(statsRoutes, {prefix: 'api/stats'});
 
 	// GLOBAL ERROR HANDLING
 	app.setErrorHandler( async (error, request, reply) => {
