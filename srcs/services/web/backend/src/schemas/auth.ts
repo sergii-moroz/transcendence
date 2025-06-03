@@ -52,3 +52,16 @@ export const loginSchema = {
 		401: errorResponseSchema,
 	}
 }
+
+export const logoutSchema = {
+	description: 'Clears authentication and CSRF cookies to log the user out.',
+	tags: ['auth'],
+	response: {
+		200: {
+			type: 'object',
+			properties: {
+				success: { type: 'boolean' }
+			}
+		}
+	}
+}

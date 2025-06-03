@@ -114,3 +114,24 @@ export const loginVerify2FASchema = {
 		404: errorResponseSchema, // FST_2FA_SECRET_NOT_FOUND, FST_USER_NOT_FOUND
 	}
 }
+
+export const disable2FASchema = {
+	body: {
+		type: 'object',
+		required: ['code'],
+		properties: {
+			code: { type: 'string', minLength: 6, maxLength: 6 },
+		},
+	},
+	response: {
+		200: {
+			type: 'object',
+			properties: {
+				success: { type: 'boolean' },
+			},
+		},
+		400: errorResponseSchema, // FST_2FA_NOT_ENABLED
+		401: errorResponseSchema, // FST_2FA_INVALID_CODE
+		404: errorResponseSchema, // FST_2FA_SECRET_NOT_FOUND, FST_USER_NOT_FOUND
+	},
+}

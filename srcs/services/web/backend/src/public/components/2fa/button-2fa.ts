@@ -11,12 +11,10 @@ const innerHTML = `
 		"
 	>
 		<div class="tw-card text-center p-6 w-80 space-y-4 relative">
-			<button id="btn-close" class="absolute top-2 right-2 text-xl text-gray-700 dark:text-gray-300">
-				✕
-			</button>
 			<h2 class="text-xl font-bold mb-4 dark:text-white">Disable two factor authentification?</h2>
-			<p>All remaning backup codes would be deleted</p>
-			<button id="btn-confirm" class="tw-btn w-full">Continue & Disable 2FA</button>
+			<p>Disabling 2FA will remove <strong>all backup codes</strong> and make your account less secure.
+				You can re-enable it later, but new backup codes will be generated.</p>
+			<button id="btn-confirm" class="tw-btn w-full">Disable 2FA</button>
 			<button id="btn-cancel" class="tw-btn-outline w-full">Cancel</button>
 		</div>
 	</div>
@@ -62,7 +60,6 @@ export class Button2FA extends HTMLElement {
 	}
 
 	private handleEnable2FA() {
-		console.log('click: handle enalbe 2fa')
 		Router.navigateTo('/settings/2fa/method')
 	}
 
@@ -76,14 +73,11 @@ export class Button2FA extends HTMLElement {
 	}
 
 	private handleOnClickBtnCancel = () => {
-		console.log("Cancel: clicked")
 		this.dlgConfirm?.classList.add('hidden')
 	}
 
 	private handleOnClickBtnConfirm = () => {
-		console.log("Confirm: clicked")
 		this.dlgConfirm?.classList.add('hidden')
-		// disable 2fa here
-		Router.navigateTo('/settings')
+		Router.navigateTo('/settings/2fa/disable-verify')
 	}
 }
