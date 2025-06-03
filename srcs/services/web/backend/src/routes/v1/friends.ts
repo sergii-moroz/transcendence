@@ -14,12 +14,12 @@ import { findUserIdByUsername } from "../../services/userService.js";
 export const friends = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
 	app.get('/sidebar', async (req, reply) => {
 		const answer: SidebarResponse = {
-			friends: await getFriendList(req.user.id),
+			friends: await getFriendList(req.user.id, app),
 			FriendRequests: await getFriendRequests(req.user.id)
 		};
 
 
-		const reqests = await getFriendList(req.user.id);
+		const reqests = await getFriendList(req.user.id, app);
 		console.log(`request: `, reqests);
 		reply.send(answer);
 	});

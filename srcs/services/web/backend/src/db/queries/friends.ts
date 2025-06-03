@@ -2,6 +2,10 @@ import { findUserIdByUsername } from "../../services/userService.js";
 import { Friend, FriendChat, User } from "../../types/user.js";
 import { db } from "../connections.js";
 
+import {
+	FastifyInstance,
+} from "fastify"
+
 
 export const getFriendRequests = async (id: number): Promise<Friend[]> => {
 	return new Promise((resolve, reject) => {
@@ -19,12 +23,12 @@ export const getFriendRequests = async (id: number): Promise<Friend[]> => {
 }
 
 // hardcoded right now
-const OnlineUsers: string[] = [
-	'admin',
-	'dolifero',
-]
+// const OnlineUsers: string[] = [
+// 	'admin',
+// 	'dolifero',
+// ]
 
-export const getFriendList = async (id: number): Promise<{online: Friend[], offline: Friend[]}> => {
+export const getFriendList = async (id: number, app: FastifyInstance): Promise<{online: Friend[], offline: Friend[]}> => {
 	const allFriends = await new Promise<Friend[]>((resolve, reject) => {
 		db.all<Friend>(' \
 			SELECT username as name, avatar as picture from friends f \
@@ -42,8 +46,8 @@ export const getFriendList = async (id: number): Promise<{online: Friend[], offl
 		})
 	})
 	return {
-		online: allFriends.filter(friend => OnlineUsers.includes(friend.name)),
-		offline: allFriends.filter(friend => !OnlineUsers.includes(friend.name))
+		online: allFriends.filter(friend => app.onlineUsers.has(friend.name)),
+		offline: allFriends.filter(friend => !app.onlineUsers.has(friend.name))
 	};
 }
 
@@ -83,7 +87,7 @@ export const removeFriend = async (friendName: string, user_id: number): Promise
 	});
 }
 
-export const getFriendChat = async (friendName: string, user_id: number): Promise<FriendChat> => {
+export const getFriendChat = async (friendName: string, user_id: number, app: FastifyInstance): Promise<FriendChat> => {
 	const friend_id = await findUserIdByUsername(friendName);
 	if (!friend_id) throw new Error("friend does not exist");
 	const FriendData = await new Promise<Friend & { blocked_by_inviter: string | null, blocked_by_recipient: string | null, inviter_id: number, recipient_id: number }>((resolve, reject) => {
@@ -110,6 +114,6 @@ export const getFriendChat = async (friendName: string, user_id: number): Promis
 		name: FriendData.name,
 		picture: FriendData.picture,
 		blocked: blockStatus,
-		online: OnlineUsers.includes(FriendData.name)
+		online: app.onlineUsers.has(FriendData.name)
 	};
 }

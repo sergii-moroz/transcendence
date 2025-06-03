@@ -17,7 +17,7 @@ export const chat = async (app: FastifyInstance, opts: FastifyPluginOptions) => 
 	app.post('/api/chat', async (req, reply) => {
 		try {
 			const chatPartner = (req.body as { name: string }).name;
-			const friend = await getFriendChat(chatPartner, req.user.id);
+			const friend = await getFriendChat(chatPartner, req.user.id, app);
 			const answer: ChatInitResponse = {
 				friend,
 				messages: await getOldMessages(chatPartner, req.user.id, friend.blocked),
