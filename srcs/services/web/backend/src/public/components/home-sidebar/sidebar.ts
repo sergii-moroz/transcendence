@@ -10,11 +10,9 @@ import {
 	iconX,
 	iconPlus,
 	iconArrowLeft,
-	iconBlock,
 	iconTrash,
 	iconChatSend,
 	iconSidebarCheck,
-	iconCheck,
 	iconLockClose,
 	iconLockOpen
 } from "../icons/icons.js"
@@ -22,13 +20,11 @@ import {
 export class Sidebar extends HTMLElement {
 	state: string;
 	openChatwith: string | null;
-	// messages: Message[];
 
 	constructor() {
 		super()
 		this.state = 'collapsed'
 		this.openChatwith = null;
-		// this.messages = [];
 	}
 
 	
@@ -51,15 +47,17 @@ export class Sidebar extends HTMLElement {
 		this.renderCollapsed();
 		this.addEventListener('click', this.handleClick);
 		this.addEventListener('keydown', this.handleKeyPress);
+		document.addEventListener('trigger-sidebar', this.changeToFriendList);
 	}
 	
 	disconnectedCallback() {
 		if (this.openChatwith) {
-				socialSocketManager.removeMessageCallback();
-				this.openChatwith = null;
+			socialSocketManager.removeMessageCallback();
+			this.openChatwith = null;
 		}
 		this.removeEventListener('click', this.handleClick);
 		this.removeEventListener('keydown', this.handleKeyPress);
+		document.removeEventListener('trigger-sidebar', this.changeToFriendList);
 	}
 	
 	handleKeyPress(event: KeyboardEvent) {
@@ -89,22 +87,27 @@ export class Sidebar extends HTMLElement {
 		}
 	}
 
+	changeToFriendList = () => {
+		this.state = 'friendList';
+		this.renderOpen();
+		this.initFriends();
+	}
+
 	async handleClick(event: Event) {
 		const target = event.target as HTMLElement;
 
-		if (target.closest('#sideBar-collapsed') || target.closest('#back-to-friends-btn')) {
-			this.state = 'friendList';
-			if (this.openChatwith) {
-				socialSocketManager.removeMessageCallback();
-				this.openChatwith = null;
-			}
-			this.renderOpen();
-			this.initFriends();
+		if (target.closest('#sideBar-collapsed')) {
+			this.changeToFriendList()
+		}
+		else if (target.closest('#back-to-friends-btn')) {
+			socialSocketManager.removeMessageCallback();
+			this.openChatwith = null;
+			this.changeToFriendList()
 		}
 		else if (target.closest('#refresh-friends-btn')) {
 			this.initFriends();
 		}
-		else if (target.closest('#close-social-btn')) {
+		else if (target.closest('#close-social-btn') || target.closest('#sidebar-backdrop')) {
 			this.state = 'collapsed'
 			this.renderCollapsed();
 		}
@@ -188,8 +191,8 @@ export class Sidebar extends HTMLElement {
 
 	renderCollapsed() {
 		this.innerHTML = `
-			<div id="sideBar-collapsed" class="w-16 h-screen right-0 dark:bg-gray-800 bg-white border-l dark:border-gray-700 border-gray-200 flex flex-col items-center py-6 cursor-pointer dark:hover:bg-gray-700/50 hover:bg-white/70 transition-colors">
-				<div class="mb-6">
+			<div id="sideBar-collapsed" class="hidden lg:flex z-50 w-16 h-screen fixed right-0 dark:bg-gray-800 bg-white border-l dark:border-gray-700 border-gray-200 flex-col items-center py-6 cursor-pointer dark:hover:bg-gray-700/50 hover:bg-white/70 transition-colors">
+				<div class="mb-6 text-blue-400 dark:text-white">
 					${iconFriends}
 				</div>
 				<div class="w-10 h-10 dark:bg-gray-700 bg-gray-100 rounded-full mb-3 relative">
@@ -205,12 +208,17 @@ export class Sidebar extends HTMLElement {
 					FRIENDS
 				</div>
 			</div>
+			<div class="h-full pr-16 hidden lg:block"></div>
 		`;
 	}
 
 	renderOpen() {
 		this.innerHTML = `
-			<div id="sidebar-friends" class="w-80 h-screen right-0 dark:bg-gray-800 bg-white border-l dark:border-gray-700 border-gray-200 flex flex-col">
+			<div id="sidebar-backdrop" 
+				class="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden">
+			</div>
+
+			<div id="sidebar-friends" class="z-50 w-80 h-screen fixed right-0 dark:bg-gray-800 bg-white border-l dark:border-gray-700 border-gray-200 flex flex-col">
 				<div class="p-4 flex justify-between items-center">
 					<h2 class="text-lg font-bold flex items-center">
 						<span class="mr-2">${iconFriends}</span>
@@ -242,6 +250,7 @@ export class Sidebar extends HTMLElement {
 					<div id="friendList" class="flex-shrink-0"></div>
 				</div>
 			</div>
+			<div class="h-full pr-80 hidden lg:block"></div>
 		`;
 	}
 
@@ -313,7 +322,6 @@ export class Sidebar extends HTMLElement {
 		const requestsContainer = online.querySelector('#insertContainer');
 	
 		data.friends.online.forEach((friend: Friend) => {
-		// data.friends.online.forEach((friend: Friend & {unreadMessages: boolean}) => {
 			const requestElement = document.createElement('div');
 			requestElement.className = "friend-item flex items-center p-2 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg";
 			requestElement.dataset.friendName = friend.name;
@@ -328,7 +336,6 @@ export class Sidebar extends HTMLElement {
 				</div>
 				<span class="font-medium">${friend.name}</span>
 			`;
-			// <!-- ${friend.unreadMessages ? '  <div class="w-2 h-2 ml-3 bg-blue-500 rounded-full" title="unread Messages"></div>' : ''} -->
 			requestsContainer!.appendChild(requestElement);
 		})
 		root.append(online);
@@ -345,7 +352,6 @@ export class Sidebar extends HTMLElement {
 	
 		const requestsContainer = offline.querySelector('#insertContainer');
 		data.friends.offline.forEach((friend: Friend) => {
-		// data.friends.offline.forEach((friend: Friend & {unreadMessages: boolean}) => {
 			const requestElement = document.createElement('div');
 			requestElement.className = "friend-item flex items-center p-2 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg";
 			requestElement.dataset.friendName = friend.name;
@@ -360,7 +366,6 @@ export class Sidebar extends HTMLElement {
 				</div>
 				<span class="font-medium">${friend.name}</span>
 			`;
-			// ${friend.unreadMessages ? '  <div class="w-2 h-2 ml-3 bg-blue-500 rounded-full" title="unread Messages"></div>' : ''}
 			requestsContainer!.appendChild(requestElement);
 		});
 		root.append(offline);
@@ -377,7 +382,11 @@ export class Sidebar extends HTMLElement {
 
 	renderChat(data: ChatInitResponse) {
 		this.innerHTML = `
-			<div id="sidebar-chat" class="w-80 h-screen right-0 dark:bg-gray-800 bg-white border-l dark:border-gray-700 border-gray-200 flex flex-col">
+			<div id="sidebar-backdrop" 
+				class="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden">
+			</div>
+
+			<div id="sidebar-chat" class="z-50 w-80 h-screen fixed right-0 dark:bg-gray-800 bg-white border-l dark:border-gray-700 border-gray-200 flex flex-col">
 				<!-- Friend header -->
 				<div  class="p-4 border-b dark:border-gray-700 border-gray-200 flex justify-between items-center">
 					<div id='chatProfile-btn' class="flex items-center cursor-pointer">
@@ -433,6 +442,7 @@ export class Sidebar extends HTMLElement {
 					</div>
 				</div>
 			</div>
+			<div class="h-full pr-80 hidden lg:block"></div>
 		`
 	}
 
