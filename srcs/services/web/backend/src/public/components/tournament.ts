@@ -51,7 +51,6 @@ export class Tournament extends HTMLElement {
 	
 			if (data.type === 'redirectingToGame') {
 				console.log(`Redirecting to game room: ${data.gameRoomId}`);
-				this.socket?.close();
 				setTimeout(() => {
 					Router.navigateTo('/game/' + data.gameRoomId);
 				}, 100);
@@ -60,7 +59,6 @@ export class Tournament extends HTMLElement {
 			if (data.type === 'victory') {
 				console.log(`Victory message: ${data.message}`);
 				alert(`Victory! ${data.message}`);
-				this.socket?.close();
 				Router.navigateTo('/home');
 			}
 
