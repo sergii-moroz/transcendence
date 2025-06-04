@@ -9,6 +9,7 @@ export class Tournament {
 	players: Array<[id: string, socket: WebSocket]>;
 	knownIds: Map<string, boolean>; // true = eliminated, false = not eliminated
 	allConnected: boolean;
+	activeGames: number;
 	isRunning: boolean;
 	id: string;
 	maxPlayers: number;
@@ -22,6 +23,7 @@ export class Tournament {
 		this.knownIds = new Map();
 		this.allConnected = false;
 		this.isRunning = false;
+		this.activeGames = 0;
 		this.maxPlayers = maxPlayers || 4;
 		this.id = crypto.randomBytes(16).toString('hex');
 	}
@@ -98,6 +100,7 @@ export class Tournament {
 			const player2 = this.players.shift()!;
 
 			const game = new Game(this.id);
+			this.activeGames++;
 			this.games.set(game.gameRoomId, game);
 			this.app.gameInstances.set(game.gameRoomId, game);
 
@@ -124,6 +127,7 @@ export class Tournament {
 							console.custom('DEBUG', `Eliminated: ${player.id}, knownIds: ${Array.from(this.knownIds.entries())}`);
 						}
 					}
+					this.activeGames--;
 					this.games.delete(game.gameRoomId);
 					this.app.gameInstances.delete(game.gameRoomId);
 				}
