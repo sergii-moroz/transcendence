@@ -511,7 +511,7 @@ export class Sidebar extends HTMLElement {
 
 
 		requestAnimationFrame(() => {
-			root.lastElementChild!.scrollIntoView({ behavior: 'smooth' });
+			root.lastElementChild!.scrollIntoView();
 		});
 	}
 

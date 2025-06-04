@@ -36,3 +36,27 @@ export const addMessage = async (sender_id: number, receiver_id: number, text: s
 		);
 	})
 }
+
+export const isBlocked = async (sender_id: number, receiver_name: string): Promise<boolean> => {
+	const receiver_id = await findUserIdByUsername(receiver_name);
+	if (!receiver_id) throw new Error("friend does not exist");
+	const data = await new Promise<{ blocked_by_inviter: string | null, blocked_by_recipient: string | null, inviter_id: number, recipient_id: number } | undefined>((resolve, reject) => {
+		db.get<{ blocked_by_inviter: string | null, blocked_by_recipient: string | null, inviter_id: number, recipient_id: number }>(` \
+			SELECT blocked_by_inviter, blocked_by_recipient, recipient_id, inviter_id from friends \
+			WHERE status = "accepted" \
+			AND ((inviter_id = ? AND recipient_id = ?) \
+				OR (inviter_id = ? AND recipient_id = ?))`,
+			[sender_id, receiver_id, receiver_id, sender_id],
+			(err, row) => {
+				if (err) return reject(err);
+				if (!row) resolve(undefined);
+				else resolve(row);
+			}
+		);
+	})
+
+	if (!data)
+		throw new Error("looking up blocked state failed");
+	const blocked = data.inviter_id == sender_id ? data.blocked_by_recipient : data.blocked_by_inviter;
+	return (blocked ? true: false); 
+}

@@ -9,7 +9,7 @@ import {
 
 import { getFriendChat } from "../../db/queries/friends.js";
 import { findUserIdByUsername } from "../../services/userService.js";
-import { addMessage, getOldMessages } from "../../db/queries/chat.js";
+import { addMessage, getOldMessages, isBlocked } from "../../db/queries/chat.js";
 import { WebSocket } from "@fastify/websocket";
 import { sendMessage } from "../../services/utils.js";
 
@@ -49,12 +49,16 @@ export const chat = async (app: FastifyInstance, opts: FastifyPluginOptions) => 
 				if (!receiver_id) throw new Error("friend not found");
 				addMessage(req.user.id, receiver_id, message.text);
 
-				if (app.onlineUsers.has(message.to)) {
+				const blocked = await isBlocked(req.user.id, message.to);
+				// console.custom("WARN", blocked)
+				if (app.onlineUsers.has(message.to) && !blocked) {
 					sendMessage(message.text, req.user.username, app.onlineUsers.get(message.to));
 				}
 		} catch (error) {
 			console.custom("ERROR", error);
-			socket.send({type: "error", text: "Message processing on the server failed"});
+			socket.send(JSON.stringify(
+				{type: "error", text: error instanceof Error ? error.message : "Message processing failed"}
+			));
 		}
 			
 		})
