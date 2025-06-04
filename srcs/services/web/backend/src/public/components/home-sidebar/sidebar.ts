@@ -289,7 +289,6 @@ export class Sidebar extends HTMLElement {
 						<div id="friendRequestProfile" class="flex items-center gap-2 cursor-pointer">
 							<img 
 								src="${request.picture}"
-								onerror="this.src='/uploads/default.jpg'"
 								class="w-10 h-10 rounded-full object-cover"
 							>
 							<span class="font-medium">${request.name}</span>
@@ -329,7 +328,6 @@ export class Sidebar extends HTMLElement {
 				<div class="relative mr-3">
 					<img 
 						src=${friend.picture}
-						onerror="this.src='/uploads/default.jpg'"
 						class="w-10 h-10 rounded-full"
 					>
 					<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
@@ -359,7 +357,6 @@ export class Sidebar extends HTMLElement {
 				<div class="relative mr-3">
 					<img 
 						src=${friend.picture}
-						onerror="this.src='/uploads/default.jpg'"
 						class="w-10 h-10 rounded-full"
 					>
 					<div class="absolute bottom-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
@@ -392,7 +389,6 @@ export class Sidebar extends HTMLElement {
 					<div id='chatProfile-btn' class="flex items-center cursor-pointer">
 						<img 
 							src=${data.friend.picture}
-							onerror="this.src='/uploads/default.jpg'"
 							class="w-10 h-10 rounded-full mr-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
 						>
 						<div>

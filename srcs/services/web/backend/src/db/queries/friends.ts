@@ -6,6 +6,7 @@ import {
 	FastifyInstance,
 } from "fastify"
 
+const DEFAULT_PICTURE_PATH = "/uploads/default.jpg";
 
 export const getFriendRequests = async (id: number): Promise<Friend[]> => {
 	return new Promise((resolve, reject) => {
@@ -17,16 +18,13 @@ export const getFriendRequests = async (id: number): Promise<Friend[]> => {
 			[id],
 			(err, rows) => {
 				if (err) return reject(err);
+				rows.forEach(friend => {
+					if (!friend.picture) friend.picture = DEFAULT_PICTURE_PATH;
+				})
 				resolve(rows);
-		})
+			})
 	})
 }
-
-// hardcoded right now
-// const OnlineUsers: string[] = [
-// 	'admin',
-// 	'dolifero',
-// ]
 
 export const getFriendList = async (id: number, app: FastifyInstance): Promise<{online: Friend[], offline: Friend[]}> => {
 	const allFriends = await new Promise<Friend[]>((resolve, reject) => {
@@ -45,6 +43,10 @@ export const getFriendList = async (id: number, app: FastifyInstance): Promise<{
 				resolve(rows);
 		})
 	})
+	allFriends.forEach(friend => {
+		if (!friend.picture) friend.picture = DEFAULT_PICTURE_PATH;
+	})
+
 	return {
 		online: allFriends.filter(friend => app.onlineUsers.has(friend.name)),
 		offline: allFriends.filter(friend => !app.onlineUsers.has(friend.name))
@@ -112,7 +114,7 @@ export const getFriendChat = async (friendName: string, user_id: number, app: Fa
 
 	return {
 		name: FriendData.name,
-		picture: FriendData.picture,
+		picture: FriendData.picture || DEFAULT_PICTURE_PATH,
 		blocked: blockStatus,
 		online: app.onlineUsers.has(FriendData.name)
 	};

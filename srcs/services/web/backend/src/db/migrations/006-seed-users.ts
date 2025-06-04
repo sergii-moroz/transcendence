@@ -8,15 +8,15 @@ export async function up() {
 			{ username: 'smoroz', password: 'password', bio: 'smoroz likes coffee.' },
 			{ username: 'olanokhi', password: 'password', bio: 'Alex likes chocolate.' },
 			{ username: 'tecker', password: 'password', bio: 'Tom writes code.' },
-			{ username: 'dolifero', password: 'password', bio: 'Dima is developing a game.' },
+			{ username: 'dolifero', password: 'password', bio: 'Dima is developing a game.', avatar: "/uploads/hans.jpg" },
 		];
 
 		db.serialize(() => {
 			for (const user of users) {
 				const hashed = bcrypt.hashSync(user.password, 10);
 				db.run(
-					`INSERT INTO users (username, password, bio) VALUES (?, ?, ?)`,
-					[user.username, hashed, user.bio],
+					`INSERT INTO users (username, password, bio, avatar) VALUES (?, ?, ?, ?)`,
+					[user.username, hashed, user.bio, user.avatar],
 					(err) => {
 						if (err) reject(err);
 					}
