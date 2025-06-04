@@ -51,7 +51,7 @@ export const tournamentRoomSock = async (app: FastifyInstance) => {
 			if (!tournament.deleteTimeout) {
 				tournament.deleteTimeout = setTimeout(() => {
 					// Check again before deleting
-					if (tournament.players.length === 0) {
+					if (tournament.players.length === 0 && tournament.games.size === 0) {
 						app.tournaments.delete(tournamentId);
 						console.custom('INFO', `Tournament room ${tournamentId} closed due to inactivity`);
 					}

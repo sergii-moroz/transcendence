@@ -110,7 +110,7 @@ export class Tournament {
 
 	async detectWinners() {
 		const interval = setInterval(() => {
-			if (!this.isRunning || this.games.size === 0) {
+			if (!this.isRunning) {
 				clearInterval(interval);
 				return;
 			}
