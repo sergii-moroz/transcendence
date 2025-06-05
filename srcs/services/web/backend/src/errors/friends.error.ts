@@ -24,5 +24,11 @@ export const AdminError = createError(
 	400
 );
 
+export const MessageInvalid = createError(
+	'INVALID_MESSAGE',
+	'message has wrong format',
+	400
+);
+
 
 

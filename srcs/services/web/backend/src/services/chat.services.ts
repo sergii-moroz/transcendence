@@ -10,6 +10,12 @@ import {
 
 import { db } from "../db/connections.js";
 import { findUserIdByUsername } from "./userService.js";
+import {
+	FriendInvalid,
+	FriendInvalidCustom,
+	FriendshipInvalid,
+	MessageInvalid
+} from "../errors/friends.error.js";
 
 
 const DEFAULT_PICTURE_PATH = "/uploads/default.jpg";
@@ -17,7 +23,7 @@ const DEFAULT_PICTURE_PATH = "/uploads/default.jpg";
 export const getFriendChat = async (friendName: string, req: FastifyRequest): Promise<FriendInChat> => {
 	const user_id = req.user.id;
 	const friend_id = await findUserIdByUsername(friendName);
-	if (!friend_id) throw new Error("friend does not exist");
+	if (!friend_id) throw new FriendInvalid(friendName);
 	const FriendData = await new Promise<Friend & { blocked_by_inviter: string | null, blocked_by_recipient: string | null, inviter_id: number, recipient_id: number }>((resolve, reject) => {
 		db.get<Friend & { blocked_by_inviter: string | null, blocked_by_recipient: string | null, inviter_id: number, recipient_id: number }>(' \
 			SELECT username as name, avatar as picture, blocked_by_inviter, blocked_by_recipient, recipient_id, inviter_id from friends f \
@@ -31,7 +37,7 @@ export const getFriendChat = async (friendName: string, req: FastifyRequest): Pr
 			[user_id, friend_id, user_id, friend_id, user_id],
 			(err, row) => {
 				if (err) return reject(err);
-				if (!row) return reject(new Error("friend not found"));
+				if (!row) return reject(new FriendshipInvalid());
 				resolve(row);
 		})
 	})
@@ -48,7 +54,7 @@ export const getFriendChat = async (friendName: string, req: FastifyRequest): Pr
 
 export const getOldMessages = async (friendName: string, user_id: number, blocked: string | null): Promise<Message[] | undefined> => {
 	const friend_id = await findUserIdByUsername(friendName);
-	if (!friend_id) throw new Error("friend does not exist");
+	if (!friend_id) throw new FriendInvalid(friendName);
 	return new Promise((resolve, reject) => {
 		let params: any[] = [friend_id, user_id, user_id, friend_id];
 		let query = 'SELECT username as owner, text from messages m \
@@ -68,12 +74,14 @@ export const getOldMessages = async (friendName: string, user_id: number, blocke
 }
 
 export const addMessage = async (sender_id: number, receiver_id: number, text: string): Promise<void> => {
+	if (!text || text.length > 100) throw new MessageInvalid();
 	return new Promise((resolve, reject) => {
 		db.run(
 			`INSERT INTO messages (sender_id, receiver_id, text) VALUES (?, ?, ?)`,
 			[sender_id, receiver_id, text],
-			(err) => {
+			function (err) {
 				if (err) reject(err);
+				else if (!this.lastID) reject(new FriendshipInvalid())
 				else resolve();
 			}
 		);
@@ -82,7 +90,7 @@ export const addMessage = async (sender_id: number, receiver_id: number, text: s
 
 export const isBlocked = async (sender_id: number, receiver_name: string): Promise<boolean> => {
 	const receiver_id = await findUserIdByUsername(receiver_name);
-	if (!receiver_id) throw new Error("friend does not exist");
+	if (!receiver_id) throw new FriendInvalidCustom("friend was invalid for block check");
 	const data = await new Promise<{ blocked_by_inviter: string | null, blocked_by_recipient: string | null, inviter_id: number, recipient_id: number } | undefined>((resolve, reject) => {
 		db.get<{ blocked_by_inviter: string | null, blocked_by_recipient: string | null, inviter_id: number, recipient_id: number }>(` \
 			SELECT blocked_by_inviter, blocked_by_recipient, recipient_id, inviter_id from friends \
@@ -92,14 +100,12 @@ export const isBlocked = async (sender_id: number, receiver_name: string): Promi
 			[sender_id, receiver_id, receiver_id, sender_id],
 			(err, row) => {
 				if (err) return reject(err);
-				if (!row) resolve(undefined);
+				if (!row) reject(new FriendshipInvalid());
 				else resolve(row);
 			}
 		);
 	})
 
-	if (!data)
-		throw new Error("looking up blocked state failed");
-	const blocked = data.inviter_id == sender_id ? data.blocked_by_recipient : data.blocked_by_inviter;
-	return (blocked ? true: false); 
+	const blocked = data?.inviter_id == sender_id ? data?.blocked_by_recipient : data?.blocked_by_inviter;
+	return (blocked ? true : false); 
 }
