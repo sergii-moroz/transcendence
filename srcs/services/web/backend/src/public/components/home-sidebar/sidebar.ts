@@ -30,9 +30,9 @@ export class Sidebar extends HTMLElement {
 	
 	async initFriends() {
 		try {
-			const data = await API.getFriendList() as SidebarResponse;
+			const data = await API.getFriendList();
 			if (!data) {
-				console.error("Error fetching friends data");
+				console.error(`Error fetching friends data`);
 				return this.showErrorState(this.querySelector('#friendList'));
 			}
 			this.addRequests(data);
@@ -83,8 +83,9 @@ export class Sidebar extends HTMLElement {
 		const name = input.value.trim();
 		if (name) {
 			const res = await API.addFriend(name);
-			if (!res.success)
+			if (!res.success) {
 				console.error(`adding friend failed: ${res.message}`);
+			}
 			input.value = '';
 		}
 	}
@@ -104,7 +105,7 @@ export class Sidebar extends HTMLElement {
 		else if (target.closest('#back-to-friends-btn')) {
 			socialSocketManager.removeMessageCallback();
 			this.openChatwith = null;
-			this.changeToFriendList()
+			this.changeToFriendList();
 		}
 		else if (target.closest('#refresh-friends-btn')) {
 			this.initFriends();
@@ -119,13 +120,19 @@ export class Sidebar extends HTMLElement {
 		}
 		else if (target.closest('#acceptFriendReq')) {
 			const name = (target.closest('#acceptFriendReq') as HTMLElement).dataset.friendName;
-			await API.acceptFriend(name!);
+			const res = await API.acceptFriend(name!);
+			if (!res.success) {
+				console.error(`accepting friend invite failed: ${res.message}`);
+			}
 			this.initFriends();
 		}
 		else if (target.closest('#rejectFriendReq')) {
 			const name = (target.closest('#rejectFriendReq') as HTMLElement).dataset.friendName;
 			console.log(name);
-			await API.rejectFriend(name!);
+			const res = await API.rejectFriend(name!);
+			if (!res.success) {
+				console.error(`rejecting friend invite failed: ${res.message}`);
+			}
 			this.initFriends();
 		}
 		else if (target.closest('.friend-item')) {
@@ -143,24 +150,32 @@ export class Sidebar extends HTMLElement {
 			if (this.openChatwith == "admin")
 				return alert("cant delete admin user from friends!");
 			if (confirm("Are you sure you want to delete this friend?")) {
-				await API.deleteFriend(this.openChatwith!);
-				this.state = 'friendList';
+				const res = await API.deleteFriend(this.openChatwith!);
+				if (!res.success) {
+					console.error(`deleting friend failed: ${res.message}`);
+				}
 				this.openChatwith = null;
-				this.renderOpen();
-				this.initFriends();
+				this.changeToFriendList();
 			}
 		}
 		else if (target.closest('#block-btn')) {
 			if (this.openChatwith == "admin")
 				return alert("cant block admin user!");
-			await API.blockFriend(this.openChatwith!);
+			const res = await API.blockFriend(this.openChatwith!);
+			if (!res.success) {
+				console.error(`blocking friend failed: ${res.message}`);
+				return;
+			}
 			const block = this.querySelector('#block-btn') as HTMLElement;
 			const unblock = this.querySelector('#unblock-btn') as HTMLElement;
 			block.classList.add("hidden");
 			unblock.classList.remove("hidden");
 		}
 		else if (target.closest('#unblock-btn')) {
-			await API.unblockFriend(this.openChatwith!);
+			const res = await API.unblockFriend(this.openChatwith!);
+			if (!res.success) {
+				console.error(`unblocking friend failed: ${res.message}`);
+			}
 			this.initChat();
 		}
 		else if (target.closest('#send-message-btn')) {

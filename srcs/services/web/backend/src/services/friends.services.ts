@@ -7,7 +7,8 @@ import { db } from "../db/connections.js";
 import { findUserIdByUsername } from "./userService.js";
 import {
 	FriendInvalid,
-	FriendInvalidCustom
+	FriendInvalidCustom,
+	FriendshipInvalid
 } from "../errors/friends.error.js";
 
 
@@ -82,12 +83,14 @@ export const addFriend = async (friendName: string, inviter_id: number): Promise
 
 export const acceptFriend = async (friendName: string, recipient_id: number): Promise<void> => {
 	const inviter_id = await findUserIdByUsername(friendName);
+	if (!inviter_id) throw new FriendInvalid(friendName);
 	await new Promise<void>((resolve, reject) => {
 		db.run(
 			'UPDATE friends SET status = "accepted" WHERE inviter_id = ? AND recipient_id = ?',
 			[inviter_id, recipient_id],
 			function (err) {
 				if (err) reject(err);
+				else if (this.changes === 0) reject(new FriendshipInvalid())
 				else resolve();
 			}
 		);
@@ -96,12 +99,14 @@ export const acceptFriend = async (friendName: string, recipient_id: number): Pr
 
 export const deleteFriend = async (friendName: string, user_id: number): Promise<void> => {
 	const friend_id = await findUserIdByUsername(friendName);
+	if (!friend_id) throw new FriendInvalid(friendName);
 	await new Promise<void>((resolve, reject) => {
 		db.run(
 			'DELETE FROM friends WHERE (inviter_id = ? AND recipient_id = ?) or (recipient_id = ? AND inviter_id = ?)',
 			[friend_id, user_id, friend_id, user_id],
 			function (err) {
 				if (err) reject(err);
+				else if (this.changes === 0) reject(new FriendshipInvalid())
 				else resolve();
 			}
 		);
@@ -110,7 +115,7 @@ export const deleteFriend = async (friendName: string, user_id: number): Promise
 
 export const blockFriend = async (friendName: string, user_id: number): Promise<void> => {
 	const friend_id = await findUserIdByUsername(friendName);
-	if (!friend_id) throw new Error("friend does not exist");
+	if (!friend_id) throw new FriendInvalid(friendName);
 	await new Promise<void>((resolve, reject) => {
 		db.run(
 			'UPDATE friends \
@@ -121,6 +126,7 @@ export const blockFriend = async (friendName: string, user_id: number): Promise<
 			[user_id, user_id, friend_id, user_id, user_id, friend_id],
 			function (err) {
 				if (err) reject(err);
+				else if (this.changes === 0) reject(new FriendshipInvalid())
 				else resolve();
 			}
 		);
@@ -129,7 +135,7 @@ export const blockFriend = async (friendName: string, user_id: number): Promise<
 
 export const undblockFriend = async (friendName: string, user_id: number): Promise<void> => {
 	const friend_id = await findUserIdByUsername(friendName);
-	if (!friend_id) throw new Error("friend does not exist");
+	if (!friend_id) throw new FriendInvalid(friendName);
 	await new Promise<void>((resolve, reject) => {
 		db.run(
 			'UPDATE friends \
@@ -140,6 +146,7 @@ export const undblockFriend = async (friendName: string, user_id: number): Promi
 			[user_id, user_id, friend_id, user_id, user_id, friend_id],
 			function (err) {
 				if (err) reject(err);
+				else if (this.changes === 0) reject(new FriendshipInvalid())
 				else resolve();
 			}
 		);

@@ -6,6 +6,12 @@ export const FriendInvalid = createError(
 	400
 );
 
+export const FriendshipInvalid = createError(
+	'FRIENSHIP_INVALID',
+	'Friendship is invalid',
+	400
+)
+
 export const FriendInvalidCustom = createError(
 	'FRIEND_INVALID',
 	'%s',
