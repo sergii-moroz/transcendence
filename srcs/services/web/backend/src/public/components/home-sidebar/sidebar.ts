@@ -79,10 +79,12 @@ export class Sidebar extends HTMLElement {
 		}
 	}
 
-	addFriend(input: HTMLInputElement) {
+	async addFriend(input: HTMLInputElement) {
 		const name = input.value.trim();
 		if (name) {
-			API.addFriend(name);
+			const res = await API.addFriend(name);
+			if (!res.success)
+				console.error(`adding friend failed: ${res.message}`);
 			input.value = '';
 		}
 	}

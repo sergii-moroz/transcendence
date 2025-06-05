@@ -297,8 +297,7 @@ export class API {
 	static async addFriend(name: string) {
 		try {
 			const res = await this.post('/api/addFriend', {name});
-			if (!res.ok)
-				console.error("Add Friend API call failed");
+			return res.json();
 		} catch (error) {
 			console.error("Add Friend API call failed:", error);
 		}

@@ -5,6 +5,10 @@ import {
 import { Friend } from "../types/user.js";
 import { db } from "../db/connections.js";
 import { findUserIdByUsername } from "./userService.js";
+import {
+	FriendInvalid,
+	FriendInvalidCustom
+} from "../errors/friends.error.js";
 
 
 const DEFAULT_PICTURE_PATH = "/uploads/default.jpg";
@@ -57,7 +61,7 @@ export const getFriendList = async (req: FastifyRequest): Promise<{online: Frien
 
 export const addFriend = async (friendName: string, inviter_id: number): Promise<void> => {
 	const recipient_id = await findUserIdByUsername(friendName);
-	if (!recipient_id || recipient_id == inviter_id) throw new Error("Friend is not valid to add");
+	if (!recipient_id || recipient_id == inviter_id) throw new FriendInvalid(friendName);
 	return new Promise((resolve, reject) => {
 		db.run(' \
 			INSERT INTO friends (inviter_id, recipient_id, status) VALUES (?, ?, "pending")',
@@ -65,8 +69,9 @@ export const addFriend = async (friendName: string, inviter_id: number): Promise
 			(err) => {
 				if (err) {
 					console.log(err);
-					if (err.message.includes('Friendship already exists') || err.message.includes('UNIQUE constraint failed'))
-						return reject(new Error("friend already exists"));
+					if (err.message.includes('Friendship already exists') || err.message.includes('UNIQUE constraint failed')) {
+						reject(new FriendInvalidCustom(`friendship already exists with ${friendName} (or is pending)`));
+					}
 					return reject(err);
 				} 
 				resolve();
