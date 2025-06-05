@@ -27,11 +27,13 @@ class SocialSocketHandler {
 			}
 		}
 
-		this.socket.onclose = (event: CloseEvent) => {
-			if (event.code === 1000)
-				alert('User is already signed in!');
+		this.socket.onclose = async (event: CloseEvent) => {
 			console.log('social Socket closed');
 			this.socket = null;
+			if (event.code === 1000) {
+				await Router.logout();
+				alert('User is already signed in!');
+			}
 		}
 
 		this.socket.onerror = (error: Event) => {

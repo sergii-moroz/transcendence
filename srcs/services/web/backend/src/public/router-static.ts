@@ -1,6 +1,6 @@
-import { WebSocket } from "@fastify/websocket";
+import { API } from "./api-static.js";
 import { routes, tRoute } from "./routes.js";
-import { socialSocketManager } from "./SocialWebSocket.js";
+import { socialSocketManager } from "./socialWebSocket.js";
 
 export class Router {
 	private static currentRoute: tRoute | null = null;
@@ -79,6 +79,13 @@ export class Router {
 			document.head.appendChild(meta);
 		}
 		meta.setAttribute("content", route.description);
+	}
+
+	static async logout() {
+		socialSocketManager.disconnect();
+		Router.initSocket = false;
+		await API.logout();
+		Router.navigateTo('/login');
 	}
 }
 

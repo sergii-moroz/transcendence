@@ -1,6 +1,4 @@
-import { API } from "../../api-static.js";
 import { Router } from "../../router-static.js"
-import { socialSocketManager } from "../../SocialWebSocket.js";
 
 import {
 	iconHomeProfile,
@@ -34,10 +32,7 @@ export class HomeHeader extends HTMLElement {
 			Router.navigateTo('/leaderboard');
 		}
 		else if (target.closest('#logout-btn')) {
-			socialSocketManager.disconnect();
-			Router.initSocket = false;
-			await API.logout();
-			Router.navigateTo('/login');
+			Router.logout();
 		}
 		else if (target.closest("#sidebarToggle")) {
 			document.dispatchEvent(new CustomEvent('trigger-sidebar'));
