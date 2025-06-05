@@ -269,9 +269,9 @@ export class API {
 		}
 	}
 
-	static async getSidebar() {
+	static async getFriendList() {
 		try {
-			const res = await this.get('/api/sidebar');
+			const res = await this.get('/api/friendList');
 			return res;
 		} catch (error) {
 			console.error("Sidebar API call failed:", error);
@@ -279,9 +279,9 @@ export class API {
 		}
 	}
 
-	static async getChat(name: string) {
+	static async getInitChatData(name: string) {
 		try {
-			const res = await this.post('/api/chat', {name});
+			const res = await this.post('/api/chatInit', {name});
 			if (!res.ok) {
 				console.error("Add Friend API call failed");
 				return null;

@@ -1,6 +1,6 @@
 import { API } from "../../api-static.js"
 import { Router } from "../../router-static.js";
-import { socialSocketManager } from "../../SocialWebSocket.js";
+import { socialSocketManager } from "../../socialWebSocket.js";
 
 import { ChatInitResponse, Friend, Message, SidebarResponse } from "../../../types/user.js";
 
@@ -30,7 +30,7 @@ export class Sidebar extends HTMLElement {
 	
 	async initFriends() {
 		try {
-			const data = await API.getSidebar() as SidebarResponse;
+			const data = await API.getFriendList() as SidebarResponse;
 			if (!data) {
 				console.error("Error fetching friends data");
 				return this.showErrorState(this.querySelector('#friendList'));
@@ -70,7 +70,7 @@ export class Sidebar extends HTMLElement {
 			else if (chatInput) {
 				const message = chatInput.value.trim();
 				if (message) {
-					console.log(`Chat message: ${message}`);
+					// console.log(`Chat message: ${message}`);
 					socialSocketManager.send({text: message, to: this.openChatwith!});
 					this.addMessages({text: message, owner: "you"});
 					chatInput.value = '';
@@ -165,7 +165,7 @@ export class Sidebar extends HTMLElement {
 			const chatInput = document.getElementById('chat-input') as HTMLInputElement;
 			const message = chatInput.value.trim();
 			if (message) {
-				console.log(`Chat message: ${message}`);
+				// console.log(`Chat message: ${message}`);
 				socialSocketManager.send({text: message, to: this.openChatwith!});
 				this.addMessages({text: message, owner: "you"});
 				chatInput.value = '';
@@ -475,7 +475,7 @@ export class Sidebar extends HTMLElement {
 
 	async initChat() {
 		try {
-			const data = await API.getChat(this.openChatwith!) as ChatInitResponse;
+			const data = await API.getInitChatData(this.openChatwith!) as ChatInitResponse;
 			if (!data) {
 				console.error("Error fetching chat init data");
 				return this.showErrorState(this.querySelector('#sidebar-chat'));
@@ -484,7 +484,7 @@ export class Sidebar extends HTMLElement {
 			this.setBlockButton(data.friend.blocked);
 			if (data.gameInvite)
 				this.addGameInvitation();
-			data.messages.forEach(message => this.addMessages(message));
+			data.messages?.forEach(message => this.addMessages(message));
 		} catch (error) {
 			console.error("Error fetching chat init data:", error);
 			this.showErrorState(this.querySelector('#sidebar-chat'));

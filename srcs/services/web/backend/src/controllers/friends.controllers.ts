@@ -35,7 +35,7 @@ export const handleFriendListSidebar = async (
 			friends: await getFriendList(req),
 			friendRequests: await getFriendRequests(req.user.id)
 		};
-		console.log(`Sidebar-FriendList response: `, answer);
+		// console.log(`Sidebar-FriendList response: `, answer);
 		reply.send(answer);
 	} catch (error) {
 		throw error;

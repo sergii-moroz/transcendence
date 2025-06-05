@@ -9,7 +9,6 @@ const friendTypeSchema = {
   },
 };
 
-
 export const friendListSbSchema = {
   response: {
     200: {
@@ -42,6 +41,7 @@ export const friendSchema = {
 	response: {
 		200: {
 			type: 'object',
+      required: ['success'],
 			properties: {
 				success: { type: 'boolean' },
 			},

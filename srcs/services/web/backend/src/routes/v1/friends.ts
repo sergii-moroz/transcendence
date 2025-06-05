@@ -18,7 +18,7 @@ import {
 } from "../../controllers/friends.controllers.js";
 
 export const friends = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
-	app.get('/sidebar', {
+	app.get('/friendList', {
 		schema: friendListSbSchema,
 		handler: handleFriendListSidebar
 	});
