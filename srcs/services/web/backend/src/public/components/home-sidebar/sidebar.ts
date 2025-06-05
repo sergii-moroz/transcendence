@@ -268,7 +268,7 @@ export class Sidebar extends HTMLElement {
 		if (!root) return;
 		root.innerHTML = '';
 
-		if (data.FriendRequests.length > 0) {
+		if (data.friendRequests.length > 0) {
 			const element = document.createElement('div');
 			element.innerHTML = `
 				<div class="p-4 border-b dark:border-gray-700 border-gray-200">
@@ -281,7 +281,7 @@ export class Sidebar extends HTMLElement {
 	
 			const requestsContainer = element.querySelector('#insertContainer');
 	
-			data.FriendRequests.forEach((request: Friend) => {
+			data.friendRequests.forEach((request: Friend) => {
 				const requestElement = document.createElement('div');
 				requestElement.className = 'dark:bg-gray-700 bg-gray-100 rounded-3xl shadow-sm p-2 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg';
 				requestElement.innerHTML = `

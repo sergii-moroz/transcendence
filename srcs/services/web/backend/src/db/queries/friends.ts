@@ -4,90 +4,92 @@ import { db } from "../connections.js";
 
 import {
 	FastifyInstance,
+	FastifyRequest,
 } from "fastify"
 
 const DEFAULT_PICTURE_PATH = "/uploads/default.jpg";
 
-export const getFriendRequests = async (id: number): Promise<Friend[]> => {
-	return new Promise((resolve, reject) => {
-		db.all<Friend>(' \
-			SELECT username as name, avatar as picture from friends f \
-			JOIN users u on f.inviter_id = u.id \
-			WHERE recipient_id = ? and status = "pending" \
-			ORDER by created_at',
-			[id],
-			(err, rows) => {
-				if (err) return reject(err);
-				rows.forEach(friend => {
-					if (!friend.picture) friend.picture = DEFAULT_PICTURE_PATH;
-				})
-				resolve(rows);
-			})
-	})
-}
+// export const getFriendRequests = async (id: number): Promise<Friend[]> => {
+// 	return new Promise((resolve, reject) => {
+// 		db.all<Friend>(' \
+// 			SELECT username as name, avatar as picture from friends f \
+// 			JOIN users u on f.inviter_id = u.id \
+// 			WHERE recipient_id = ? and status = "pending" \
+// 			ORDER by created_at',
+// 			[id],
+// 			(err, rows) => {
+// 				if (err) return reject(err);
+// 				rows.forEach(friend => {
+// 					if (!friend.picture) friend.picture = DEFAULT_PICTURE_PATH;
+// 				})
+// 				resolve(rows);
+// 			})
+// 	})
+// }
 
-export const getFriendList = async (id: number, app: FastifyInstance): Promise<{online: Friend[], offline: Friend[]}> => {
-	const allFriends = await new Promise<Friend[]>((resolve, reject) => {
-		db.all<Friend>(' \
-			SELECT username as name, avatar as picture from friends f \
-			JOIN users u on u.id = \
-				case \
-					when f.inviter_id = ? then f.recipient_id \
-					else f.inviter_id \
-				end \
-			WHERE (inviter_id = ? and status = "accepted") or (recipient_id = ? and status = "accepted") \
-			ORDER by created_at',
-			[id, id, id],
-			(err, rows) => {
-				if (err) return reject(err);
-				resolve(rows);
-		})
-	})
-	allFriends.forEach(friend => {
-		if (!friend.picture) friend.picture = DEFAULT_PICTURE_PATH;
-	})
+// export const getFriendList = async (req: FastifyRequest): Promise<{online: Friend[], offline: Friend[]}> => {
+// 	const id = req.user.id;
+// 	const allFriends = await new Promise<Friend[]>((resolve, reject) => {
+// 		db.all<Friend>(' \
+// 			SELECT username as name, avatar as picture from friends f \
+// 			JOIN users u on u.id = \
+// 				case \
+// 					when f.inviter_id = ? then f.recipient_id \
+// 					else f.inviter_id \
+// 				end \
+// 			WHERE (inviter_id = ? and status = "accepted") or (recipient_id = ? and status = "accepted") \
+// 			ORDER by created_at',
+// 			[id, id, id],
+// 			(err, rows) => {
+// 				if (err) return reject(err);
+// 				resolve(rows);
+// 		})
+// 	})
+// 	allFriends.forEach(friend => {
+// 		if (!friend.picture) friend.picture = DEFAULT_PICTURE_PATH;
+// 	})
 
-	return {
-		online: allFriends.filter(friend => app.onlineUsers.has(friend.name)),
-		offline: allFriends.filter(friend => !app.onlineUsers.has(friend.name))
-	};
-}
+// 	return {
+// 		online: allFriends.filter(friend => req.server.onlineUsers.has(friend.name)),
+// 		offline: allFriends.filter(friend => !req.server.onlineUsers.has(friend.name))
+// 	};
+// }
 
 // will be put somewhere else later
-export const addFriendtoDB = async (friendName: string, inviter_id: number): Promise<void> => {
-	const recipient_id = await findUserIdByUsername(friendName);
-	if (!recipient_id || recipient_id == inviter_id) throw new Error("Friend is not valid to add");
-	return new Promise((resolve, reject) => {
-		db.run(' \
-			INSERT INTO friends (inviter_id, recipient_id, status) VALUES (?, ?, "pending")',
-			[inviter_id, recipient_id],
-			(err) => {
-				if (err) {
-					console.log(err);
-					if (err.message.includes('Friendship already exists') || err.message.includes('UNIQUE constraint failed'))
-  						return reject(new Error("friend already exists"));
-					return reject(err);
-				} 
-				resolve();
-			}
-		)
-	})
-}
-export const removeFriend = async (friendName: string, user_id: number): Promise<void> => {
-	// if (friendName == OnlineUsers[0]) throw new Error("Admin Friend cant be deleted");
-	const friend_id = await findUserIdByUsername(friendName);
-	if (!friend_id) throw new Error("friend does not exist");
-	await new Promise<void>((resolve, reject) => {
-		db.run(
-			'DELETE FROM friends WHERE (inviter_id = ? AND recipient_id = ?) or (recipient_id = ? AND inviter_id = ?)',
-			[friend_id, user_id, friend_id, user_id],
-			function (err) {
-				if (err) reject(err);
-				else resolve();
-			}
-		);
-	});
-}
+// export const addFriendtoDB = async (friendName: string, inviter_id: number): Promise<void> => {
+// 	const recipient_id = await findUserIdByUsername(friendName);
+// 	if (!recipient_id || recipient_id == inviter_id) throw new Error("Friend is not valid to add");
+// 	return new Promise((resolve, reject) => {
+// 		db.run(' \
+// 			INSERT INTO friends (inviter_id, recipient_id, status) VALUES (?, ?, "pending")',
+// 			[inviter_id, recipient_id],
+// 			(err) => {
+// 				if (err) {
+// 					console.log(err);
+// 					if (err.message.includes('Friendship already exists') || err.message.includes('UNIQUE constraint failed'))
+//   						return reject(new Error("friend already exists"));
+// 					return reject(err);
+// 				} 
+// 				resolve();
+// 			}
+// 		)
+// 	})
+// }
+// export const removeFriend = async (friendName: string, user_id: number): Promise<void> => {
+// 	// if (friendName == OnlineUsers[0]) throw new Error("Admin Friend cant be deleted");
+// 	const friend_id = await findUserIdByUsername(friendName);
+// 	if (!friend_id) throw new Error("friend does not exist");
+// 	await new Promise<void>((resolve, reject) => {
+// 		db.run(
+// 			'DELETE FROM friends WHERE (inviter_id = ? AND recipient_id = ?) or (recipient_id = ? AND inviter_id = ?)',
+// 			[friend_id, user_id, friend_id, user_id],
+// 			function (err) {
+// 				if (err) reject(err);
+// 				else resolve();
+// 			}
+// 		);
+// 	});
+// }
 
 export const getFriendChat = async (friendName: string, user_id: number, app: FastifyInstance): Promise<FriendChat> => {
 	const friend_id = await findUserIdByUsername(friendName);

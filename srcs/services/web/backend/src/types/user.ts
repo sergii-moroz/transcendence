@@ -49,10 +49,8 @@ export interface SidebarResponse {
 	friends: {
 		online: Friend[];
 		offline: Friend[];
-		// online: (Friend & { unreadMessages: boolean})[];
-		// offline: (Friend & { unreadMessages: boolean})[];
 	}
-	FriendRequests: Friend[];
+	friendRequests: Friend[];
 }
 
 export interface Message {
