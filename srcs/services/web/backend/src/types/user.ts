@@ -40,7 +40,7 @@ export interface Friend {
 	picture: string;
 }
 
-export interface FriendChat extends Friend {
+export interface FriendInChat extends Friend {
 	online: boolean;
 	blocked: string | null;
 }
@@ -65,7 +65,7 @@ export interface MessageToServer {
 
 
 export interface ChatInitResponse {
-	messages: Message[];
-	friend: FriendChat;
+	messages: Message[] | undefined;
+	friend: FriendInChat;
 	gameInvite: boolean;
 }
