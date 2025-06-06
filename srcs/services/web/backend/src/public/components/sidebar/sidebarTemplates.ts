@@ -1,4 +1,3 @@
-import { ChatInitResponse } from "../../../types/user.js";
 import {
 	iconArrowLeft,
 	iconChatSend,
@@ -35,7 +34,7 @@ export const SidebarTemplates = {
 	`,
 
 	friendList: () => `
-		<div id="sidebar-backdrop" 
+		<div id="backdrop" 
 			class="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden">
 		</div>
 
@@ -49,7 +48,7 @@ export const SidebarTemplates = {
 					<button id="refresh-friends-btn" class="text-gray-400 dark:hover:text-white hover:text-gray-500  p-1" title="Refresh Friends">
 						${iconRefresh}
 					</button>
-					<button id="close-social-btn" class="text-gray-400 dark:hover:text-white hover:text-gray-500 p-1">
+					<button id="close-btn" class="text-gray-400 dark:hover:text-white hover:text-gray-500 p-1">
 						${iconX}
 					</button>
 				</div>
@@ -74,27 +73,15 @@ export const SidebarTemplates = {
 		<div class="h-full pr-80 hidden lg:block"></div>
 	`,
 
-	chat: (data: ChatInitResponse) => `
-		<div id="sidebar-backdrop" 
+	chat: () => `
+		<div id="backdrop" 
 			class="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden">
 		</div>
 
 		<div id="sidebar-chat" class="z-50 w-80 h-screen fixed right-0 dark:bg-gray-800 bg-white border-l dark:border-gray-700 border-gray-200 flex flex-col">
 			<!-- Friend header -->
 			<div  class="p-4 border-b dark:border-gray-700 border-gray-200 flex justify-between items-center">
-				<div id='chatProfile-btn' class="flex items-center cursor-pointer">
-					<img 
-						src=${data.friend.picture}
-						class="w-10 h-10 rounded-full mr-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
-					>
-					<div>
-						<div class="font-medium">
-							${data.friend.name}
-						</div>
-						<div class="text-xs text-gray-400">${data.friend.online ? "online" : "offline"}</div>
-					</div>
-				</div>
-				
+				<div id='chatProfile-btn' class="cursor-pointer"></div>
 				<div class="flex items-center gap-2">
 					<button id="block-btn" class="text-gray-400 hover:text-red-500 p-1" title="Block User">
 						${iconLockClose}
