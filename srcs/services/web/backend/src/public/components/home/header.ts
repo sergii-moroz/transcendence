@@ -35,7 +35,9 @@ export class HomeHeader extends HTMLElement {
 			Router.logout();
 		}
 		else if (target.closest("#sidebarToggle")) {
-			document.dispatchEvent(new CustomEvent('trigger-sidebar'));
+			window.dispatchEvent(new CustomEvent('open-sidebar', {
+				detail: {state: 'friendList'}
+			}))
 		}
 	}
 

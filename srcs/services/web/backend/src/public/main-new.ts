@@ -27,6 +27,9 @@ import { GameRoom } from "./components/game.js";
 import { TournamentList } from "./components/tournament-list.js";
 import { Tournament } from "./components/tournament.js";
 import { Router } from "./router-static.js";
+import { CollapsedView } from "./components/sidebar/sidebarCollapsed.js";
+import { FriendListView } from "./components/sidebar/sidebarFriendList.js";
+import { ChatView } from "./components/sidebar/sidebarChat.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
 customElements.define('btn-theme-toggle', ButtonThemeToggle)
@@ -49,8 +52,11 @@ customElements.define('two-fa-disable-verify', TwoFADisableVerify)
 // Home
 customElements.define('home-header', HomeHeader);
 customElements.define('home-content', HomeContent);
-customElements.define('friends-sidebar', Sidebar);
 
+customElements.define('friends-sidebar', Sidebar);
+customElements.define('collapsed-sidebar', CollapsedView);
+customElements.define('friendlist-sidebar', FriendListView);
+customElements.define('chat-sidebar', ChatView);
 
 // ICONS
 customElements.define('icon-check', IconCheck)
