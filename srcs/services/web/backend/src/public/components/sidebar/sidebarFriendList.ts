@@ -11,34 +11,30 @@ export class FriendListView extends HTMLElement {
 	el_refresh: HTMLElement | null = null;
 	el_addFriend: HTMLElement | null = null;
 	el_addFriendInput: HTMLInputElement | null = null;
-	el_acceptFriend: HTMLElement | null = null;
-	el_rejectFriend: HTMLElement | null = null;
+	// el_acceptFriend: HTMLElement | null = null;
+	// el_rejectFriend: HTMLElement | null = null;
 
 
 	constructor() {
 		super();
+		this.render();
 	}
 
-	async connectedCallback() {
-		await this.loadFriendList();
-		
-		
+	async connectedCallback() {		
 		this.el_close = this.querySelector('#close-btn');
 		this.el_backdrop = this.querySelector('#backdrop');
 		this.el_refresh = this.querySelector('#refresh-friends-btn');
 		this.el_addFriend = this.querySelector('#addFriendBTN');
 		this.el_addFriendInput = this.querySelector('#addFriendInput') as HTMLInputElement;
-		this.el_acceptFriend = this.querySelector('#acceptFriendReq');
-		this.el_rejectFriend = this.querySelector('#rejectFriendReq');
 	
 		this.el_close?.addEventListener('click', this.switchToCollapseSidebar);
 		this.el_backdrop?.addEventListener('click', this.switchToCollapseSidebar);
 		this.el_refresh?.addEventListener('click', this.loadFriendList);
 		this.el_addFriend?.addEventListener('click', this.addFriend);
 		this.el_addFriendInput?.addEventListener('keydown', this.addFriend);
-		this.el_acceptFriend?.addEventListener('click', this.acceptFriend);
-		this.el_rejectFriend?.addEventListener('click', this.rejectFriend);
-		this.addEventListener('click', this.switchToChatSidebar);
+		this.addEventListener('click', this.handleDynamicContent);
+
+		await this.loadFriendList();
 	}
 	
 	disconnectedCallback() {
@@ -47,14 +43,11 @@ export class FriendListView extends HTMLElement {
 		this.el_refresh?.removeEventListener('click', this.loadFriendList);
 		this.el_addFriend?.removeEventListener('click', this.addFriend);
 		this.el_addFriendInput?.removeEventListener('keydown', this.addFriend);
-		this.el_acceptFriend?.removeEventListener('click', this.acceptFriend);
-		this.el_rejectFriend?.removeEventListener('click', this.rejectFriend);
-		this.removeEventListener('click', this.switchToChatSidebar);
+		this.removeEventListener('click', this.handleDynamicContent);
 	}
 
 	loadFriendList = async () => {
 		try {
-			this.render();
 			const data = await API.getFriendList();
 			if (!data.success) throw Error(`fetching friendList data failed: ${data.message}`);
 			this.appendRequests(data);
@@ -183,16 +176,25 @@ export class FriendListView extends HTMLElement {
 		root.append(offline);
 	}
 
-	switchToChatSidebar = (event: Event) => {
+	handleDynamicContent = (event: Event) => {
 		const target = event.target as HTMLElement;
-		const item = target.closest('.friend-item') as HTMLElement | null;
-		if (item) {
-			const name = item.dataset.friendName;
-			this.dispatchEvent(new CustomEvent('state-change', {
-				detail: {state: 'chat', name},
-				bubbles: true
-			}))
-		}
+
+		const friend = target.closest('.friend-item') as HTMLElement | null;
+		if (friend) this.switchToChatSidebar(friend);
+
+		const acceptFriend = target.closest('#acceptFriendReq') as HTMLElement | null;
+		if (acceptFriend) this.acceptFriend(acceptFriend);
+
+		const rejectFriend = target.closest('#rejectFriendReq') as HTMLElement | null;
+		if (rejectFriend) this.acceptFriend(rejectFriend);
+	}
+
+	switchToChatSidebar = (friend: HTMLElement) => {
+		const name = friend.dataset.friendName;
+		this.dispatchEvent(new CustomEvent('state-change', {
+			detail: {state: 'chat', name},
+			bubbles: true
+		}))
 	}
 
 	switchToCollapseSidebar = () => {
@@ -202,8 +204,8 @@ export class FriendListView extends HTMLElement {
 		}))
 	}
 
-	rejectFriend = async () => {
-		const name = this.el_rejectFriend!.dataset.friendName;
+	rejectFriend = async (inviter: HTMLElement) => {
+		const name = inviter.dataset.friendName;
 		const res = await API.rejectFriend(name!);
 		if (!res.success) {
 			console.error(`rejecting friend invite failed: ${res.message}`);
@@ -211,8 +213,8 @@ export class FriendListView extends HTMLElement {
 		this.loadFriendList();
 	}
 
-	acceptFriend = async () => {
-		const name = this.el_acceptFriend!.dataset.friendName;
+	acceptFriend = async (inviter: HTMLElement) => {
+		const name = inviter.dataset.friendName;
 		const res = await API.acceptFriend(name!);
 		if (!res.success) {
 			console.error(`accepting friend invite failed: ${res.message}`);
