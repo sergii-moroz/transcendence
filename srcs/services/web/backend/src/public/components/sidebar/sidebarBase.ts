@@ -1,58 +1,65 @@
-import { socialSocketManager } from "../../socialWebSocket.js";
-import {
-	changeToFriendList,
-	handleClick,
-	handleKeyPress,
-	renderCollapsed
-} from "./sidebarEvents.js";
+import { ChatView } from "./sidebarChat.js";
+import { CollapsedView } from "./sidebarCollapsed.js";
+import { FriendListView } from "./sidebarFriendList.js";
 
+interface StateChangeEvent {
+	state: 'collapsed' | 'friendList' | 'chat';
+	name?: string;
+}
 
 export class Sidebar extends HTMLElement {
-	state: 'collapsed' | 'friendList' | 'chat';
-	openChatwith: string | null;
+	state: 'collapsed' | 'friendList' | 'chat' = 'collapsed';
 
 	constructor() {
 		super()
-		this.state = 'collapsed'
-		this.openChatwith = null;
 	}
-
+	
 	connectedCallback() {
-		renderCollapsed(this);
-		this.addEventListener('click', this.handleClick);
-		this.addEventListener('keydown', this.handleKeyPress);
-		document.addEventListener('trigger-sidebar', this.handleSidebarTrigger);
+		this.append(new CollapsedView());
+
+		this.addEventListener('state-change', this.handleChange);
+		window.addEventListener('open-sidebar', this.handleChange);
 	}
 	
 	disconnectedCallback() {
-		if (this.openChatwith) {
-			socialSocketManager.removeMessageCallback();
-			this.openChatwith = null;
+		this.removeEventListener('state-change', this.handleChange);
+		window.removeEventListener('open-sidebar', this.handleChange);
+	}
+
+	handleChange = (event: Event) => {
+		const { state, name } = (event as CustomEvent<StateChangeEvent>).detail;
+
+		this.innerHTML = '';
+		switch (state) {
+			case 'collapsed':
+				this.changeState('collapsed');
+				this.append(new CollapsedView());
+				break;
+			case 'friendList':
+				this.changeState('friendList');
+				this.append(new FriendListView());
+				break;
+			case 'chat':
+				this.changeState('chat');
+				const chatView = new ChatView();
+				chatView.setAttribute('friend', name!);
+				this.append(chatView);
+				break;
 		}
-		this.removeEventListener('click', this.handleClick);
-		this.removeEventListener('keydown', this.handleKeyPress);
-		document.removeEventListener('trigger-sidebar', this.handleSidebarTrigger);
 	}
 
-	handleClick = (event: Event) => {
-		const target = event.target as HTMLElement;
-		handleClick(this, target);
+	changeState(state: "collapsed" | "friendList" | "chat") {
+		this.state = state;
+		// console.log(`Sidebar: new state: ${this.state}`);
 	}
-
-	handleKeyPress = (event: KeyboardEvent) => {
-		handleKeyPress(this, event.key);
-	}
-
-	handleSidebarTrigger = (event: Event) => {
-		changeToFriendList(this);
-	}
-
-	showErrorState(element: HTMLElement | null) {
-		if (!element) return;
-		element.innerHTML = `
-		<div class="flex items-center justify-center h-full min-h-screen">
-		<h2 class="text-red-500">Failed to load data</h2>
-			</div>
-		`;
-	}	
 }
+
+
+export function showErrorState(element: HTMLElement | null) {
+	if (!element) return;
+	element.innerHTML = `
+	<div class="flex items-center justify-center h-full min-h-screen">
+	<h2 class="text-red-500">Failed to load data</h2>
+		</div>
+	`;
+}	
