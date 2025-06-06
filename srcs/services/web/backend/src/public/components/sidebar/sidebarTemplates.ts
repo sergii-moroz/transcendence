@@ -99,7 +99,7 @@ export const SidebarTemplates = {
 			</div>
 			
 			<!-- Game invite button -->
-			<div class="p-4 border-b dark:border-gray-700 border-gray-200">
+			<div id="gameInviteButtonSection" class="p-4 border-b dark:border-gray-700 border-gray-200">
 				<button id="invite-to-game-btn" class="w-full bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-medium py-2 rounded-lg transition-colors flex items-center justify-center duration-300 hover:scale-[1.02] hover:shadow-lg">
 					Invite to Game
 				</button>

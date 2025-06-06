@@ -19,6 +19,8 @@ export class ChatView extends HTMLElement {
 	el_inputField: HTMLElement | null = null;
 	el_inviteBTN: HTMLElement | null = null;
 	el_friendProfile: HTMLElement | null = null;
+	el_gameInvitationSection: HTMLElement | null = null;
+	el_gameInviteButtonSection: HTMLElement | null = null;
 
 	constructor() {
 		super();
@@ -43,6 +45,8 @@ export class ChatView extends HTMLElement {
 		this.el_inviteBTN = this.querySelector('#invite-to-game-btn');
 		this.el_inputField = this.querySelector('#inputField');
 		this.el_friendProfile = this.querySelector('#chatProfile-btn');
+		this.el_gameInvitationSection = this.querySelector('#game-invitations-section');
+		this.el_gameInviteButtonSection = this.querySelector('#gameInviteButtonSection');
 
 		this.el_back?.addEventListener('click', this.switchToFriendListSidebar);
 		this.el_backdrop?.addEventListener('click', this.switchToCollapseSidebar);
@@ -120,18 +124,21 @@ export class ChatView extends HTMLElement {
 			this.el_block!.classList.add("hidden");
 			this.el_unblock!.classList.remove("hidden");
 			this.el_inputField?.classList.add("hidden");
+			this.el_gameInvitationSection?.classList.add("hidden");
+			this.el_gameInviteButtonSection?.classList.add("hidden");
 		}
 		else {
 			this.el_unblock!.classList.add("hidden");
 			this.el_block!.classList.remove("hidden");
 			this.el_inputField?.classList.remove("hidden");
+			this.el_gameInvitationSection?.classList.remove("hidden");
+			this.el_gameInviteButtonSection?.classList.remove("hidden");
 		}
 	}
 
 	addGameInvitation() {
-		const root = this.querySelector('#game-invitations-section');
-		if (!root) throw new Error('render must have failed');
-		root.innerHTML = '';
+		if (!this.el_gameInvitationSection) throw new Error('render must have failed');
+		this.el_gameInvitationSection.innerHTML = '';
 		
 		const invitation = document.createElement('div');
 		invitation.classList = "p-4 border-b dark:border-gray-700 border-gray-200";
@@ -158,7 +165,7 @@ export class ChatView extends HTMLElement {
 				</div>
 			</div>
 		`
-		root.append(invitation)
+		this.el_gameInvitationSection.append(invitation)
 	}
 
 	setProfileInfo(data: ChatInitResponse) {
@@ -248,6 +255,8 @@ export class ChatView extends HTMLElement {
 		this.el_block!.classList.toggle("hidden");
 		this.el_unblock!.classList.toggle("hidden");
 		this.el_inputField?.classList.add("hidden");
+		this.el_gameInvitationSection?.classList.add("hidden");
+		this.el_gameInviteButtonSection?.classList.add("hidden");
 	}
 
 	unblock = async () => {
