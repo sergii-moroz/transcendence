@@ -1,140 +1,234 @@
 import { Friend, SidebarResponse } from "../../../types/user.js";
 import { API } from "../../api-static.js";
 import { iconCheck, iconX } from "../icons/icons.js";
-import { Sidebar } from "./sidebarBase.js";
+import { showErrorState } from "./sidebarBase.js";
 import { SidebarTemplates } from "./sidebarTemplates.js";
 
 
-export async function loadFriendList(sidebar: Sidebar) {
-	try {
-		const data = await API.getFriendList();
-		if (!data) {
-			console.error(`Error fetching friends data`);
-			return sidebar.showErrorState(sidebar.querySelector('#friendList'));
-		}
-		renderFriendList(sidebar);
-		addRequests(sidebar, data);
-		addFriends(sidebar, data);
-	} catch (error) {
-		console.error("Error fetching friends data:", error);
-		sidebar.showErrorState(sidebar.querySelector('#friendList'));
+export class FriendListView extends HTMLElement {
+	el_close: HTMLElement | null = null;
+	el_backdrop: HTMLElement | null = null;
+	el_refresh: HTMLElement | null = null;
+	el_addFriend: HTMLElement | null = null;
+	el_addFriendInput: HTMLInputElement | null = null;
+	el_acceptFriend: HTMLElement | null = null;
+	el_rejectFriend: HTMLElement | null = null;
+
+
+	constructor() {
+		super();
 	}
-}
 
-function renderFriendList(sidebar: Sidebar) {
-	sidebar.innerHTML = SidebarTemplates.friendList();
-}
+	async connectedCallback() {
+		await this.loadFriendList();
+		
+		
+		this.el_close = this.querySelector('#close-btn');
+		this.el_backdrop = this.querySelector('#backdrop');
+		this.el_refresh = this.querySelector('#refresh-friends-btn');
+		this.el_addFriend = this.querySelector('#addFriendBTN');
+		this.el_addFriendInput = this.querySelector('#addFriendInput') as HTMLInputElement;
+		this.el_acceptFriend = this.querySelector('#acceptFriendReq');
+		this.el_rejectFriend = this.querySelector('#rejectFriendReq');
+	
+		this.el_close?.addEventListener('click', this.switchToCollapseSidebar);
+		this.el_backdrop?.addEventListener('click', this.switchToCollapseSidebar);
+		this.el_refresh?.addEventListener('click', this.loadFriendList);
+		this.el_addFriend?.addEventListener('click', this.addFriend);
+		this.el_addFriendInput?.addEventListener('keydown', this.addFriend);
+		this.el_acceptFriend?.addEventListener('click', this.acceptFriend);
+		this.el_rejectFriend?.addEventListener('click', this.rejectFriend);
+		this.addEventListener('click', this.switchToChatSidebar);
+	}
+	
+	disconnectedCallback() {
+		this.el_close?.removeEventListener('click', this.switchToCollapseSidebar);
+		this.el_backdrop?.removeEventListener('click', this.switchToCollapseSidebar);
+		this.el_refresh?.removeEventListener('click', this.loadFriendList);
+		this.el_addFriend?.removeEventListener('click', this.addFriend);
+		this.el_addFriendInput?.removeEventListener('keydown', this.addFriend);
+		this.el_acceptFriend?.removeEventListener('click', this.acceptFriend);
+		this.el_rejectFriend?.removeEventListener('click', this.rejectFriend);
+		this.removeEventListener('click', this.switchToChatSidebar);
+	}
 
-function addFriends(sidebar: Sidebar, data: SidebarResponse) {
-	const root = sidebar.querySelector('#friendList');
-	if (!root) return;
-	root.innerHTML = '';
+	loadFriendList = async () => {
+		try {
+			this.render();
+			const data = await API.getFriendList();
+			if (!data.success) throw Error(`fetching friendList data failed: ${data.message}`);
+			this.appendRequests(data);
+			this.appendFriends(data);
+		} catch (error) {
+			console.error("Error loading friendList View: ", error);
+			showErrorState(this.querySelector('#friendList'));
+		}
+	}
 
-	addOnlineFriends(data, root);
-	addOfflineFriends(data, root);
-}
+	render() {
+		this.innerHTML = SidebarTemplates.friendList();
+	}
 
-function addRequests(sidebar: Sidebar, data: SidebarResponse) {
-	const root = sidebar.querySelector('#friendInvite');
-	if (!root) return;
-	root.innerHTML = '';
+	appendFriends(data: SidebarResponse) {
+		const root = this.querySelector('#friendList');
+		if (!root) throw new Error('render must have failed');
+		root.innerHTML = '';
 
-	if (data.friendRequests.length > 0) {
-		const element = document.createElement('div');
-		element.innerHTML = `
+		this.appendOnlineFriends(data, root);
+		this.appendOfflineFriends(data, root);
+	}
+
+	appendRequests(data: SidebarResponse) {
+		const root = this.querySelector('#friendInvite');
+		if (!root) throw new Error('render must have failed');
+		root.innerHTML = '';
+
+		if (data.friendRequests.length > 0) {
+			const element = document.createElement('div');
+			element.innerHTML = `
+				<div class="p-4 border-b dark:border-gray-700 border-gray-200">
+					<h3 class="font-bold text-lg mb-3 pb-2">
+						Friend  Requests
+					</h3>
+					<div id="insertContainer" class="space-y-3"></div>
+				</div>
+			`;
+
+			const requestsContainer = element.querySelector('#insertContainer');
+
+			data.friendRequests.forEach((request: Friend) => {
+				const requestElement = document.createElement('div');
+				requestElement.className = 'dark:bg-gray-700 bg-gray-100 rounded-3xl shadow-sm p-2 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg';
+				requestElement.innerHTML = `
+					<div class="flex items-center justify-between">
+						<div id="friendRequestProfile" class="flex items-center gap-2 cursor-pointer">
+							<img 
+								src="${request.picture}"
+								class="w-10 h-10 rounded-full object-cover"
+							>
+							<span class="font-medium">${request.name}</span>
+						</div>
+						<div class="flex gap-2">
+							<button id="acceptFriendReq" class="p-1.5 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors" data-friend-name=${request.name}>
+								${iconCheck}
+							</button>
+							<button id="rejectFriendReq" class="p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors" data-friend-name=${request.name}>
+								${iconX}
+							</button>
+						</div>
+					</div>
+				`;
+				requestsContainer!.appendChild(requestElement);
+			})
+			root.append(element);
+		}
+	}
+
+	appendOnlineFriends(data: SidebarResponse, root: Element) {
+		const online = document.createElement('div');
+		online.innerHTML = `
 			<div class="p-4 border-b dark:border-gray-700 border-gray-200">
-				<h3 class="font-bold text-lg mb-3 pb-2">
-					Friend  Requests
-				</h3>
-				<div id="insertContainer" class="space-y-3"></div>
+				<h3 class="text-xs font-bold text-gray-400 mb-3">ONLINE • ${data.friends.online.length}</h3>
+				<div id="insertContainer" class="space-y-2"></div>
 			</div>
 		`;
 
-		const requestsContainer = element.querySelector('#insertContainer');
+		const requestsContainer = online.querySelector('#insertContainer');
 
-		data.friendRequests.forEach((request: Friend) => {
+		data.friends.online.forEach((friend: Friend) => {
 			const requestElement = document.createElement('div');
-			requestElement.className = 'dark:bg-gray-700 bg-gray-100 rounded-3xl shadow-sm p-2 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg';
+			requestElement.className = "friend-item flex items-center p-2 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg";
+			requestElement.dataset.friendName = friend.name;
 			requestElement.innerHTML = `
-				<div class="flex items-center justify-between">
-					<div id="friendRequestProfile" class="flex items-center gap-2 cursor-pointer">
-						<img 
-							src="${request.picture}"
-							class="w-10 h-10 rounded-full object-cover"
-						>
-						<span class="font-medium">${request.name}</span>
-					</div>
-					<div class="flex gap-2">
-						<button id="acceptFriendReq" class="p-1.5 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors" data-friend-name=${request.name}>
-							${iconCheck}
-						</button>
-						<button id="rejectFriendReq" class="p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors" data-friend-name=${request.name}>
-							${iconX}
-						</button>
-					</div>
+				<div class="relative mr-3">
+					<img 
+						src=${friend.picture}
+						class="w-10 h-10 rounded-full"
+					>
+					<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
 				</div>
+				<span class="font-medium">${friend.name}</span>
 			`;
 			requestsContainer!.appendChild(requestElement);
 		})
-		root.append(element);
+		root.append(online);
 	}
-}
 
-function addOnlineFriends(data: SidebarResponse, root: Element) {
-	const online = document.createElement('div');
-	online.innerHTML = `
-		<div class="p-4 border-b dark:border-gray-700 border-gray-200">
-			<h3 class="text-xs font-bold text-gray-400 mb-3">ONLINE • ${data.friends.online.length}</h3>
-			<div id="insertContainer" class="space-y-2"></div>
-		</div>
-	`;
-
-	const requestsContainer = online.querySelector('#insertContainer');
-
-	data.friends.online.forEach((friend: Friend) => {
-		const requestElement = document.createElement('div');
-		requestElement.className = "friend-item flex items-center p-2 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg";
-		requestElement.dataset.friendName = friend.name;
-		requestElement.innerHTML = `
-			<div class="relative mr-3">
-				<img 
-					src=${friend.picture}
-					class="w-10 h-10 rounded-full"
-				>
-				<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
+	appendOfflineFriends(data: SidebarResponse, root: Element) {
+		const offline = document.createElement('div');
+		offline.innerHTML = `
+			<div class="p-4">
+				<h3 class="text-xs font-bold text-gray-400 mb-3">OFFLINE • ${data.friends.offline.length}</h3>
+				<div id="insertContainer" class="space-y-2"></div>
 			</div>
-			<span class="font-medium">${friend.name}</span>
 		`;
-		requestsContainer!.appendChild(requestElement);
-	})
-	root.append(online);
-}
 
-function addOfflineFriends(data: SidebarResponse, root: Element) {
-	const offline = document.createElement('div');
-	offline.innerHTML = `
-		<div class="p-4">
-			<h3 class="text-xs font-bold text-gray-400 mb-3">OFFLINE • ${data.friends.offline.length}</h3>
-			<div id="insertContainer" class="space-y-2"></div>
-		</div>
-	`;
+		const requestsContainer = offline.querySelector('#insertContainer');
+		data.friends.offline.forEach((friend: Friend) => {
+			const requestElement = document.createElement('div');
+			requestElement.className = "friend-item flex items-center p-2 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg";
+			requestElement.dataset.friendName = friend.name;
+			requestElement.innerHTML = `
+				<div class="relative mr-3">
+					<img 
+						src=${friend.picture}
+						class="w-10 h-10 rounded-full"
+					>
+					<div class="absolute bottom-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
+				</div>
+				<span class="font-medium">${friend.name}</span>
+			`;
+			requestsContainer!.appendChild(requestElement);
+		});
+		root.append(offline);
+	}
 
-	const requestsContainer = offline.querySelector('#insertContainer');
-	data.friends.offline.forEach((friend: Friend) => {
-		const requestElement = document.createElement('div');
-		requestElement.className = "friend-item flex items-center p-2 rounded-lg dark:hover:bg-gray-700 hover:bg-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg";
-		requestElement.dataset.friendName = friend.name;
-		requestElement.innerHTML = `
-			<div class="relative mr-3">
-				<img 
-					src=${friend.picture}
-					class="w-10 h-10 rounded-full"
-				>
-				<div class="absolute bottom-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 dark:border-gray-800 border-white"></div>
-			</div>
-			<span class="font-medium">${friend.name}</span>
-		`;
-		requestsContainer!.appendChild(requestElement);
-	});
-	root.append(offline);
+	switchToChatSidebar = (event: Event) => {
+		const target = event.target as HTMLElement;
+		const item = target.closest('.friend-item') as HTMLElement | null;
+		if (item) {
+			const name = item.dataset.friendName;
+			this.dispatchEvent(new CustomEvent('state-change', {
+				detail: {state: 'chat', name},
+				bubbles: true
+			}))
+		}
+	}
+
+	switchToCollapseSidebar = () => {
+		this.dispatchEvent(new CustomEvent('state-change', {
+			detail: {state: 'collapsed'},
+			bubbles: true
+		}))
+	}
+
+	rejectFriend = async () => {
+		const name = this.el_rejectFriend!.dataset.friendName;
+		const res = await API.rejectFriend(name!);
+		if (!res.success) {
+			console.error(`rejecting friend invite failed: ${res.message}`);
+		}
+		this.loadFriendList();
+	}
+
+	acceptFriend = async () => {
+		const name = this.el_acceptFriend!.dataset.friendName;
+		const res = await API.acceptFriend(name!);
+		if (!res.success) {
+			console.error(`accepting friend invite failed: ${res.message}`);
+		}
+		this.loadFriendList();
+	}
+
+	addFriend = async (event: Event) => {
+		if (event instanceof KeyboardEvent && event.key !== 'Enter') return;
+		const name = this.el_addFriendInput?.value.trim();
+		if (name) {
+			const res = await API.addFriend(name);
+			if (!res.success) {
+				console.error(`adding friend failed: ${res.message}`);
+			}
+			this.el_addFriendInput!.value = '';
+		}
+	}
 }
