@@ -48,10 +48,10 @@ export const routes: tRoutes = {
 		description: "Home page"
 	},
 
-	"/waiting-room": {
-		template: "/templates/waiting-room.html",
+	"/matchmaking": {
+		template: "/templates/matchmaking.html",
 		title: `1v1 Lobby | ${APP_TITLE}`,
-		description: "Waiting room for 1v1 matchmaking"
+		description: "Matchmaking lobby for 1v1 games"
 	},
 
 	"/game/:gameRoomId": {

@@ -22,7 +22,7 @@ import { IconUserRound } from "./components/icons/icon-user-round.js";
 import { LoginForm } from "./components/login-form.js";
 import { ModalLoginMenu } from "./components/modal-login-menu.js";
 import { RegisterForm } from "./components/register-form.js";
-import { WaitingRoom } from "./components/waiting-room.js";
+import { Matchmaking } from "./components/match-making.js";
 import { GameRoom } from "./components/game.js";
 import { TournamentList } from "./components/tournament-list.js";
 import { Tournament } from "./components/tournament.js";
@@ -62,8 +62,8 @@ customElements.define('icon-home-single-player', IconHomeSingleplayer)
 customElements.define('icon-home-multiplayer', IconHomeMultiplayer)
 customElements.define('icon-home-tournament', IconHomeTournament)
 
-// Waiting Room
-customElements.define('waiting-room', WaitingRoom)
+// Matchmaking
+customElements.define('match-making', Matchmaking)
 
 // Game
 customElements.define('game-room', GameRoom)

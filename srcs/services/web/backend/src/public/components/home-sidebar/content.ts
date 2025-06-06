@@ -57,7 +57,7 @@ export class HomeContent extends HTMLElement {
 						title="Multiplayer"
 						description="Real-time 1v1 matches with random matchmaking"
 						button-text="Play 1v1"
-						href="/waiting-room"
+						href="/matchmaking"
 						icon="icon-home-multiplayer"
 						accent-color="blue"
 					></play-card>

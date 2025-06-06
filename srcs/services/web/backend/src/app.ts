@@ -10,8 +10,8 @@ import { authRoutes } from "./routes/v1/auth.js";
 import { routes } from "./routes/v1/routes.js";
 import { pages } from "./routes/v1/pages.js";
 import { gameRoomSock } from "./routes/v1/gameRoom.js";
-import { waitingRoomSock } from "./routes/v1/waitingRoom.js";
-import { tWaitingRoomSock } from "./routes/v1/tournamentList.js";
+import { matchmakingSock } from "./routes/v1/matchmaking.js";
+import { tournamentListSock } from "./routes/v1/tournamentList.js";
 import { tournamentRoomSock } from "./routes/v1/tournamentRoom.js";
 import { initializeDB } from "./db/init.js";
 import { db } from "./db/connections.js"
@@ -85,9 +85,9 @@ export const build = async (opts: FastifyServerOptions) => {
 	app.register(pages, {prefix: "api"});
 	app.register(friends, {prefix: "api"});
 	app.register(chat);
-	app.register(waitingRoomSock, {prefix: "ws"});
+	app.register(matchmakingSock, {prefix: "ws"});
 	app.register(gameRoomSock, {prefix: "ws"});
-	app.register(tWaitingRoomSock, {prefix: "ws"});
+	app.register(tournamentListSock, {prefix: "ws"});
 	app.register(tournamentRoomSock, {prefix: "ws"});
 	app.register(authRoutes, {prefix: "api"});
 	app.register(twoFARoutes, {prefix: 'api/2fa'});
