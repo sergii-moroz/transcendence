@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { Game } from './game.js';
 import crypto from 'crypto';
-import { redirectToGameRoom } from '../routes/v1/waitingRoom.js';
+import { redirectToGameRoom } from '../routes/v1/matchmaking.js';
 import { db } from '../db/connections.js';
 
 export class Tournament {
@@ -105,7 +105,7 @@ export class Tournament {
 			this.app.gameInstances.set(game.gameRoomId, game);
 
 			await new Promise(resolve => setTimeout(resolve, 50));
-			
+
 			redirectToGameRoom(game.gameRoomId, [player1, player2]);
 			console.custom('INFO', `Tournament: Game room ${game.gameRoomId} created with players ${player1[0]} and ${player2[0]}`);
 		}
