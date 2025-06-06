@@ -25,7 +25,8 @@ export const handleChatInit = async (
 		const answer = {
 			friend,
 			messages: await getOldMessages(friendName, req.user.id, friend.blocked),
-			gameInvite: true //TODO
+			gameInvite: true, //TODO
+			success: true
 		};
 		// console.log(`Chat Init response: `, answer);
 		reply.status(200).send(answer);

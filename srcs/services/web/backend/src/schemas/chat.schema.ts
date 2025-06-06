@@ -31,13 +31,14 @@ export const chatInitSchema = {
 	response: {
 		200: {
 			type: 'object',
-      required: ['friend', 'messages', 'gameInvite'],
+      required: ['friend', 'messages', 'gameInvite', 'success'],
 			properties: {
 				friend: friendTypeSchema,
         messages: { type: 'array', items: messageTypeSchema },
-        gmaeInvite: {
+        gameInvite: {
           type: 'boolean',
-        }
+        },
+        success: { type: 'boolean' },
 			},
 		},
 		400: errorResponseSchema,

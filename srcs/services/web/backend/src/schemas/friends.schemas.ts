@@ -13,7 +13,7 @@ export const friendListSbSchema = {
   response: {
     200: {
       type: 'object',
-      required: ['friends', 'friendRequests'],
+      required: ['friends', 'friendRequests', 'success'],
       properties: {
         friends: {
           type: 'object',
@@ -24,6 +24,7 @@ export const friendListSbSchema = {
           },
         },
         friendRequests: { type: 'array', items: friendTypeSchema },
+        success: {type: 'boolean' }
       },
     },
     400: errorResponseSchema,
