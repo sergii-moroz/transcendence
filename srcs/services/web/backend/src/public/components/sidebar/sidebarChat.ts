@@ -1,64 +1,134 @@
 import { ChatInitResponse, Message } from "../../../types/user.js";
 import { API } from "../../api-static.js";
+import { socialSocketManager } from "../../socialWebSocket.js";
 import { iconSidebarCheck, iconX } from "../icons/icons.js";
-import { Sidebar } from "./sidebarBase.js";
+import { showErrorState, Sidebar } from "./sidebarBase.js";
 import { SidebarTemplates } from "./sidebarTemplates.js";
 
 
-export async function loadChat(sidebar: Sidebar) {
-	try {
-		const data = await API.getInitChatData(sidebar.openChatwith!) as ChatInitResponse;
-		if (!data) {
-			console.error("Error fetching chat init data");
-			return sidebar.showErrorState(sidebar.querySelector('#sidebar-chat'));
-		}
-		renderChat(sidebar, data);
-		setBlockButton(sidebar, data.friend.blocked);
-		if (data.gameInvite)
-			addGameInvitation(sidebar);
-		data.messages?.forEach(message => addMessages(sidebar, message));
-	} catch (error) {
-		console.error("Error fetching chat init data:", error);
-		sidebar.showErrorState(sidebar.querySelector('#sidebar-chat'));
+export class ChatView extends HTMLElement {
+	name: string = '';
+
+	el_back: HTMLElement | null = null;
+	el_backdrop: HTMLElement | null = null;
+	el_unfriend: HTMLElement | null = null;
+	el_block: HTMLElement | null = null;
+	el_unblock: HTMLElement | null = null;
+	el_sendMSG: HTMLElement | null = null;
+	el_chatInput: HTMLInputElement | null = null;
+	el_inviteBTN: HTMLElement | null = null;
+	el_acceptInvite: HTMLElement | null = null;
+	el_rejectInvite: HTMLElement | null = null;
+	el_friendProfile: HTMLElement | null = null;
+
+	constructor() {
+		super();
 	}
-}
 
-export function addMessages(sidebar: Sidebar, message: Message) {
-	const root = sidebar.querySelector('#friend-chat-messages');
-	if (!root || !sidebar.openChatwith) return;
+	async connectedCallback() {
+		this.name = this.getAttribute('friend') || '';
+		socialSocketManager.setMessageCallback((data: Message) => {
+			if (data.owner != this.name)
+				return socialSocketManager.addPopup(data);
+			this.addMessages(data);
+		});
 
-	const messageElement = document.createElement('div');
-	if (message.owner == sidebar.openChatwith)
-		messageElement.classList = "w-fit max-w-[70%] rounded-2xl rounded-bl-none dark:bg-blue-200 bg-blue-100 border border-blue-200 text-blue-800 p-2";
-	else
-		messageElement.classList = "ml-auto w-fit max-w-[70%] rounded-2xl rounded-br-none bg-blue-600 border border-blue-700 text-white p-2";
-	messageElement.innerHTML = `
-		<p class="text-sm text-left break-all">${message.text}</p>
-	`
-	root.append(messageElement);
+		await this.loadChat();
+
+		this.el_back = this.querySelector('#back-to-friends-btn');
+		this.el_backdrop = this.querySelector('#backdrop');
+		this.el_unfriend = this.querySelector('#unfriend-btn');
+		this.el_block = this.querySelector('#block-btn');
+		this.el_unblock = this.querySelector('#unblock-btn');
+		this.el_sendMSG = this.querySelector('#send-message-btn');
+		this.el_chatInput = this.querySelector('#chat-input') as HTMLInputElement;
+		this.el_inviteBTN = this.querySelector('#invite-to-game-btn');
+		this.el_acceptInvite = this.querySelector('#acceptGameInvite-btn');
+		this.el_rejectInvite = this.querySelector('#rejectGameInvite-btn');
+		this.el_friendProfile = this.querySelector('#chatProfile-btn');
+
+		this.el_back?.addEventListener('click', this.switchToFriendListSidebar);
+		this.el_backdrop?.addEventListener('click', this.switchToCollapseSidebar);
+		this.el_unfriend?.addEventListener('click', this.unfriend);
+		this.el_block?.addEventListener('click', this.block);
+		this.el_unblock?.addEventListener('click', this.unblock);
+		this.el_sendMSG?.addEventListener('click', this.sendMessage);
+		this.el_chatInput?.addEventListener('keydown', this.sendMessage);
+		this.el_inviteBTN?.addEventListener('click', this.gameInvitation);
+		this.el_acceptInvite?.addEventListener('click', this.acceptGameInvite);
+		this.el_rejectInvite?.addEventListener('click', this.rejectGameInvite);
+		this.el_friendProfile?.addEventListener('click', this.switchToProfilePage);
+	}
+	
+	disconnectedCallback() {
+		socialSocketManager.removeMessageCallback();
+
+		this.el_back?.removeEventListener('click', this.switchToFriendListSidebar);
+		this.el_backdrop?.removeEventListener('click', this.switchToCollapseSidebar);
+		this.el_unfriend?.removeEventListener('click', this.unfriend);
+		this.el_block?.removeEventListener('click', this.block);
+		this.el_unblock?.removeEventListener('click', this.unblock);
+		this.el_sendMSG?.removeEventListener('click', this.sendMessage);
+		this.el_chatInput?.removeEventListener('keydown', this.sendMessage);
+		this.el_inviteBTN?.removeEventListener('click', this.gameInvitation);
+		this.el_acceptInvite?.removeEventListener('click', this.acceptGameInvite);
+		this.el_rejectInvite?.removeEventListener('click', this.rejectGameInvite);
+		this.el_friendProfile?.removeEventListener('click', this.switchToProfilePage);
+	}
+
+	loadChat = async () => {
+		try {
+			if (!this.name) throw new Error("friend is undefined");
+			this.render();
+			const data = await API.getInitChatData(this.name);
+			if (!data.success) throw new Error(`fetching chatInit data failed: ${data.message}`);
+			this.setProfileInfo(data);
+			this.setBlockButton(data.friend.blocked);
+			if (data.gameInvite)
+				this.addGameInvitation();
+			data.messages?.forEach((message: Message) => this.addMessages(message));
+		} catch (error) {
+			console.error("Error loading Chat View: ", error);
+			showErrorState(this.querySelector('#sidebar-chat'));
+		}
+	}
+
+	render() {
+		this.innerHTML = SidebarTemplates.chat();
+	}
+
+	addMessages(message: Message) {
+		const root = this.querySelector('#friend-chat-messages');
+		if (!root || !this.name) throw new Error('render must have failed');
+
+		const messageElement = document.createElement('div');
+		if (message.owner == this.name)
+			messageElement.classList = "w-fit max-w-[70%] rounded-2xl rounded-bl-none dark:bg-blue-200 bg-blue-100 border border-blue-200 text-blue-800 p-2";
+		else
+			messageElement.classList = "ml-auto w-fit max-w-[70%] rounded-2xl rounded-br-none bg-blue-600 border border-blue-700 text-white p-2";
+		messageElement.innerHTML = `
+			<p class="text-sm text-left break-all">${message.text}</p>
+		`
+		root.append(messageElement);
 
 
-	requestAnimationFrame(() => {
-		root.lastElementChild!.scrollIntoView();
-	});
-}
+		requestAnimationFrame(() => {
+			root.lastElementChild!.scrollIntoView();
+		});
+	}
 
-function renderChat(sidebar: Sidebar, data: ChatInitResponse) {
-	sidebar.innerHTML = SidebarTemplates.chat(data);
-}
+	setBlockButton(blocked: string | null) {
+		const block = this.querySelector('#block-btn') as HTMLElement;
+		const unblock = this.querySelector('#unblock-btn') as HTMLElement;
+		if (blocked)
+			block.classList.add("hidden");
+		else
+			unblock.classList.add("hidden");
+	}
 
-function setBlockButton(sidebar: Sidebar, blocked: string | null) {
-	const block = sidebar.querySelector('#block-btn') as HTMLElement;
-	const unblock = sidebar.querySelector('#unblock-btn') as HTMLElement;
-	if (blocked)
-		block.classList.add("hidden");
-	else
-		unblock.classList.add("hidden");
-}
-
-function addGameInvitation(sidebar: Sidebar) {
-		const root = sidebar.querySelector('#game-invitations-section');
-		if (!root) return;
+	addGameInvitation() {
+		const root = this.querySelector('#game-invitations-section');
+		if (!root) throw new Error('render must have failed');
 		const invitation = document.createElement('div');
 		invitation.classList = "p-4 border-b dark:border-gray-700 border-gray-200";
 		invitation.innerHTML = `
@@ -86,3 +156,100 @@ function addGameInvitation(sidebar: Sidebar) {
 		`
 		root.append(invitation)
 	}
+
+	setProfileInfo(data: ChatInitResponse) {
+		const root = this.querySelector('#chatProfile-btn');
+		if (!root) throw new Error('render must have failed');
+		const div = document.createElement('div');
+		div.classList = "flex items-center";
+		div.innerHTML = `
+			<img 
+				src=${data.friend.picture}
+				class="w-10 h-10 rounded-full mr-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
+			>
+			<div>
+				<div class="font-medium">
+					${data.friend.name}
+				</div>
+				<div class="text-xs text-gray-400">${data.friend.online ? "online" : "offline"}</div>
+			</div>
+		`
+		root.append(div);
+	}
+
+	switchToProfilePage = async () => {
+		alert("will be added");
+	}
+
+	switchToCollapseSidebar = () => {
+		this.dispatchEvent(new CustomEvent('state-change', {
+			detail: {state: 'collapsed'},
+			bubbles: true
+		}))
+	}
+
+	switchToFriendListSidebar = () => {
+		this.dispatchEvent(new CustomEvent('state-change', {
+			detail: {state: 'friendList'},
+			bubbles: true
+		}))
+	}
+
+	acceptGameInvite = async () => {
+		alert("will be added");
+	}
+
+	rejectGameInvite = async () => {
+		alert("will be added");
+	}
+
+	gameInvitation = async () => {
+		if (this.querySelector('#game-invitations-container')) {
+			alert('there is already an invitation!');
+			return;
+		}
+		alert("will be added");
+	}
+
+	sendMessage = (event: Event) => {
+		if (event instanceof KeyboardEvent && event.key !== 'Enter') return;
+		const message = this.el_chatInput?.value.trim();
+		if (message) {
+			socialSocketManager.send({text: message, to: this.name});
+			this.addMessages({text: message, owner: "you"});
+			this.el_chatInput!.value = '';
+		}
+	}
+
+	block = async () => {
+		if (this.name == "admin")
+			return alert("cant block admin user!");
+		const res = await API.blockFriend(this.name);
+		if (!res.success) {
+			console.error(`blocking friend failed: ${res.message}`);
+			return;
+		}
+		this.el_block!.classList.toggle("hidden");
+		this.el_unblock!.classList.toggle("hidden");
+	}
+
+	unblock = async () => {
+		const res = await API.unblockFriend(this.name);
+		if (!res.success) {
+			console.error(`unblocking friend failed: ${res.message}`);
+		}
+		this.loadChat();
+	}
+
+	unfriend = async () => {
+		if (this.name == "admin")
+			return alert("cant delete admin user from friends!");
+		if (confirm("Are you sure you want to delete sidebar friend?")) {
+			const res = await API.deleteFriend(this.name);
+			if (!res.success) {
+				console.error(`deleting friend failed: ${res.message}`);
+			}
+			this.switchToFriendListSidebar();
+		}
+	}
+}
