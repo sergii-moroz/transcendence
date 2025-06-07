@@ -61,7 +61,6 @@ export class TournamentList extends HTMLElement {
 		this.socket.onerror = (err) => {
 			alert(`WebSocket error: ${err}`);
 			console.error('WebSocket error:', err);
-			// Router.navigateTo('/home');
 		};
 	}
 

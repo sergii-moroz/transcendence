@@ -5,7 +5,6 @@ import {
 } from "fastify"
 
 import { Tournament } from "../../services/tournament.js";
-import { send } from "process";
 
 export const tournamentListSock = async (app: FastifyInstance) => {
 	const tournamentListConns = new Array<[string, WebSocket]>();
@@ -19,39 +18,49 @@ export const tournamentListSock = async (app: FastifyInstance) => {
 		sendTournamentList(tournamentListConns, app);
 
 		socket.on('message', (messageBuffer: Event) => {
-			const message = JSON.parse(messageBuffer.toString());
-
-			if(message.type === 'createTournament') {
-				const tournament = new Tournament(app, message.maxPlayers || 4);
-				app.tournaments.set(tournament.id, tournament);
-				console.custom('INFO', `Tournament created with ID: ${tournament.id}`);
-				redirectToTournament(tournament.id, app, {id: userId, socket: socket}, tournamentListConns);
-				setTimeout(() => {
-					sendTournamentList(tournamentListConns, app);
-				}, 500);
-			}
-
-			if(message.type === 'joinTournament') {
-				console.custom('INFO', `User ${userId} is joining tournament: ${message.tournamentId}`);
-				const tournamentId = message.tournamentId;
-				redirectToTournament(tournamentId, app, {id: userId, socket: socket}, tournamentListConns);
-				setTimeout(() => {
-					sendTournamentList(tournamentListConns, app);
-				}, 500);
-			}
+			handleMessage(messageBuffer, userId, socket);
 		})
 
 		socket.on('close', () => {
-			const index = tournamentListConns.findIndex(([id]) => id === userId);
-			if (index !== -1) {
-				tournamentListConns.splice(index, 1);
-			}
+			handleClose(userId);
 		})
 
 		socket.on('error', (err: Event) => {
 			console.custom('error', err);
+			handleClose(userId);
 		})
 	});
+
+	function handleMessage(messageBuffer: Event, userId: string, socket: WebSocket) {
+		const message = JSON.parse(messageBuffer.toString());
+
+		if(message.type === 'createTournament') {
+			const tournament = new Tournament(app, message.maxPlayers || 4);
+			app.tournaments.set(tournament.id, tournament);
+			console.custom('INFO', `Tournament created with ID: ${tournament.id}`);
+			redirectToTournament(tournament.id, app, {id: userId, socket: socket}, tournamentListConns);
+			setTimeout(() => {
+				sendTournamentList(tournamentListConns, app);
+			}, 500);
+		}
+
+		if(message.type === 'joinTournament') {
+			console.custom('INFO', `User ${userId} is joining tournament: ${message.tournamentId}`);
+			const tournamentId = message.tournamentId;
+			redirectToTournament(tournamentId, app, {id: userId, socket: socket}, tournamentListConns);
+			setTimeout(() => {
+				sendTournamentList(tournamentListConns, app);
+			}, 500);
+		}
+	}
+
+	function handleClose(userId: string) {
+		const index = tournamentListConns.findIndex(([id]) => id === userId);
+		if (index !== -1) {
+			tournamentListConns.splice(index, 1);
+			console.custom('INFO', `${userId} has left the tournament waiting room`);
+		}
+	}
 
 	function connectUser(userId: string, socket: WebSocket) {
 		const index = tournamentListConns.findIndex(([id]) => id === userId);
