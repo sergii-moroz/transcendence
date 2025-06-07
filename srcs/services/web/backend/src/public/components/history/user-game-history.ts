@@ -271,11 +271,45 @@ export class UserGameHistory extends HTMLElement {
 				this.loadData()
 			} else if (target.id === 'retry-btn') {
 				this.loadData()
+			} else if (action === 'page-size-plus') {
+				this.incPageSize()
+			} else if (action === 'page-size-minus') {
+				this.decPageSize()
 			}
 		})
 	}
 
 	private cleanupEventListers() {
 		this.removeEventListener('click', () => {})
+	}
+
+	private incPageSize() {
+		const currentIndex = PAGE_SIZE_OPTIONS.indexOf(this.pageSize)
+		if (currentIndex < PAGE_SIZE_OPTIONS.length - 1) {
+			const oldPageSize = this.pageSize
+			this.pageSize = PAGE_SIZE_OPTIONS[currentIndex + 1]
+			this.adjustPageForNewPageSize(oldPageSize)
+		}
+	}
+
+	private decPageSize() {
+		const currentIndex = PAGE_SIZE_OPTIONS.indexOf(this.pageSize)
+		if (currentIndex > 0) {
+			const oldPageSize = this.pageSize
+			this.pageSize = PAGE_SIZE_OPTIONS[currentIndex - 1]
+			this.adjustPageForNewPageSize(oldPageSize)
+		}
+	}
+
+	private adjustPageForNewPageSize(oldPageSize: number) {
+		// Calculate which item we were viewing at the top of current page
+		const firstVisibleItemIndex = oldPageSize * (this.currentPage - 1);
+
+		// Calculate what page this item would be on with the new page size
+		const newPage = Math.max(1, Math.floor(firstVisibleItemIndex / this.pageSize) + 1);
+
+		this.currentPage = newPage;
+
+		this.loadData();
 	}
 }
