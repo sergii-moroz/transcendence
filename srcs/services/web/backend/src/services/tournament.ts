@@ -30,51 +30,8 @@ export class Tournament {
 
 	addPlayer(socket: WebSocket, id: string) {
 		if(this.allConnected){
-			if (this.knownIds.has(id) && this.knownIds.get(id) === false) {
-				this.players = this.players.filter(([pid]) => pid !== id);
-				this.players.push([id, socket]);
-				console.custom('INFO', `Tournament: Player ${id} reconnected`);
-
-				console.custom('DEBUG', 'knownIds before remaining:', Array.from(this.knownIds.entries()));
-				const remaining = Array.from(this.knownIds.entries()).filter(([_, eliminated]) => !eliminated);
-				console.custom('INFO', `Tournament: Remaining players after rejoin: ${remaining.map(([id]) => id).join(', ')}`);
-				if (remaining.length === 1) {
-					const [finalWinnerId] = remaining[0];
-					console.custom('INFO', `Tournament: Tournament finished with winner ${finalWinnerId}`);
-					this.isRunning = false;
-					const winnerSocket = this.players.find(([id]) => id === finalWinnerId)?.[1];
-					if (winnerSocket) {
-						winnerSocket.send(JSON.stringify({
-							type: 'victory',
-							message: `Congratulations! You have won the tournament!`,
-							winnerId: finalWinnerId,
-							tournamentId: this.id
-						}));
-					}
-					db.run(
-							`UPDATE user_stats SET t_wins = t_wins + 1 WHERE user_id = ?`, [finalWinnerId]
-					);
-					this.app.tournaments.delete(this.id);
-					return;
-				}
-
-				if(this.isRunning) {
-					console.custom('INFO', `Tournament: Starting next round...`);
-					this.startTournament();
-				}
-			} else if (this.knownIds.has(id) && this.knownIds.get(id) === true) {
-				socket.send(JSON.stringify({
-					type: 'Error',
-					message: 'You have been eliminated.'
-				}));
-				console.custom('ERROR', `Tournament: User ${id} tried to rejoin after elimination`);
-		 	} else {
-				socket.send(JSON.stringify({
-					type: 'Error',
-					message: 'Tournament is full.'
-				}));
-				console.custom('ERROR', `Tournament: User ${id} tried to join a full tournament`);
-			}
+			this.handleReconnect(socket, id);
+			return;
 		} else if(this.players.length !== this.maxPlayers) { // Add player
 			this.players = this.players.filter(([pid]) => pid !== id);
 			this.players.push([id, socket]);
@@ -87,11 +44,62 @@ export class Tournament {
 			}));
 			console.custom('ERROR', `Tournament: User ${id} tried to join a full tournament`);
 		}
-		if(this.players.length === this.maxPlayers && !this.isRunning) { // Start tournament if 4 players are connected
+		if(this.players.length === this.maxPlayers && !this.isRunning) { // Start tournament if max players reached
 			this.allConnected = true;
 			console.custom('INFO', `Tournament: Starting tournament...`);
 			this.startTournament();
 		}
+	}
+
+	handleReconnect(socket: WebSocket, id: string) {
+		if (this.knownIds.has(id) && this.knownIds.get(id) === false) {
+			this.players = this.players.filter(([pid]) => pid !== id);
+			this.players.push([id, socket]);
+			console.custom('INFO', `Tournament: Player ${id} reconnected`);
+
+			const remaining = Array.from(this.knownIds.entries()).filter(([_, eliminated]) => !eliminated);
+			console.custom('INFO', `Tournament: Remaining players after rejoin: ${remaining.map(([id]) => id).join(', ')}`);
+			if (remaining.length === 1) {
+				this.handleVictory(remaining[0][0]);
+				return;
+			}
+
+			if(this.isRunning) {
+				console.custom('INFO', `Tournament: Starting next round...`);
+				this.startTournament();
+			}
+		} else if (this.knownIds.has(id) && this.knownIds.get(id) === true) {
+			socket.send(JSON.stringify({
+				type: 'Error',
+				message: 'You have been eliminated.'
+			}));
+			console.custom('ERROR', `Tournament: User ${id} tried to rejoin after elimination`);
+		} else {
+			socket.send(JSON.stringify({
+				type: 'Error',
+				message: 'Tournament is full.'
+			}));
+			console.custom('ERROR', `Tournament: User ${id} tried to join a full tournament`);
+		}
+	}
+
+	handleVictory(finalWinnerId: string) {
+		console.custom('INFO', `Tournament: Tournament finished with winner ${finalWinnerId}`);
+		this.isRunning = false;
+		const winnerSocket = this.players.find(([id]) => id === finalWinnerId)?.[1];
+		if (winnerSocket) {
+			winnerSocket.send(JSON.stringify({
+				type: 'victory',
+				message: `Congratulations! You have won the tournament!`,
+				winnerId: finalWinnerId,
+				tournamentId: this.id
+			}));
+		}
+		db.run(
+				`UPDATE user_stats SET t_wins = t_wins + 1 WHERE user_id = ?`, [finalWinnerId]
+		);
+		this.app.tournaments.delete(this.id);
+		return;
 	}
 
 	async matchPlayers() {
