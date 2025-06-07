@@ -27,7 +27,7 @@ export const tournamentRoomSock = async (app: FastifyInstance) => {
 
 		socket.on('message', (messageBuffer: Event) => {
 			const message = JSON.parse(messageBuffer.toString());
-			
+
 			if(message.type === 'joinRoom') {
 				if (tournament.deleteTimeout) {
 					clearTimeout(tournament.deleteTimeout);
@@ -50,7 +50,6 @@ export const tournamentRoomSock = async (app: FastifyInstance) => {
 			}
 			if (!tournament.deleteTimeout) {
 				tournament.deleteTimeout = setTimeout(() => {
-					// Check again before deleting
 					if (tournament.players.length === 0 && tournament.activeGames === 0) {
 						app.tournaments.delete(tournamentId);
 						console.custom('INFO', `Tournament room ${tournamentId} closed due to inactivity`);
