@@ -15,10 +15,7 @@ export class TournamentList extends HTMLElement {
 	}
 
 	disconnectedCallback() {
-		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-			this.socket.close();
-			console.log('Disconnecting from socket, page unload...');
-		}
+		this.handleClose();
 		document.removeEventListener('click', this.handleClick);
 	}
 
@@ -38,30 +35,9 @@ export class TournamentList extends HTMLElement {
 		this.socket.onopen = () => {
 			console.log('WebSocket connection established.');
 		}
-
-		this.socket.onmessage = (event) => {
-			const data = JSON.parse(event.data) as tournamentListJson;
-			if (data.type === 'tournamentList') {
-				this.updateTournamentList(data.tournaments);
-			}
-
-			if (data.type === 'redirectingToTournament') {
-				if(this.socket && this.socket.readyState === WebSocket.OPEN) {
-					this.socket.close();
-				}
-				console.log(`Redirecting to tournament: ${data.tournamentId}`);
-				Router.navigateTo('/tournament/' + data.tournamentId);
-			}
-		};
-
-		this.socket.onclose = () => {
-			console.log('WebSocket connection closed.');
-		};
-
-		this.socket.onerror = (err) => {
-			alert(`WebSocket error: ${err}`);
-			console.error('WebSocket error:', err);
-		};
+		this.socket.onmessage = this.handleMessage;
+		this.socket.onclose = this.handleClose;
+		this.socket.onerror = this.handleError;
 	}
 
 	handleClick = (event: Event) => {
@@ -70,6 +46,34 @@ export class TournamentList extends HTMLElement {
 		if (target.closest('#create-tournament')) {
 			this.socket?.send(JSON.stringify({ type: 'createTournament' }));
 		}
+	}
+
+	handleMessage = (event: MessageEvent) => {
+		const data = JSON.parse(event.data) as tournamentListJson;
+		if (data.type === 'tournamentList') {
+			this.updateTournamentList(data.tournaments);
+		}
+
+		if (data.type === 'redirectingToTournament') {
+			if(this.socket && this.socket.readyState === WebSocket.OPEN) {
+				this.socket.close();
+			}
+			console.log(`Redirecting to tournament: ${data.tournamentId}`);
+			Router.navigateTo('/tournament/' + data.tournamentId);
+		}
+	}
+
+	handleClose = () => {
+		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+			this.socket.close();
+			console.log('Disconnecting from socket, page unload...');
+		}
+		console.log('WebSocket connection closed.');
+	}
+
+	handleError = (event: Event) => {
+		alert(`WebSocket error: ${event}`);
+		console.error('WebSocket error:', event);
 	}
 
 	updateTournamentList(tournaments: Array<{ id: string, playerCount: number, maxPlayers: number }> | undefined) {
