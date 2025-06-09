@@ -110,8 +110,9 @@ export class TournamentList extends HTMLElement {
 		// Handle button clicks
 		popup.querySelectorAll('button[data-size]').forEach(btn => {
 			btn.addEventListener('click', (e) => {
-				const size = (e.target as HTMLElement).getAttribute('data-size');
+				const size = (e.currentTarget as HTMLElement).getAttribute('data-size');
 				this.socket?.send(JSON.stringify({ type: 'createTournament', maxPlayers: Number(size) }));
+				console.log(`Creating tournament with ${size} players...`);
 				popup.remove();
 			});
 		});
