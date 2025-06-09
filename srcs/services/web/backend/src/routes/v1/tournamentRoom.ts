@@ -48,19 +48,24 @@ export const tournamentRoomSock = async (app: FastifyInstance) => {
 			if (tournament.players.some(([id]) => id === userId)) {
 				tournament.players = tournament.players.filter(([id]) => id !== userId);
 			}
-			if (!tournament.deleteTimeout) {
-				tournament.deleteTimeout = setTimeout(() => {
-					if (tournament.players.length === 0 && tournament.activeGames === 0) {
-						app.tournaments.delete(tournamentId);
-						console.custom('INFO', `Tournament room ${tournamentId} closed due to inactivity`);
-					}
-					tournament.deleteTimeout = null;
-				}, 10000);
-			}
+			handleTimeout(tournament);
 		})
 
 		socket.on('error', (err: Event) => {
 			console.custom('ERROR', 'WebSocket error:', err);
+			handleTimeout(tournament);
 		})
 	});
+
+	function handleTimeout(tournament: Tournament) {
+		if (!tournament.deleteTimeout) {
+			tournament.deleteTimeout = setTimeout(() => {
+				if (tournament.players.length === 0 && tournament.activeGames === 0) {
+					app.tournaments.delete(tournament.id);
+					console.custom('INFO', `Tournament room ${tournament.id} closed due to inactivity`);
+				}
+				tournament.deleteTimeout = null;
+			}, 10000);
+		}
+	}
 }

@@ -84,9 +84,10 @@ export class Tournament {
 	}
 
 	handleVictory(finalWinnerId: string) {
-		console.custom('INFO', `Tournament: Tournament finished with winner ${finalWinnerId}`);
 		this.isRunning = false;
+		console.custom('INFO', `Tournament: Tournament finished with winner ${finalWinnerId}`);
 		const winnerSocket = this.players.find(([id]) => id === finalWinnerId)?.[1];
+
 		if (winnerSocket) {
 			winnerSocket.send(JSON.stringify({
 				type: 'victory',
