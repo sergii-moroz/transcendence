@@ -56,9 +56,9 @@ export class HomeHeader extends HTMLElement {
 						<span class="md:hidden text-white [&>svg]:size-5 sm:[&>svg]:size-6">${iconPower}</span>
 						<span class="hidden text-white md:inline-block">Logout</span>
 					</button>
-					<div id="sidebarToggle" class="p-2 lg:hidden flex cursor-pointer items-center text-blue-400 dark:text-white justify-center rounded-4xl border border-gray-200 bg-white hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+					<button id="sidebarToggle" class="p-2 lg:hidden [&>svg]:size-5 sm:[&>svg]:size-6 text-blue-400 dark:text-white rounded-full border border-gray-200 bg-white hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
 						${iconFriends}
-					</div>
+					</button>
 				</div>
 			</header>
 		`;

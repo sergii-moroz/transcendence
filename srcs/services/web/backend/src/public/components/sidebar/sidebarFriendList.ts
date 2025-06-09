@@ -1,6 +1,6 @@
 import { Friend, SidebarResponse } from "../../../types/user.js";
 import { API } from "../../api-static.js";
-import { iconCheck, iconX } from "../icons/icons.js";
+import { iconSidebarCheck, iconX } from "../icons/icons.js";
 import { showErrorState } from "./sidebarBase.js";
 import { SidebarTemplates } from "./sidebarTemplates.js";
 
@@ -11,9 +11,6 @@ export class FriendListView extends HTMLElement {
 	el_refresh: HTMLElement | null = null;
 	el_addFriend: HTMLElement | null = null;
 	el_addFriendInput: HTMLInputElement | null = null;
-	// el_acceptFriend: HTMLElement | null = null;
-	// el_rejectFriend: HTMLElement | null = null;
-
 
 	constructor() {
 		super();
@@ -28,6 +25,7 @@ export class FriendListView extends HTMLElement {
 		this.el_addFriendInput = this.querySelector('#addFriendInput') as HTMLInputElement;
 	
 		this.el_close?.addEventListener('click', this.switchToCollapseSidebar);
+		window.addEventListener('keydown', this.switchToCollapseSidebar);
 		this.el_backdrop?.addEventListener('click', this.switchToCollapseSidebar);
 		this.el_refresh?.addEventListener('click', this.loadFriendList);
 		this.el_addFriend?.addEventListener('click', this.addFriend);
@@ -103,7 +101,7 @@ export class FriendListView extends HTMLElement {
 						</div>
 						<div class="flex gap-2">
 							<button id="acceptFriendReq" class="p-1.5 rounded-full bg-green-500 hover:bg-green-600 text-white transition-colors" data-friend-name=${request.name}>
-								${iconCheck}
+								${iconSidebarCheck}
 							</button>
 							<button id="rejectFriendReq" class="p-1.5 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors" data-friend-name=${request.name}>
 								${iconX}
@@ -197,7 +195,8 @@ export class FriendListView extends HTMLElement {
 		}))
 	}
 
-	switchToCollapseSidebar = () => {
+	switchToCollapseSidebar = (event: Event) => {
+		if (event && event instanceof KeyboardEvent && event.key !== 'Escape') return;
 		this.dispatchEvent(new CustomEvent('state-change', {
 			detail: {state: 'collapsed'},
 			bubbles: true
@@ -231,6 +230,7 @@ export class FriendListView extends HTMLElement {
 				console.error(`adding friend failed: ${res.message}`);
 			}
 			this.el_addFriendInput!.value = '';
+			this.el_addFriendInput?.blur();
 		}
 	}
 }

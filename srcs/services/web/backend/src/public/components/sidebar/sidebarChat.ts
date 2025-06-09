@@ -2,7 +2,7 @@ import { ChatInitResponse, Message } from "../../../types/user.js";
 import { API } from "../../api-static.js";
 import { socialSocketManager } from "../../socialWebSocket.js";
 import { iconSidebarCheck, iconX } from "../icons/icons.js";
-import { showErrorState, Sidebar } from "./sidebarBase.js";
+import { showErrorState } from "./sidebarBase.js";
 import { SidebarTemplates } from "./sidebarTemplates.js";
 
 
@@ -49,6 +49,7 @@ export class ChatView extends HTMLElement {
 		this.el_gameInviteButtonSection = this.querySelector('#gameInviteButtonSection');
 
 		this.el_back?.addEventListener('click', this.switchToFriendListSidebar);
+		window.addEventListener('keydown', this.switchToFriendListSidebar);
 		this.el_backdrop?.addEventListener('click', this.switchToCollapseSidebar);
 		this.el_unfriend?.addEventListener('click', this.unfriend);
 		this.el_block?.addEventListener('click', this.block);
@@ -66,6 +67,7 @@ export class ChatView extends HTMLElement {
 		socialSocketManager.removeMessageCallback();
 
 		this.el_back?.removeEventListener('click', this.switchToFriendListSidebar);
+		window.removeEventListener('keydown', this.switchToFriendListSidebar);
 		this.el_backdrop?.removeEventListener('click', this.switchToCollapseSidebar);
 		this.el_unfriend?.removeEventListener('click', this.unfriend);
 		this.el_block?.removeEventListener('click', this.block);
@@ -83,7 +85,7 @@ export class ChatView extends HTMLElement {
 			const data = await API.getInitChatData(this.name);
 			if (!data.success) throw new Error(`fetching chatInit data failed: ${data.message}`);
 			this.setProfileInfo(data);
-			this.setBlockButton(data.friend.blocked);
+			this.applyBlockState(data.friend.blocked);
 			if (data.gameInvite)
 				this.addGameInvitation();
 			const messageRoot = this.querySelector('#friend-chat-messages') as HTMLElement;
@@ -119,7 +121,7 @@ export class ChatView extends HTMLElement {
 		});
 	}
 
-	setBlockButton(blocked: string | null) {
+	applyBlockState(blocked: string | null) {
 		if (blocked) {
 			this.el_block!.classList.add("hidden");
 			this.el_unblock!.classList.remove("hidden");
@@ -211,7 +213,8 @@ export class ChatView extends HTMLElement {
 		}))
 	}
 
-	switchToFriendListSidebar = () => {
+	switchToFriendListSidebar = (event?: Event) => {
+		if (event && event instanceof KeyboardEvent && event.key !== 'Escape') return;
 		this.dispatchEvent(new CustomEvent('state-change', {
 			detail: {state: 'friendList'},
 			bubbles: true
@@ -241,6 +244,7 @@ export class ChatView extends HTMLElement {
 			socialSocketManager.send({text: message, to: this.name});
 			this.addMessages({text: message, owner: "you"});
 			this.el_chatInput!.value = '';
+			this.el_chatInput!.blur();
 		}
 	}
 
