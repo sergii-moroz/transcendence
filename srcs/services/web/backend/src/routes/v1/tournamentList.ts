@@ -99,7 +99,8 @@ function sendTournamentList(connections: Array<[string, WebSocket]>, app: Fastif
 	let tournamentList = Array.from(app.tournaments.values()).map(tournament => ({
 		id: tournament.id,
 		maxPlayers: tournament.maxPlayers,
-		playerCount: tournament.players.length,
+		playerCount: Array.from(tournament.knownIds.values()).filter(eliminated => !eliminated).length,
+		isRunning: tournament.isRunning
 	}));
 	connections.forEach(([userId, socket]) => {
 		socket.send(JSON.stringify({
