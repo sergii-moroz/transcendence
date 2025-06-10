@@ -139,76 +139,68 @@ export class Game {
 				}));
 			});
 
-			if (this.state.scores.player1 >= 7 || this.state.scores.player2 >= 7) {
-				this.gameRunning = false;
-
-				const winnerRole = this.state.scores.player1 >= 7 ? 'player1' : 'player2';
-				const loserRole = winnerRole === 'player1' ? 'player2' : 'player1';
-				const winner = this.players.get(winnerRole);
-				const loser = this.players.get(loserRole);
-
-				this.winnerId = winner?.id || null;
-
-				// Send gameOver message
-				if (winner) {
-					winner.socket.send(JSON.stringify({
-						type: 'gameOver',
-						message: `${winnerRole === 'player1'
-							? this.players.get('player1')!.username
-							: this.players.get('player2')!.username} wins!`,
-						winner: winnerRole,
-						tournamentId: this.tournamentId, // Only winner gets tournamentId
-					}));
-				}
-				if (loser) {
-					loser.socket.send(JSON.stringify({
-						type: 'gameOver',
-						message: `${winnerRole === 'player1'
-							? this.players.get('player1')!.username
-							: this.players.get('player2')!.username} wins!`,
-						winner: winnerRole,
-						tournamentId: null, // Loser does not get tournamentId
-					}));
-				}
-
-				if (this.tournamentId) {
-					console.custom('INFO', `Game room ${this.gameRoomId} in Tournament ${this.tournamentId}: ${winnerRole === 'player1' ? 'Player 1' : 'Player 2'} wins!`);
-				} else {
-					console.custom('INFO', `Game room ${this.gameRoomId}: ${winnerRole === 'player1' ? 'Player 1' : 'Player 2'} wins!`);
-				}
-
-				// Update stats
-				if (winner) {
-					if(!this.tournamentId) {
-						db.run(
-							`UPDATE user_stats SET m_wins = m_wins + 1 WHERE user_id = ?`, [winner.id]
-						);
-						const gameResults = {
-							gameId: this.gameRoomId,
-							gameModeId: this.game_mode,
-							player1Id: parseInt(this.players.get('player1')!.id),
-							player2Id: parseInt(this.players.get('player2')!.id),
-							score1: this.state.scores.player1,
-							score2: this.state.scores.player2,
-							duration: 42,
-							techWin: false
-						}
-						saveGameResults(gameResults)
-					}
-				}
-				if (loser) {
-					if(this.tournamentId) {
-						db.run(
-							`UPDATE user_stats SET t_losses = t_losses + 1 WHERE user_id = ?`, [loser.id]
-						);
-					} else {
-						db.run(
-							`UPDATE user_stats SET m_losses = m_losses + 1 WHERE user_id = ?`, [loser.id]
-						);
-					}
-				}
-			}
+			this.checkScores();
 		}, 16);
+	}
+
+	checkScores() {
+		if (this.state.scores.player1 >= 7 || this.state.scores.player2 >= 7) {
+			this.gameRunning = false;
+
+			const winnerRole = this.state.scores.player1 >= 7 ? 'player1' : 'player2';
+			const loserRole = winnerRole === 'player1' ? 'player2' : 'player1';
+			const winner = this.players.get(winnerRole);
+			const loser = this.players.get(loserRole);
+
+			this.winnerId = winner?.id || null;
+
+			// Send gameOver message
+			if (winner) {
+				winner.socket.send(JSON.stringify({
+					type: 'gameOver',
+					message: `${winnerRole === 'player1'
+						? this.players.get('player1')!.username
+						: this.players.get('player2')!.username} wins!`,
+					winner: winnerRole,
+					tournamentId: this.tournamentId, // Only winner gets tournamentId
+				}));
+			}
+			if (loser) {
+				loser.socket.send(JSON.stringify({
+					type: 'gameOver',
+					message: `${winnerRole === 'player1'
+						? this.players.get('player1')!.username
+						: this.players.get('player2')!.username} wins!`,
+					winner: winnerRole,
+					tournamentId: null, // Loser does not get tournamentId
+				}));
+			}
+
+			if (this.tournamentId) {
+				console.custom('INFO', `Game room ${this.gameRoomId} in Tournament ${this.tournamentId}: ${winnerRole === 'player1' ? 'Player 1' : 'Player 2'} wins!`);
+			} else {
+				console.custom('INFO', `Game room ${this.gameRoomId}: ${winnerRole === 'player1' ? 'Player 1' : 'Player 2'} wins!`);
+			}
+
+			// Update stats
+			if(winner && loser)
+				this.updateDatabase(winner, loser);
+		}
+	}
+
+	updateDatabase(winner: {socket: WebSocket, id: string, username: string}, loser: {socket: WebSocket, id: string, username: string}) {
+		if(!this.tournamentId) {
+			db.run(
+				`UPDATE user_stats SET m_wins = m_wins + 1 WHERE user_id = ?`, [winner.id]
+			);
+			db.run(
+				`UPDATE user_stats SET m_losses = m_losses + 1 WHERE user_id = ?`, [loser.id]
+			);
+		} else {
+			db.run(
+				`UPDATE user_stats SET t_losses = t_losses + 1 WHERE user_id = ?`, [loser.id]
+			);
+		}
 	}
 
 	registerPlayerInput(input: string, connection: WebSocket) {

@@ -46,5 +46,6 @@ export interface tournamentListJson {
 		id: string;
 		playerCount: number;
 		maxPlayers: number;
+		isRunning: boolean;
 	}[];
 }

@@ -15,16 +15,13 @@ export class TournamentList extends HTMLElement {
 	}
 
 	disconnectedCallback() {
-		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-			this.socket.close();
-			console.log('Disconnecting from socket, page unload...');
-		}
+		this.handleClose();
 		document.removeEventListener('click', this.handleClick);
 	}
 
 	render = () => {
 		this.innerHTML = `
-			<div class="flex items-center justify-between mb-4 mt-6">
+			<div class="flex items-center justify-between mb-4 mt-6 min-w-[75vw]">
 				<h2 class="text-xl font-bold">Active tournaments</h2>
 				<button id="create-tournament" class="tw-btn w-20 mt-6">New</button>
 			</div>
@@ -38,42 +35,91 @@ export class TournamentList extends HTMLElement {
 		this.socket.onopen = () => {
 			console.log('WebSocket connection established.');
 		}
-
-		this.socket.onmessage = (event) => {
-			const data = JSON.parse(event.data) as tournamentListJson;
-			if (data.type === 'tournamentList') {
-				this.updateTournamentList(data.tournaments);
-			}
-
-			if (data.type === 'redirectingToTournament') {
-				if(this.socket && this.socket.readyState === WebSocket.OPEN) {
-					this.socket.close();
-				}
-				console.log(`Redirecting to tournament: ${data.tournamentId}`);
-				Router.navigateTo('/tournament/' + data.tournamentId);
-			}
-		};
-
-		this.socket.onclose = () => {
-			console.log('WebSocket connection closed.');
-		};
-
-		this.socket.onerror = (err) => {
-			alert(`WebSocket error: ${err}`);
-			console.error('WebSocket error:', err);
-			// Router.navigateTo('/home');
-		};
+		this.socket.onmessage = this.handleMessage;
+		this.socket.onclose = this.handleClose;
+		this.socket.onerror = this.handleError;
 	}
 
 	handleClick = (event: Event) => {
 		const target = event.target as HTMLElement;
 
 		if (target.closest('#create-tournament')) {
-			this.socket?.send(JSON.stringify({ type: 'createTournament' }));
+			this.showCreateTournamentPopup();
 		}
 	}
 
-	updateTournamentList(tournaments: Array<{ id: string, playerCount: number, maxPlayers: number }> | undefined) {
+	handleMessage = (event: MessageEvent) => {
+		const data = JSON.parse(event.data) as tournamentListJson;
+		if (data.type === 'tournamentList') {
+			this.updateTournamentList(data.tournaments);
+		}
+
+		if (data.type === 'redirectingToTournament') {
+			if(this.socket && this.socket.readyState === WebSocket.OPEN) {
+				this.socket.close();
+			}
+			console.log(`Redirecting to tournament: ${data.tournamentId}`);
+			Router.navigateTo('/tournament/' + data.tournamentId);
+		}
+	}
+
+	handleClose = () => {
+		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+			this.socket.close();
+			console.log('Disconnecting from socket, page unload...');
+		}
+		console.log('WebSocket connection closed.');
+	}
+
+	handleError = (event: Event) => {
+		alert(`WebSocket error: ${event}`);
+		console.error('WebSocket error:', event);
+	}
+
+	showCreateTournamentPopup = () => {
+		// Remove existing popup if any
+		const existing = document.getElementById('create-tournament-popup');
+		if (existing) existing.remove();
+
+		const popup = document.createElement('div');
+		popup.id = 'create-tournament-popup';
+		popup.className = 'fixed inset-0 flex items-center justify-center z-50';
+		popup.innerHTML = `
+			<div class="absolute inset-0 bg-black opacity-20 pointer-events-none"></div>
+			<div class="tw-card p-8 rounded shadow-lg flex flex-col items-center">
+				<h3 class="text-lg font-bold mb-6">Create Tournament</h3>
+				<div class="flex gap-6 mb-6">
+					<button class="tw-btn flex flex-col items-center justify-center w-28 h-28 text-4xl font-extrabold rounded-lg shadow transition hover:bg-blue-200" data-size="4">
+						<span class="text-5xl leading-none">4</span>
+						<span class="text-xs mt-2">players</span>
+					</button>
+					<button class="tw-btn flex flex-col items-center justify-center w-28 h-28 text-4xl font-extrabold rounded-lg shadow transition hover:bg-blue-200" data-size="8">
+						<span class="text-5xl leading-none">8</span>
+						<span class="text-xs mt-2">players</span>
+					</button>
+					<button class="tw-btn flex flex-col items-center justify-center w-28 h-28 text-4xl font-extrabold rounded-lg shadow transition hover:bg-blue-200" data-size="16">
+						<span class="text-5xl leading-none">16</span>
+						<span class="text-xs mt-2">players</span>
+					</button>
+				</div>
+				<button class="tw-btn mt-2" id="close-create-tournament">Cancel</button>
+			</div>
+		`;
+		document.body.appendChild(popup);
+
+		// Handle button clicks
+		popup.querySelectorAll('button[data-size]').forEach(btn => {
+			btn.addEventListener('click', (e) => {
+				const size = (e.currentTarget as HTMLElement).getAttribute('data-size');
+				this.socket?.send(JSON.stringify({ type: 'createTournament', maxPlayers: Number(size) }));
+				console.log(`Creating tournament with ${size} players...`);
+				popup.remove();
+			});
+		});
+		popup.querySelector('#close-create-tournament')?.addEventListener('click', () => popup.remove());
+	}
+
+	updateTournamentList(tournaments: Array<{ id: string, playerCount: number, maxPlayers: number, isRunning: boolean }> | undefined) {
 		const listElement = document.getElementById('tournament-list')!;
 		if (!listElement) {
 			console.error('Tournament list element not found.');
@@ -97,11 +143,11 @@ export class TournamentList extends HTMLElement {
 					</div>
 					<button
 						id="join-tournament-${tournament.id}"
-						class="tw-btn ml-4"
+						class="${tournament.isRunning ? 'tw-btn-disabled' : 'tw-btn'} ml-4"
 						data-tournament-id="${tournament.id}"
-						${tournament.playerCount >= tournament.maxPlayers ? 'disabled' : ''}
+						${tournament.isRunning ? 'disabled' : ''}
 					>
-						${tournament.playerCount >= tournament.maxPlayers ? 'Full' : 'Join'}
+						${tournament.isRunning ? 'Full' : 'Join'}
 					</button>
 				`;
 
