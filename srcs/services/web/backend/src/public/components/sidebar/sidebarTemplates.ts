@@ -1,5 +1,6 @@
 import {
 	iconArrowLeft,
+	iconChatMessage,
 	iconChatSend,
 	iconFriends,
 	iconLockClose,
@@ -15,7 +16,7 @@ export const SidebarTemplates = {
 	collapsed: () => ` 
 		<div id="sideBar-collapsed" class="hidden lg:flex z-50 w-16 h-dvh fixed right-0 dark:bg-gray-800 bg-white border-l dark:border-gray-700 border-gray-200 flex-col items-center py-6 cursor-pointer dark:hover:bg-gray-700/50 hover:bg-white/70 transition-colors">
 			<div class="mb-6 text-blue-400 dark:text-white">
-				${iconFriends}
+				${iconChatMessage}
 			</div>
 			<div class="w-10 h-10 dark:bg-gray-700 bg-gray-100 rounded-full mb-3 relative">
 				<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 dark:border-gray-800 border-white"></div>

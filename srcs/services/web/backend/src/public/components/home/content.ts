@@ -37,7 +37,7 @@ export class HomeContent extends HTMLElement {
 
 	render() {
 		this.innerHTML = `
-			<div class="max-w-6xl mx-auto px-4 py-6 space-y-12">
+			<div class="max-w-6xl mx-auto px-11 md:px-4 py-6 space-y-12">
 
 				<!-- grid for the 3 play container -->
 				<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">

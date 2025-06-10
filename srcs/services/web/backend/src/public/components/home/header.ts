@@ -4,7 +4,7 @@ import {
 	iconHomeProfile,
 	iconHomeLeaderboard,
 	iconPower,
-	iconFriends,
+	iconChatMessage,
 } from "../icons/icons.js"
 
 export class HomeHeader extends HTMLElement {
@@ -43,21 +43,21 @@ export class HomeHeader extends HTMLElement {
 
 	render() {
 		this.innerHTML = `
-			<header class="flex justify-between items-center p-4 sm:p-8">
+			<header class="flex justify-between items-center py-4 px-6 sm:p-8">
 				<h1 class="text-xl sm:text-3xl font-bold">TRANSCENDENCE</h1>
 				<div class="flex items-center gap-1 sm:gap-2 md:gap-3">
-					<button id="profile-btn" class="p-2 [&>svg]:size-5 sm:[&>svg]:size-6 dark:hover:bg-gray-800 hover:bg-gray-200 rounded-full hover:shadow-lg transition-all hover:scale-[1.04]">
+					<button id="profile-btn" class="p-2 [&>svg]:size-5 sm:[&>svg]:size-6 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-all hover:scale-[1.04]">
 						${iconHomeProfile}
 					</button>
-					<button id="leaderboard-btn" class="p-2 [&>svg]:size-5 sm:[&>svg]:size-6 dark:hover:bg-gray-800 hover:bg-gray-200 rounded-full hover:shadow-lg transition-all hover:scale-[1.04]">
+					<button id="leaderboard-btn" class="p-2 [&>svg]:size-5 sm:[&>svg]:size-6 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-all hover:scale-[1.04]">
 						${iconHomeLeaderboard}
 					</button>
-					<button id="logout-btn" class="p-2 md:px-4 bg-red-500 hover:bg-red-600 rounded-full hover:shadow-lg transition-all hover:scale-[1.04]">
-						<span class="md:hidden text-white [&>svg]:size-5 sm:[&>svg]:size-6">${iconPower}</span>
-						<span class="hidden text-white md:inline-block">Logout</span>
+					<button id="sidebarToggle" class="p-2 lg:hidden [&>svg]:size-5 sm:[&>svg]:size-6 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-all hover:scale-[1.04]">
+						${iconChatMessage}
 					</button>
-					<button id="sidebarToggle" class="p-2 lg:hidden [&>svg]:size-5 sm:[&>svg]:size-6 text-blue-400 dark:text-white rounded-full border border-gray-200 bg-white hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
-						${iconFriends}
+					<button id="logout-btn" class="p-2 md:px-4 rounded-full border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:shadow-md transition-all hover:scale-[1.04]">
+						<span class="md:hidden [&>svg]:size-5 sm:[&>svg]:size-6">${iconPower}</span>
+						<span class="hidden md:inline-block">Logout</span>
 					</button>
 				</div>
 			</header>
