@@ -1,6 +1,6 @@
 import { ChatInitResponse, Message } from "../../../types/user.js";
 import { API } from "../../api-static.js";
-import { socialSocketManager } from "../../socialWebSocket.js";
+import { socialSocketManager } from "../../SocialWebSocket.js";
 import { iconSidebarCheck, iconX } from "../icons/icons.js";
 import { showErrorState } from "./sidebarBase.js";
 import { SidebarTemplates } from "./sidebarTemplates.js";
@@ -62,7 +62,7 @@ export class ChatView extends HTMLElement {
 
 		await this.loadChat();
 	}
-	
+
 	disconnectedCallback() {
 		socialSocketManager.removeMessageCallback();
 
@@ -141,7 +141,7 @@ export class ChatView extends HTMLElement {
 	addGameInvitation() {
 		if (!this.el_gameInvitationSection) throw new Error('render must have failed');
 		this.el_gameInvitationSection.innerHTML = '';
-		
+
 		const invitation = document.createElement('div');
 		invitation.classList = "p-4 border-b dark:border-gray-700 border-gray-200";
 		invitation.innerHTML = `
@@ -174,11 +174,11 @@ export class ChatView extends HTMLElement {
 		const root = this.querySelector('#chatProfile-btn');
 		if (!root) throw new Error('render must have failed');
 		root.innerHTML = '';
-		
+
 		const div = document.createElement('div');
 		div.classList = "flex items-center";
 		div.innerHTML = `
-			<img 
+			<img
 				src=${data.friend.picture}
 				class="w-10 h-10 rounded-full mr-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
 			>

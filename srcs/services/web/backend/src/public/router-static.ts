@@ -1,6 +1,6 @@
 import { API } from "./api-static.js";
 import { routes, tRoute } from "./routes.js";
-import { socialSocketManager } from "./socialWebSocket.js";
+import { socialSocketManager } from "./SocialWebSocket.js";
 
 export class Router {
 	private static currentRoute: tRoute | null = null;
@@ -37,7 +37,7 @@ export class Router {
 			socialSocketManager.init();
 			this.initSocket = true;
 		}
-    
+
 		try {
 			const html = await this.loadTemplate(route.template)
 			this.updateDOM(route, html)
