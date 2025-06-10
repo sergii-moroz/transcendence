@@ -16,6 +16,7 @@ export class Game {
 	gameRunning: boolean;
 	winnerId: string | null;
 	tournamentId: string | null;
+	private game_mode: number = 2
 
 	constructor(tournamentId: string | null = null) {
 		this.tournamentId = tournamentId;
@@ -32,6 +33,7 @@ export class Game {
 		this.winnerId = null;
 		this.gameRoomId = crypto.randomBytes(16).toString('hex');
 		this.gameRunning = false;
+		this.game_mode = this.tournamentId ? 3 : 2
 	}
 
 	addPlayer(socket: WebSocket, id: string, username: string) {
@@ -151,8 +153,8 @@ export class Game {
 				if (winner) {
 					winner.socket.send(JSON.stringify({
 						type: 'gameOver',
-						message: `${winnerRole === 'player1' 
-							? this.players.get('player1')!.username 
+						message: `${winnerRole === 'player1'
+							? this.players.get('player1')!.username
 							: this.players.get('player2')!.username} wins!`,
 						winner: winnerRole,
 						tournamentId: this.tournamentId, // Only winner gets tournamentId
@@ -161,8 +163,8 @@ export class Game {
 				if (loser) {
 					loser.socket.send(JSON.stringify({
 						type: 'gameOver',
-						message: `${winnerRole === 'player1' 
-							? this.players.get('player1')!.username 
+						message: `${winnerRole === 'player1'
+							? this.players.get('player1')!.username
 							: this.players.get('player2')!.username} wins!`,
 						winner: winnerRole,
 						tournamentId: null, // Loser does not get tournamentId
@@ -181,6 +183,17 @@ export class Game {
 						db.run(
 							`UPDATE user_stats SET m_wins = m_wins + 1 WHERE user_id = ?`, [winner.id]
 						);
+						const gameResults = {
+							gameId: this.gameRoomId,
+							gameModeId: this.game_mode,
+							player1Id: parseInt(this.players.get('player1')!.id),
+							player2Id: parseInt(this.players.get('player2')!.id),
+							score1: this.state.scores.player1,
+							score2: this.state.scores.player2,
+							duration: 42,
+							techWin: false
+						}
+						saveGameResults(gameResults)
 					}
 				}
 				if (loser) {
@@ -225,6 +238,44 @@ export class Game {
 	}
 }
 
+interface GameProps {
+	gameId: string
+	gameModeId: number
+	player1Id: number
+	player2Id: number
+	score1: number
+	score2: number
+	duration: number
+	techWin?: boolean
+}
 
-
-
+export const saveGameResults = async (game: GameProps): Promise<void> => {
+	return new Promise((resolve, reject) => {
+		db.run(`
+			INSERT INTO games (
+				id,
+				game_mode_id,
+				player1,
+				player2,
+				score1,
+				score2,
+				tech_win,
+				duration
+			) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+			[
+				game.gameId,
+				game.gameModeId,
+				game.player1Id,
+				game.player2Id,
+				game.score1,
+				game.score2,
+				game.techWin || false,
+				game.duration
+			],
+			(err) => {
+				if (err) return reject(err)
+				resolve()
+			}
+		)
+	})
+}

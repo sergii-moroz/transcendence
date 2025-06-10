@@ -27,6 +27,7 @@ import { GameRoom } from "./components/game.js";
 import { TournamentList } from "./components/tournament-list.js";
 import { Tournament } from "./components/tournament.js";
 import { Router } from "./router-static.js";
+import { UserGameHistory } from "./components/history/user-game-history.js";
 import { CollapsedView } from "./components/sidebar/sidebarCollapsed.js";
 import { FriendListView } from "./components/sidebar/sidebarFriendList.js";
 import { ChatView } from "./components/sidebar/sidebarChat.js";
@@ -41,6 +42,7 @@ customElements.define('login-form', LoginForm)
 customElements.define('play-card', PlayCard)
 customElements.define('stats-card', StatsCard)
 customElements.define('top-player-card', TopPlayerCard)
+customElements.define('user-game-history', UserGameHistory)
 
 // 2FA
 customElements.define('two-fa-login-verify', TwoFALoginVerify)

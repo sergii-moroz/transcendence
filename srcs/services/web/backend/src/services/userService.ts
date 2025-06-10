@@ -24,6 +24,7 @@ export async function findUserByUsername(username: string): Promise<User | undef
 	});
 }
 
+// TODO: Why we need this function???
 export async function findUserIdByUsername(username: string): Promise<number | undefined> {
 	return new Promise((resolve, reject) => {
 		db.get<{id: number}>('SELECT id FROM users WHERE username = ?', [username], (err, row) => {
@@ -44,15 +45,7 @@ export const createUser = async (username: string, hashedPassword: string): Prom
 			[username, hashedPassword],
 			function (err) {
 				if (err) return reject(err);
-				const userId = this.lastID;
-				db.run(
-					`INSERT INTO user_stats (user_id) VALUES (?)`,
-					[userId],
-					(err) => {
-						if (err) return reject(err);
-						resolve(userId); // resolve after both inserts
-					}
-				);
+				resolve(this.lastID)
 			}
 		);
 	});

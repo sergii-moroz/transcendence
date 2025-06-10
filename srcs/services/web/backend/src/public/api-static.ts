@@ -1,3 +1,5 @@
+import { JwtUserPayload } from "../types/user.js"
+
 export class API {
 	static baseUrl: string
 	static refreshInterval: number
@@ -151,6 +153,16 @@ export class API {
 
 	static async getTopPlayers() {
 		const response = await this.get('/api/stats/top-players')
+		return response
+	}
+
+	static async getUser(): Promise<JwtUserPayload> {
+		const response = await this.get('/user');
+		return response
+	}
+
+	static async getUserGameHistory(page: number = 1, pageSize: number = 5) {
+		const response = await this.get(`/api/history/ping-pong?page=${page}&page_size=${pageSize}`)
 		return response
 	}
 

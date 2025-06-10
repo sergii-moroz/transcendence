@@ -14,7 +14,6 @@ import { waitingRoomSock } from "./routes/v1/waitingRoom.js";
 import { tWaitingRoomSock } from "./routes/v1/tournamentList.js";
 import { tournamentRoomSock } from "./routes/v1/tournamentRoom.js";
 import { initializeDB } from "./db/init.js";
-import { db } from "./db/connections.js"
 import { Game } from "./services/game.js";
 import { Tournament } from "./services/tournament.js";
 import { verifyAccessToken } from "./services/tokenService.js";
@@ -23,6 +22,7 @@ import { normalizeError } from "./errors/error.js";
 import { friends } from "./routes/v1/friends.js";
 import { chat } from "./routes/v1/chat.js";
 import { statsRoutes } from "./routes/v1/stats.routes.js";
+import { historyRoutes } from "./routes/v1/game-history.route.js";
 
 export const build = async (opts: FastifyServerOptions) => {
 	const app = fastify(opts)
@@ -32,7 +32,6 @@ export const build = async (opts: FastifyServerOptions) => {
 
 	app.decorate("gameInstances", gameInstances);
 	app.decorate("tournaments", tournaments);
-	app.decorate("db", db);
 	app.decorate("onlineUsers", new Map<string, WebSocket>());
 
 	app.register(fastifyCookie, {
@@ -92,6 +91,7 @@ export const build = async (opts: FastifyServerOptions) => {
 	app.register(authRoutes, {prefix: "api"});
 	app.register(twoFARoutes, {prefix: 'api/2fa'});
 	app.register(statsRoutes, {prefix: 'api/stats'});
+	app.register(historyRoutes, {prefix: 'api/history'});
 
 	// GLOBAL ERROR HANDLING
 	app.setErrorHandler( async (error, request, reply) => {
