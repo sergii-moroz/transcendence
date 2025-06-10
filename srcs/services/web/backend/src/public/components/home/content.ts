@@ -22,7 +22,7 @@ export class HomeContent extends HTMLElement {
 	// 		alert('not available');
 	// 	}
 	// 	else if (target.closest('#multiplayer-btn')) {
-	// 		Router.navigateTo('/waiting-room');
+	// 		Router.navigateTo('/matchmaking');
 	// 	}
 	// 	else if (target.closest('#tournament-btn')) {
 	// 		Router.navigateTo('/tournament-list');
@@ -57,7 +57,7 @@ export class HomeContent extends HTMLElement {
 						title="Multiplayer"
 						description="Real-time 1v1 matches with random matchmaking"
 						button-text="Play 1v1"
-						href="/waiting-room"
+						href="/matchmaking"
 						icon="icon-home-multiplayer"
 						accent-color="blue"
 					></play-card>

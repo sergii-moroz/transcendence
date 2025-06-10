@@ -1,11 +1,10 @@
-import { API } from "../../api-static.js";
 import { Router } from "../../router-static.js"
-import { socialSocketManager } from "../../SocialWebSocket.js";
 
 import {
 	iconHomeProfile,
 	iconHomeLeaderboard,
 	iconPower,
+	iconFriends,
 } from "../icons/icons.js"
 
 export class HomeHeader extends HTMLElement {
@@ -33,10 +32,12 @@ export class HomeHeader extends HTMLElement {
 			Router.navigateTo('/leaderboard');
 		}
 		else if (target.closest('#logout-btn')) {
-			socialSocketManager.disconnect();
-			Router.initSocket = false;
-			await API.logout();
-			Router.navigateTo('/login');
+			Router.logout();
+		}
+		else if (target.closest("#sidebarToggle")) {
+			window.dispatchEvent(new CustomEvent('open-sidebar', {
+				detail: {state: 'friendList'}
+			}))
 		}
 	}
 
@@ -54,6 +55,9 @@ export class HomeHeader extends HTMLElement {
 					<button id="logout-btn" class="p-2 md:px-4 bg-red-500 hover:bg-red-600 rounded-full hover:shadow-lg transition-all hover:scale-[1.04]">
 						<span class="md:hidden text-white [&>svg]:size-5 sm:[&>svg]:size-6">${iconPower}</span>
 						<span class="hidden text-white md:inline-block">Logout</span>
+					</button>
+					<button id="sidebarToggle" class="p-2 lg:hidden [&>svg]:size-5 sm:[&>svg]:size-6 text-blue-400 dark:text-white rounded-full border border-gray-200 bg-white hover:shadow-md dark:border-gray-700 dark:bg-gray-800">
+						${iconFriends}
 					</button>
 				</div>
 			</header>

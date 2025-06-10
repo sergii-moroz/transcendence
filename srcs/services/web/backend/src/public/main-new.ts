@@ -5,12 +5,12 @@ import { TwoFARegisterGA } from "./components/2fa/2fa-register-ga.js";
 import { TwoFAVerifyGA } from "./components/2fa/2fa-verify-ga.js";
 import { Button2FA } from "./components/2fa/button-2fa.js";
 import { ButtonThemeToggle } from "./components/button-theme-toggle.js";
-import { HomeContent } from "./components/home-sidebar/content.js";
-import { HomeHeader } from "./components/home-sidebar/header.js";
-import { PlayCard } from "./components/home-sidebar/play-card.js";
-import { Sidebar } from "./components/home-sidebar/sidebar.js";
-import { StatsCard } from "./components/home-sidebar/stats-card.js";
-import { TopPlayerCard } from "./components/home-sidebar/top-player-card.js";
+import { HomeContent } from "./components/home/content.js";
+import { HomeHeader } from "./components/home/header.js";
+import { PlayCard } from "./components/home/play-card.js";
+import { Sidebar } from "./components/sidebar/sidebarBase.js";
+import { StatsCard } from "./components/home/stats-card.js";
+import { TopPlayerCard } from "./components/home/top-player-card.js";
 import { IconCheck } from "./components/icons/icon-check.js";
 import { IconChevronLeft } from "./components/icons/icon-chevron-left.js";
 import { IconHomeMultiplayer } from "./components/icons/icon-home-multiplayer.js";
@@ -27,6 +27,9 @@ import { GameRoom } from "./components/game.js";
 import { TournamentList } from "./components/tournament-list.js";
 import { Tournament } from "./components/tournament.js";
 import { Router } from "./router-static.js";
+import { CollapsedView } from "./components/sidebar/sidebarCollapsed.js";
+import { FriendListView } from "./components/sidebar/sidebarFriendList.js";
+import { ChatView } from "./components/sidebar/sidebarChat.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
 customElements.define('btn-theme-toggle', ButtonThemeToggle)
@@ -49,8 +52,11 @@ customElements.define('two-fa-disable-verify', TwoFADisableVerify)
 // Home
 customElements.define('home-header', HomeHeader);
 customElements.define('home-content', HomeContent);
-customElements.define('friends-sidebar', Sidebar);
 
+customElements.define('friends-sidebar', Sidebar);
+customElements.define('collapsed-sidebar', CollapsedView);
+customElements.define('friendlist-sidebar', FriendListView);
+customElements.define('chat-sidebar', ChatView);
 
 // ICONS
 customElements.define('icon-check', IconCheck)

@@ -1,10 +1,6 @@
 import { Router } from "./router-static.js";
 import { Message, MessageToServer } from "../types/user.js";
 
-interface MessageData extends Message {
-	type: string;
-}
-
 class SocialSocketHandler {
 	private socket: WebSocket | null = null;
 	private messageCallback: ((data: any) => void) | null = null;
@@ -31,19 +27,18 @@ class SocialSocketHandler {
 			}
 		}
 
-		this.socket.onclose = (event: CloseEvent) => {
-			if (event.code === 1000)
-				alert('User is already signed in!');
+		this.socket.onclose = async (event: CloseEvent) => {
 			console.log('social Socket closed');
 			this.socket = null;
-			// Router.navigateTo('/login');
+			if (event.code === 1000) {
+				await Router.logout();
+				alert('User is already signed in!');
+			}
 		}
 
 		this.socket.onerror = (error: Event) => {
-			console.error('social socket had an error!: ', error);
-			alert(`social socket had an error!: ${error}`)
+			console.error('social socket had an error. Possibly server shutdown');
 			this.socket = null;
-			// Router.navigateTo('/login');
 		}
 	}
 

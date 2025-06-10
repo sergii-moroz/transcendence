@@ -7,7 +7,7 @@ export async function up() {
 				id INTEGER PRIMARY KEY AUTOINCREMENT,
 				username TEXT UNIQUE NOT NULL,
 				password TEXT NOT NULL,
-				avatar TEXT DEFAULT '/uploads/default.jpg',
+				avatar TEXT DEFAULT NULL,
 				bio TEXT DEFAULT 'Hello, I am new here!'
 			)
 		`, (err) => {

@@ -269,9 +269,9 @@ export class API {
 		}
 	}
 
-	static async getSidebar() {
+	static async getFriendList() {
 		try {
-			const res = await this.get('/api/sidebar');
+			const res = await this.get('/api/friendList');
 			return res;
 		} catch (error) {
 			console.error("Sidebar API call failed:", error);
@@ -279,14 +279,9 @@ export class API {
 		}
 	}
 
-	static async getChat(name: string) {
+	static async getInitChatData(name: string) {
 		try {
-			const res = await this.post('/api/chat', {name});
-			if (!res.ok) {
-				console.error("Add Friend API call failed");
-				return null;
-			}
-
+			const res = await this.post('/api/chatInit', {name});
 			return res.json();
 		} catch (error) {
 			console.error("Chat Sidebar API call failed:", error);
@@ -297,8 +292,8 @@ export class API {
 	static async addFriend(name: string) {
 		try {
 			const res = await this.post('/api/addFriend', {name});
-			if (!res.ok)
-				console.error("Add Friend API call failed");
+			return res.json();
+			
 		} catch (error) {
 			console.error("Add Friend API call failed:", error);
 		}
@@ -307,8 +302,8 @@ export class API {
 	static async acceptFriend(name: string) {
 		try {
 			const res = await this.post('/api/acceptFriend', {name});
-			if (!res.ok)
-				console.error("Accept Friend API call failed");
+			return res.json();
+			
 		} catch (error) {
 			console.error("Accept Friend API call failed:", error);
 		}
@@ -317,8 +312,8 @@ export class API {
 	static async rejectFriend(name: string) {
 		try {
 			const res = await this.post('/api/rejectFriend', {name});
-			if (!res.ok)
-				console.error("reject Friend API call failed");
+			return res.json();
+			
 		} catch (error) {
 			console.error("reject Friend API call failed:", error);
 		}
@@ -327,8 +322,8 @@ export class API {
 	static async deleteFriend(name: string) {
 		try {
 			const res = await this.post('/api/deleteFriend', {name});
-			if (!res.ok)
-				console.error("delete Friend API call failed");
+			return res.json();
+			
 		} catch (error) {
 			console.error("delete Friend API call failed:", error);
 		}
@@ -337,8 +332,8 @@ export class API {
 	static async blockFriend(name: string) {
 		try {
 			const res = await this.post('/api/blockFriend', {name});
-			if (!res.ok)
-				console.error("delete Friend API call failed");
+			return res.json();
+			
 		} catch (error) {
 			console.error("delete Friend API call failed:", error);
 		}
@@ -347,8 +342,8 @@ export class API {
 	static async unblockFriend(name: string) {
 		try {
 			const res = await this.post('/api/unblockFriend', {name});
-			if (!res.ok)
-				console.error("delete Friend API call failed");
+			return res.json();
+			
 		} catch (error) {
 			console.error("delete Friend API call failed:", error);
 		}
