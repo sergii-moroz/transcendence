@@ -85,8 +85,10 @@ export class TournamentList extends HTMLElement {
 		popup.id = 'create-tournament-popup';
 		popup.className = 'fixed inset-0 flex items-center justify-center z-50';
 		popup.innerHTML = `
-			<div class="absolute inset-0 bg-black opacity-20 pointer-events-none"></div>
-			<div class="tw-card p-8 rounded shadow-lg flex flex-col items-center">
+			<div id="backdrop"
+				class="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden">
+			</div>
+			<div class="tw-card p-8 rounded shadow-lg flex flex-col items-center z-50">
 				<h3 class="text-lg font-bold mb-6">Create Tournament</h3>
 				<div class="flex gap-6 mb-6">
 					<button class="tw-btn flex flex-col items-center justify-center w-28 h-28 text-4xl font-extrabold rounded-lg shadow transition hover:bg-blue-200" data-size="4">
