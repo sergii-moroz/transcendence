@@ -22,7 +22,7 @@ export const getUserPerformance = async (id: number): Promise<UserStats> => {
 }
 
 // Function could return empty array if db is fresh and no games was played
-export const getTopPlayers = async (key: GameMode): Promise<PlayerStats[]> => {
+export const getTopPlayers = async (key: GameMode, limit: number = 3): Promise<PlayerStats[]> => {
 	const modeColumnMap: Record<GameMode, string> = {
 		singleplayer: 's', multiplayer: 'm', tournament: 't'
 	}
@@ -41,7 +41,7 @@ export const getTopPlayers = async (key: GameMode): Promise<PlayerStats[]> => {
 			JOIN users ON user_stats.user_id = users.id
 			WHERE user_stats.${winsCol} + user_stats.${lossesCol} > 0
 			ORDER BY win_rate DESC
-			LIMIT 3
+			LIMIT ${limit}
 		`
 		db.all<PlayerStats>(sql, [], (err, rows) => {
 				if (err) return reject (err)
