@@ -32,6 +32,7 @@ import { CollapsedView } from "./components/sidebar/sidebarCollapsed.js";
 import { FriendListView } from "./components/sidebar/sidebarFriendList.js";
 import { ChatView } from "./components/sidebar/sidebarChat.js";
 import { SingleplayerGame } from "./components/singleplayer.js";
+import { LeaderboardCard } from "./components/leaderboard/leaderboard-card.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
 customElements.define('btn-theme-toggle', ButtonThemeToggle)
@@ -44,6 +45,7 @@ customElements.define('play-card', PlayCard)
 customElements.define('stats-card', StatsCard)
 customElements.define('top-player-card', TopPlayerCard)
 customElements.define('user-game-history', UserGameHistory)
+customElements.define('leaderboard-card', LeaderboardCard)
 
 // 2FA
 customElements.define('two-fa-login-verify', TwoFALoginVerify)
