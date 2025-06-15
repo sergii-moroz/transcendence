@@ -151,8 +151,8 @@ export class API {
 		return response
 	}
 
-	static async getTopPlayers() {
-		const response = await this.get('/api/stats/top-players')
+	static async getTopPlayers(limit: number = 3) {
+		const response = await this.get(`/api/stats/top-players?limit=${limit}`)
 		return response
 	}
 
@@ -305,7 +305,7 @@ export class API {
 		try {
 			const res = await this.post('/api/addFriend', {name});
 			return res.json();
-			
+
 		} catch (error) {
 			console.error("Add Friend API call failed:", error);
 		}
@@ -315,7 +315,7 @@ export class API {
 		try {
 			const res = await this.post('/api/acceptFriend', {name});
 			return res.json();
-			
+
 		} catch (error) {
 			console.error("Accept Friend API call failed:", error);
 		}
@@ -325,7 +325,7 @@ export class API {
 		try {
 			const res = await this.post('/api/rejectFriend', {name});
 			return res.json();
-			
+
 		} catch (error) {
 			console.error("reject Friend API call failed:", error);
 		}
@@ -335,7 +335,7 @@ export class API {
 		try {
 			const res = await this.post('/api/deleteFriend', {name});
 			return res.json();
-			
+
 		} catch (error) {
 			console.error("delete Friend API call failed:", error);
 		}
@@ -345,7 +345,7 @@ export class API {
 		try {
 			const res = await this.post('/api/blockFriend', {name});
 			return res.json();
-			
+
 		} catch (error) {
 			console.error("delete Friend API call failed:", error);
 		}
@@ -355,7 +355,7 @@ export class API {
 		try {
 			const res = await this.post('/api/unblockFriend', {name});
 			return res.json();
-			
+
 		} catch (error) {
 			console.error("delete Friend API call failed:", error);
 		}
