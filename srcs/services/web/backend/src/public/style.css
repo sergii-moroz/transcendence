@@ -54,6 +54,21 @@
 	--animate-spin-down: spin-down 4s linear forwards;
 	--animate-bg-pulse-1: bg-pulse-1 30s infinite;
 	--animate-bg-pulse-2: bg-pulse-2 17s infinite;
+
+}
+@keyframes slide-in {
+	from { transform: translate(-50%, -100%);}
+	to { transform: translate(-50%, 0);}
+}
+@keyframes slide-out {
+	from { transform: translate(-50%, 0);}
+	to { transform: translate(-50%, -100%);}
+}
+.animate-slide-in {
+	animation: slide-in 0.3s ease-out forwards;
+}
+.animate-slide-out {
+	animation: slide-out 0.3s ease-in forwards;
 }
 
 @layer base {

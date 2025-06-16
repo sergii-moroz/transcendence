@@ -30,7 +30,7 @@ export const handleFriendListSidebar = async (
 	reply:	FastifyReply
 ) => {
 	try {
-		req.server.onlineUsers
+		// req.server.onlineUsers
 		const answer = {
 			friends: await getFriendList(req),
 			friendRequests: await getFriendRequests(req.user.id),
