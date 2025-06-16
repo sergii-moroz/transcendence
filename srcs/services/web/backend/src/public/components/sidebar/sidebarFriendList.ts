@@ -1,5 +1,6 @@
-import { Friend, SidebarResponse } from "../../../types/user.js";
+import { Friend, Message, SidebarResponse } from "../../../types/user.js";
 import { API } from "../../api-static.js";
+import { socialSocketManager } from "../../SocialWebSocket.js";
 import { iconSidebarCheck, iconX } from "../icons/icons.js";
 import { showErrorState } from "./sidebarBase.js";
 import { SidebarTemplates } from "./sidebarTemplates.js";
@@ -18,6 +19,7 @@ export class FriendListView extends HTMLElement {
 	}
 
 	async connectedCallback() {		
+		// socialSocketManager.setMessageCallback((data: Message) => {return});
 		this.el_close = this.querySelector('#close-btn');
 		this.el_backdrop = this.querySelector('#backdrop');
 		this.el_refresh = this.querySelector('#refresh-friends-btn');
@@ -36,6 +38,8 @@ export class FriendListView extends HTMLElement {
 	}
 	
 	disconnectedCallback() {
+		// socialSocketManager.removeMessageCallback();
+		
 		this.el_close?.removeEventListener('click', this.switchToCollapseSidebar);
 		this.el_backdrop?.removeEventListener('click', this.switchToCollapseSidebar);
 		this.el_refresh?.removeEventListener('click', this.loadFriendList);
