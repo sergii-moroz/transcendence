@@ -161,11 +161,15 @@ export class UserGameHistory extends HTMLElement {
 	}
 
 	private render() {
+		const currentMode = this.state.currentMode
+		const currentData = this.state[currentMode]
+
 		const header = this.renderTableHeader()
-		const body = this.renderTableBody()
-		const pagination = this.renderPagination()
-		const pageSizeBlock = this.renderPageSize()
-		const totalPagesBlock = this.renderTotalPages()
+		const body = this.renderTableBody(currentData.data)
+		const pagination = this.renderPagination(currentData)
+		const pageSizeBlock = this.renderPageSize(currentData.pageSize, currentData.totalItems)
+		const totalPagesBlock = this.renderTotalPages(currentData.totalPages)
+		const tabs = this.renderTabButtons()
 
 		this.innerHTML = `
 			<div class="tw-card">
@@ -176,6 +180,9 @@ export class UserGameHistory extends HTMLElement {
 						</div>
 						<h3 class="text-xl font-bold">Your Stats</h3>
 					</div>
+
+					<!-- Tabs -->
+					${tabs}
 
 					<table class="table-auto w-full border-separate border-spacing-y-1 text-xs sm:text-base">
 						${header}
@@ -215,8 +222,8 @@ export class UserGameHistory extends HTMLElement {
 		`
 	}
 
-	private renderTableBody() {
-		if (this.data.length === 0) {
+	private renderTableBody(data: Game[]) {
+		if (data.length === 0) {
 			return `
 				<tr>
 					<td colspan="5" class="p-4 text-center text-gray-500">
@@ -226,7 +233,7 @@ export class UserGameHistory extends HTMLElement {
 			`
 		}
 
-		return this.data.map(row => {
+		return data.map(row => {
 
 			return `
 			<tr class="odd:bg-blue-500/10 text-blue-900 dark:text-blue-100 hover:bg-blue-500/20 [&>td]:px-1 [&>td]:py-2 sm:[&>td]:px-4 sm:[&>td]:py-2 text-center">
@@ -239,10 +246,9 @@ export class UserGameHistory extends HTMLElement {
 		`}).join('')
 	}
 
-	private renderPagination() {
-		const totalPages = Math.ceil(this.totalItems / this.pageSize)
-		const isFirstPage = this.currentPage === 1
-		const isLastPage = this.currentPage >= totalPages
+	private renderPagination(state: GameModeData) {
+		const isFirstPage = state.currentPage === 1
+		const isLastPage = state.currentPage >= state.totalPages
 
 		return `
 			<div class="flex items-center justify-center gap-2">
@@ -257,7 +263,7 @@ export class UserGameHistory extends HTMLElement {
 				</button>
 
 				<div class="size-8 flex items-center bg-blue-500/10 text-blue-500 justify-center rounded-full select-none">
-						${this.currentPage}
+						${state.currentPage}
 				</div>
 
 				<button id="btn-next"
@@ -273,9 +279,9 @@ export class UserGameHistory extends HTMLElement {
 		`
 	}
 
-	private renderPageSize() {
-		const canIncrease = this.pageSize < PAGE_SIZE_OPTIONS[PAGE_SIZE_OPTIONS.length - 1] && this.pageSize < this.totalItems
-		const canDecrease = this.pageSize > PAGE_SIZE_OPTIONS[0]
+	private renderPageSize(pageSize: number, totalItems: number) {
+		const canIncrease = pageSize < PAGE_SIZE_OPTIONS[PAGE_SIZE_OPTIONS.length - 1] && pageSize < totalItems
+		const canDecrease = pageSize > PAGE_SIZE_OPTIONS[0]
 
 		return `
 			<span class="flex items-center gap-1 text-xs hover:[&>button]:visible group">
@@ -289,7 +295,7 @@ export class UserGameHistory extends HTMLElement {
 					</span>
 				</button>
 				<span class="relative size-6 flex items-center bg-blue-500/10 text-blue-500 justify-center rounded-full select-none">
-					${this.pageSize}
+					${pageSize}
 					<div
 						class="absolute
 							bottom-0 translate-y-full sm:bottom-auto
@@ -309,10 +315,10 @@ export class UserGameHistory extends HTMLElement {
 		`
 	}
 
-	private renderTotalPages() {
+	private renderTotalPages(totalPages: number) {
 		return `
 			<span class="relative ml-6 size-6 flex items-center bg-blue-500/10 text-xs text-blue-500 justify-center rounded-full select-none">
-				${this.totalPages}
+				${totalPages}
 				<div
 					class="absolute
 						bottom-0 translate-y-full sm:bottom-auto
@@ -344,20 +350,41 @@ export class UserGameHistory extends HTMLElement {
 			const target = event.target as HTMLElement
 			const action = target.closest('[data-action]')?.getAttribute('data-action')
 
-			if (action === 'prev' && this.currentPage > 1) {
-				this.currentPage--
-				this.loadData()
-			} else if (action === 'next') {
-				this.currentPage++
-				this.loadData()
-			} else if (target.id === 'retry-btn') {
-				this.loadData()
-			} else if (action === 'page-size-plus') {
-				this.incPageSize()
-			} else if (action === 'page-size-minus') {
-				this.decPageSize()
+			if (action === 'prev') this.prevPage()
+			if (action === 'next') this.nextPage()
+			if (target.id === 'retry-btn') {
+				// this.loadData()
 			}
+			if (action === 'page-size-plus') this.incPageSize()
+			if (action === 'page-size-minus') this.decPageSize()
+
+			this.modes.forEach(mode => {
+				const radio = this.querySelector(`#tab-stats-${mode}`)
+				radio?.addEventListener('change', () => {this.handleModeChange(mode)})
+			})
 		})
+	}
+
+	private handleModeChange(mode: GameModeName) {
+		this.state.currentMode = mode
+		this.loadDataForMode(mode)
+	}
+
+	private nextPage() {
+		const currentMode = this.state.currentMode
+
+		if (this.state[currentMode].currentPage < this.state[currentMode].totalPages)
+		this.state[currentMode].currentPage++
+		this.loadDataForMode(currentMode)
+	}
+
+	private prevPage() {
+		const currentMode = this.state.currentMode
+
+		if (this.state[currentMode].currentPage > 1) {
+			this.state[currentMode].currentPage--
+			this.loadDataForMode(currentMode)
+		}
 	}
 
 	private cleanupEventListers() {
@@ -365,32 +392,75 @@ export class UserGameHistory extends HTMLElement {
 	}
 
 	private incPageSize() {
-		const currentIndex = PAGE_SIZE_OPTIONS.indexOf(this.pageSize)
+		const mode = this.state.currentMode
+		const currentIndex = PAGE_SIZE_OPTIONS.indexOf(this.state[mode].pageSize)
+
 		if (currentIndex < PAGE_SIZE_OPTIONS.length - 1) {
-			const oldPageSize = this.pageSize
-			this.pageSize = PAGE_SIZE_OPTIONS[currentIndex + 1]
+			const oldPageSize = this.state[mode].pageSize
+			this.state[mode].pageSize = PAGE_SIZE_OPTIONS[currentIndex + 1]
 			this.adjustPageForNewPageSize(oldPageSize)
 		}
 	}
 
 	private decPageSize() {
-		const currentIndex = PAGE_SIZE_OPTIONS.indexOf(this.pageSize)
+		const mode = this.state.currentMode
+		const currentIndex = PAGE_SIZE_OPTIONS.indexOf(this.state[mode].pageSize)
+
 		if (currentIndex > 0) {
-			const oldPageSize = this.pageSize
-			this.pageSize = PAGE_SIZE_OPTIONS[currentIndex - 1]
+			const oldPageSize = this.state[mode].pageSize
+			this.state[mode].pageSize = PAGE_SIZE_OPTIONS[currentIndex - 1]
 			this.adjustPageForNewPageSize(oldPageSize)
 		}
 	}
 
 	private adjustPageForNewPageSize(oldPageSize: number) {
+		const mode = this.state.currentMode
 		// Calculate which item we were viewing at the top of current page
-		const firstVisibleItemIndex = oldPageSize * (this.currentPage - 1);
+		const firstVisibleItemIndex = oldPageSize * (this.state[mode].currentPage - 1);
 
 		// Calculate what page this item would be on with the new page size
-		const newPage = Math.max(1, Math.floor(firstVisibleItemIndex / this.pageSize) + 1);
+		const newPage = Math.max(1, Math.floor(firstVisibleItemIndex / this.state[mode].pageSize) + 1);
 
-		this.currentPage = newPage;
+		this.state[mode].currentPage = newPage;
 
-		this.loadData();
+		this.loadDataForMode(mode);
+	}
+
+	private renderTabButtons() {
+		const currentMode = this.state.currentMode
+		return this.modes.map((mode, index) => {
+			const iconElm = this.getModeIcon(mode)
+
+			return `
+				<input type="radio"
+					id="tab-stats-${mode}"
+					name="stats-tabs"
+					class="hidden peer/${mode}" ${mode === currentMode ? "checked" : ""}
+				>
+				<label for="tab-stats-${mode}"
+					class="inline-block w-fit px-2 xl:px-4 py-2 mb-2 sm:mb-3 rounded-full cursor-pointer hover:bg-gray-500/20
+						peer-checked/${mode}:bg-blue-500/10
+						peer-checked/${mode}:hover:bg-blue-500/20
+						peer-checked/${mode}:text-blue-500
+						peer-checked/${mode}:px-3
+						peer-checked/${mode}:[&>div>span]:inline-block"
+				>
+					<div class="flex items-center gap-2">
+						<${iconElm} class="xl:hidden [&>svg]:size-4 sm:[&>svg]:size-5"></${iconElm}>
+						<span class="hidden text-xs sm:text-sm xl:block">${mode}</span>
+					</div>
+				</label>
+			`
+		}).join('')
+	}
+
+	private getModeIcon(mode: GameModeName): string {
+		const icons = {
+			Singleplayer: 'icon-home-single-player',
+			Multiplayer: 'icon-home-multiplayer',
+			Tournament: 'icon-home-tournament'
+		}
+
+		return icons[mode] || 'i'
 	}
 }
