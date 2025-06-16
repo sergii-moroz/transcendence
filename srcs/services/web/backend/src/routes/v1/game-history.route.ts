@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import { authenticate } from "../../services/authService.js";
-import { handleGetHistoryPingPongAll } from "../../controllers/history.controller.js";
+import { handleGetHistoryPingPong } from "../../controllers/history.controller.js";
 
 export const historyRoutes = async (
 	app:	FastifyInstance,
@@ -8,6 +8,6 @@ export const historyRoutes = async (
 ) => {
 	app.get('/ping-pong', {
 			preHandler: [authenticate],
-			handler: handleGetHistoryPingPongAll
+			handler: handleGetHistoryPingPong
 	})
 }
