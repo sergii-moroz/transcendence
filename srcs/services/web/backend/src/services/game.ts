@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import { db } from '../db/connections.js'
+import { GAME_MODES } from '../public/types/game-history.types.js';
 
 export class Game {
 	players: Map< string, {socket: WebSocket, id: string, username: string} >;
@@ -16,7 +17,7 @@ export class Game {
 	gameRunning: boolean;
 	winnerId: string | null;
 	tournamentId: string | null;
-	private game_mode: number = 2
+	private game_mode: GAME_MODES = GAME_MODES.Multiplayer
 
 	constructor(tournamentId: string | null = null) {
 		this.tournamentId = tournamentId;
@@ -33,7 +34,7 @@ export class Game {
 		this.winnerId = null;
 		this.gameRoomId = crypto.randomBytes(16).toString('hex');
 		this.gameRunning = false;
-		this.game_mode = this.tournamentId ? 3 : 2
+		this.game_mode = this.tournamentId ? GAME_MODES.Tournament : GAME_MODES.Multiplayer
 	}
 
 	addPlayer(socket: WebSocket, id: string, username: string) {
@@ -196,6 +197,17 @@ export class Game {
 			db.run(
 				`UPDATE user_stats SET m_losses = m_losses + 1 WHERE user_id = ?`, [loser.id]
 			);
+			const gameResults = {
+				gameId: this.gameRoomId,
+				gameModeId: this.game_mode,
+				player1Id: parseInt(this.players.get('player1')!.id),
+				player2Id: parseInt(this.players.get('player2')!.id),
+				score1: this.state.scores.player1,
+				score2: this.state.scores.player2,
+				duration: 42,
+				techWin: false
+			}
+			saveGameResults(gameResults)
 		} else {
 			db.run(
 				`UPDATE user_stats SET t_losses = t_losses + 1 WHERE user_id = ?`, [loser.id]
