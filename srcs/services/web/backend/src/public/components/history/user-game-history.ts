@@ -464,3 +464,28 @@ export class UserGameHistory extends HTMLElement {
 		return icons[mode] || 'i'
 	}
 }
+
+// DO NOT DELETE
+// NEEDED FOR TAILWINDCSS
+
+// peer-checked/Singleplayer:grid
+// peer-checked/Singleplayer:text-blue-500
+// peer-checked/Singleplayer:bg-blue-500/10
+// peer-checked/Singleplayer:hover:bg-blue-500/20
+// peer-checked/Singleplayer:px-3
+
+// peer-checked/Multiplayer:grid
+// peer-checked/Multiplayer:text-blue-500
+// peer-checked/Multiplayer:bg-blue-500/10
+// peer-checked/Multiplayer:hover:bg-blue-500/20
+// peer-checked/Multiplayer:px-3
+
+// peer-checked/Tournament:grid
+// peer-checked/Tournament:text-blue-500
+// peer-checked/Tournament:bg-blue-500/10
+// peer-checked/Tournament:hover:bg-blue-500/20
+// peer-checked/Tournament:px-3
+
+// peer-checked/Singleplayer:[&>div>span]:inline-block
+// peer-checked/Multiplayer:[&>div>span]:inline-block
+// peer-checked/Tournament:[&>div>span]:inline-block
