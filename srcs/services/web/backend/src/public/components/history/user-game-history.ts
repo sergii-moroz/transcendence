@@ -329,14 +329,25 @@ export class UserGameHistory extends HTMLElement {
 	}
 
 	private formatDate(dateString: string): string {
+		// 1. Parse the input date (assumed to be UTC)
+		const date = new Date(dateString);
+
+		// 2. Get the user's timezone offset (in minutes)
+		const userTimezoneOffset = date.getTimezoneOffset() * 60000; // Convert to milliseconds
+
+		// 3. Adjust the date to the user's local time
+		const localDate = new Date(date.getTime() - userTimezoneOffset);
+
+		// 4. Format the date (no need for `timeZone` in options)
 		const options: Intl.DateTimeFormatOptions = {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit'
-		}
-		return new Date(dateString).toLocaleDateString(undefined, options)
+				year: 'numeric',
+				month: 'short',
+				day: 'numeric',
+				hour: '2-digit',
+				minute: '2-digit',
+		};
+
+		return localDate.toLocaleDateString(undefined, options);
 	}
 
 	private formatDuration(seconds: number): string {
