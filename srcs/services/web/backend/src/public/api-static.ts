@@ -1,4 +1,5 @@
 import { JwtUserPayload } from "../types/user.js"
+import { GAME_MODES } from "./types/game-history.types.js"
 
 export class API {
 	static baseUrl: string
@@ -161,8 +162,8 @@ export class API {
 		return response
 	}
 
-	static async getUserGameHistory(page: number = 1, pageSize: number = 5) {
-		const response = await this.get(`/api/history/ping-pong?page=${page}&page_size=${pageSize}`)
+	static async getUserGameHistory(page: number = 1, pageSize: number = 5, gameMode: GAME_MODES = GAME_MODES.Singleplayer) {
+		const response = await this.get(`/api/history/ping-pong?page=${page}&page_size=${pageSize}&game_mode=${gameMode}`)
 		return response
 	}
 
