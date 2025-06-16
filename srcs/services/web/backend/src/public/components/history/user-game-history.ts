@@ -1,34 +1,56 @@
+import {
+	Game,
+	GAME_MODE_MAP,
+	GAME_MODES,
+	GameHistoryState,
+	GameModeData,
+	GameModeName,
+	PAGE_SIZE_OPTIONS
+} from "../../types/game-history.types.js";
+
+import {
+	iconChevronRight,
+	iconHomeStats,
+	iconMinus,
+	iconPlus
+} from "../icons/icons.js";
+
 import { API } from "../../api-static.js";
-import { iconChevronRight, iconHomeStats, iconMinus, iconPlus } from "../icons/icons.js";
-
-type Game = {
-	id: string;
-	game_mode_id: number;
-	player1_name: number;
-	player2_name: number;
-	score1: number;
-	score2: number;
-	tech_win: boolean;
-	duration: number;
-	finished_at: string;
-};
-
-const PAGE_SIZE_OPTIONS = [5, 10, 15, 25, 50, 100] as const
 
 export class UserGameHistory extends HTMLElement {
-	private data: Game[] = []
-	private currentPage = 1
-	private pageSize: typeof PAGE_SIZE_OPTIONS[number] = 5
-	private totalItems = 0
-	private totalPages = 0
+	private modes: GameModeName[] = ['Singleplayer', 'Multiplayer', 'Tournament']
 	private isLoading = false
+	private state: GameHistoryState = {
+		Singleplayer: {
+			data: [],
+			currentPage: 1,
+			pageSize: 5,
+			totalItems: 0,
+			totalPages: 0
+		},
+		Multiplayer: {
+			data: [],
+			currentPage: 1,
+			pageSize: 5,
+			totalItems: 0,
+			totalPages: 0
+		},
+		Tournament: {
+			data: [],
+			currentPage: 1,
+			pageSize: 5,
+			totalItems: 0,
+			totalPages: 0
+		},
+		currentMode: "Singleplayer"
+	}
 
 	constructor() {
 		super()
 	}
 
 	async connectedCallback() {
-		await this.loadData()
+		await this.loadAllData()
 		this.render()
 		this.setupEventListeners()
 	}
@@ -37,17 +59,76 @@ export class UserGameHistory extends HTMLElement {
 		this.cleanupEventListers()
 	}
 
-	private async loadData() {
+	private async loadAllData() {
 		if (this.isLoading) return
 
 		this.isLoading = true
 		this.renderLoading()
 
 		try {
-			const response = await API.getUserGameHistory(this.currentPage, this.pageSize)
-			this.data = response.data
-			this.totalItems = response.meta.total
-			this.totalPages = response.meta.totalPages
+			// load data for all game modes in parallel
+			const [single, multi, tournament] = await Promise.all([
+				await API.getUserGameHistory(this.state.Singleplayer.currentPage, this.state.Singleplayer.pageSize, GAME_MODES.Singleplayer),
+				await API.getUserGameHistory(this.state.Multiplayer.currentPage, this.state.Multiplayer.pageSize, GAME_MODES.Multiplayer),
+				await API.getUserGameHistory(this.state.Tournament.currentPage, this.state.Tournament.pageSize, GAME_MODES.Tournament),
+			])
+
+			this.state.Singleplayer = {
+				data: single.data,
+				totalItems: single.meta.total,
+				currentPage: single.meta.page,
+				pageSize: single.meta.pageSize,
+				totalPages: single.meta.totalPages,
+			}
+
+			this.state.Multiplayer = {
+				data: multi.data,
+				totalItems: multi.meta.total,
+				currentPage: multi.meta.page,
+				pageSize: multi.meta.pageSize,
+				totalPages: multi.meta.totalPages,
+			}
+
+			this.state.Tournament = {
+				data: tournament.data,
+				totalItems: tournament.meta.total,
+				currentPage: tournament.meta.page,
+				pageSize: tournament.meta.pageSize,
+				totalPages: tournament.meta.totalPages,
+			}
+
+		} catch (error) {
+			console.log('Error loading game history:', error)
+			this.renderError()
+		} finally {
+			this.isLoading = false
+			this.render()
+		}
+	}
+
+	private async loadDataForMode(mode: GameModeName) {
+		if (this.isLoading) return
+
+		this.isLoading = true
+		this.renderLoading()
+
+		try {
+			const currentState = this.state[mode]
+			const response = await API.getUserGameHistory(
+				currentState.currentPage,
+				currentState.pageSize,
+				GAME_MODE_MAP[mode]
+			)
+
+			this.state[mode] = {
+				data: response.data,
+				currentPage: response.meta.page,
+				pageSize: response.meta.pageSize,
+				totalItems: response.meta.total,
+				totalPages: response.meta.totalPages,
+			}
+
+			this.state.currentMode = mode
 		} catch (error) {
 			console.log('Error loading game history:', error)
 			this.renderError()
