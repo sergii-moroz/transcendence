@@ -19,7 +19,7 @@ import {
 
 import { FastifyReply, FastifyRequest } from "fastify";
 import { verifyAccessToken } from "./tokenService.js";
-import { RegisterInputProps } from "../types/registration.js";
+import { RegisterInputProps, ResetPasswordProps } from "../types/registration.js";
 
 export const validateRegisterInput = (input: RegisterInputProps): RegisterInputProps => {
 	let { username, password, repeated } = input
@@ -65,4 +65,25 @@ export const authenticate = async (request: FastifyRequest, reply: FastifyReply)
 		if (err.name === 'TokenExpiredError') throw new AccessTokenExpiredError()
 		throw new AccessTokenInvalidError()
 	}
+}
+
+export const validatePasswordReset = (input: ResetPasswordProps): ResetPasswordProps => {
+	let { currentPassword, password, repeated } = input
+
+	currentPassword.trim()
+	password.trim()
+	repeated.trim()
+
+	// if (currentPassword.length < 0) throw new UsernameTooShortError()
+	// if (username.length > 15) throw new UsernameTooLongError()
+	// if (/\s+/g.test(username)) throw new UsernameWhitespaceError()
+
+	if (password.length < 6) throw new PasswordTooShortError();
+	if (password.length > 64) throw new PasswordTooLongError();
+	if (/\s+/g.test(password)) throw new PasswordWhitespaceError();
+	if (!/[A-Z]/.test(password)) throw new PasswordMissingUppercaseError();
+
+	if (password != repeated) throw new PasswordMismatchError()
+
+	return { currentPassword, password, repeated }
 }

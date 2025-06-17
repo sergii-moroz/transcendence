@@ -15,16 +15,13 @@ import {
 } from "../services/tokenService.js";
 
 import {
-	AccessTokenExpiredError,
-	NoAccessTokenError
-} from "../errors/middleware.errors.js";
-
-import { FastifyReply, FastifyRequest } from "fastify";
+	FastifyReply,
+	FastifyRequest
+} from "fastify";
 
 import { JwtUserPayload } from "../types/user.js";
-import { TwoFAAlreadyEnabledError, TwoFANotEnabledError } from "../errors/2fa.errors.js";
-import jwt from "jsonwebtoken";
-import { findUserById } from "../services/userService.js";
+import { NoAccessTokenError } from "../errors/middleware.errors.js";
+import { TwoFAAlreadyEnabledError } from "../errors/2fa.errors.js";
 
 export const handleGARegister = async (
 	req:		FastifyRequest,
