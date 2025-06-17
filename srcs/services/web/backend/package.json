@@ -14,7 +14,8 @@
     "watch:tsc": "tsc -w",
     "watch:css": "postcss src/public/style.css -o dist/public/style.css --watch",
     "start": "node --env-file=.env dist/index.js",
-    "dev": "nodemon --watch src --ext ts,html,js --exec \"npm run build && npm run start\""
+    "dev": "nodemon --watch src --ext ts,html,js --exec \"npm run build && npm run start\"",
+    "dev2": "nodemon --watch src --ext ts,html,js --exec \"npm run build2 && npm run start\""
   },
   "keywords": [],
   "author": "",
