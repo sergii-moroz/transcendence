@@ -5,12 +5,13 @@ import { socialSocketManager } from "./SocialWebSocket.js";
 export class Router {
 	private static currentRoute: tRoute | null = null;
 	static initSocket: boolean = false;
+	static username: string | null = null;
 
 	static async init() {
 		window.addEventListener("popstate", () => this.handleRouteChange());
 		document.addEventListener("click", (e: Event) => {
-			const target = e.target as HTMLElement;
-			if (target.matches("[data-link]")) {
+			const target = (e.target as HTMLElement).closest("[data-link]") as HTMLAnchorElement | null;
+			if (target) {
 				e.preventDefault()
 				const href = target.getAttribute('href');
 				if (href)
@@ -30,10 +31,13 @@ export class Router {
 			route = routes['/game/:gameRoomId'];
 		} else if (path.startsWith('/tournament/')) {
 			route = routes['/tournament/:tournamentId'];
+		} else if (path.startsWith('/profile/')) {
+			route = routes['/profile/:username'];
 		} else {
 			route = routes[path] ?? routes["404"]
 		}
 		if (!this.initSocket && route.description == 'Home page') {
+			this.username = (await API.getUser()).username;
 			socialSocketManager.init();
 			this.initSocket = true;
 		}
@@ -44,7 +48,7 @@ export class Router {
 			this.currentRoute = route;
 		} catch (error) {
 			console.error("ROUTER: Route handling failed:", error);
-			await this.handleRouteChange(); // Fallback to 404
+			this.updateDOM(routes["error"], 'error');
 		}
 	}
 
@@ -83,10 +87,9 @@ export class Router {
 
 	static async logout() {
 		socialSocketManager.disconnect();
-		Router.initSocket = false;
+		this.initSocket = false;
+		this.username = null;
 		await API.logout();
-		Router.navigateTo('/login');
+		this.navigateTo('/login');
 	}
 }
-
-Router.init()
