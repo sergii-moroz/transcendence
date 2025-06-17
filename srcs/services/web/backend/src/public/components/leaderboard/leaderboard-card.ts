@@ -12,7 +12,7 @@ import {
 } from "../../../types/user.js"
 import { Router } from "../../router-static.js"
 
-export class TopPlayerCard extends HTMLElement {
+export class LeaderboardCard extends HTMLElement {
 	private btn: HTMLButtonElement | null = null
 	private data: TopPlayers = { singleplayer: null, multiplayer: null, tournament: null}
 	private modes: GameMode[] = ['singleplayer', 'multiplayer', 'tournament']
@@ -22,7 +22,7 @@ export class TopPlayerCard extends HTMLElement {
 	}
 
 	async connectedCallback() {
-		this.data = await API.getTopPlayers()
+		this.data = await API.getTopPlayers(100)
 		// console.log("DATA", this.data)
 		this.render()
 
@@ -51,7 +51,7 @@ export class TopPlayerCard extends HTMLElement {
 						<div class="size-12 rounded-lg bg-yellow-500/10 flex items-center justify-center mr-4">
 							${ iconHomeRocket }
 						</div>
-						<h3 class="text-xl font-bold">Top Player</h3>
+						<h3 class="text-xl font-bold">Top 100</h3>
 					</div>
 
 					<!-- Tabs -->
@@ -61,26 +61,19 @@ export class TopPlayerCard extends HTMLElement {
 					${ sections }
 
 				</div>
-
-				<div class="p-6 pt-0">
-					<button class="w-full px-4 py-2.5 bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-400 font-medium rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
-						View Leaderboard →
-					</button>
-				</div>
 			</div>
 		`
 	}
 
 	private renderPlayerItem(item: PlayerStats, index: number): string {
 		const colors = ["text-yellow-400", "text-gray-400", "text-yellow-600"]
-		const colorClass = colors[index] || "text-yellow-400"
+		const colorClass = colors[index] || "text-gray-400"
 		const total = item.wins + item.losses
-		// const winRate = total > 0 ? (item.wins / total * 100).toFixed(1) : "0.0"
 
 		return `
 			<div class="flex items-center p-3 dark:bg-gray-700/50 bg-gray-100 rounded-lg transition-colors dark:hover:bg-gray-700/70 hover:bg-gray-100/60">
 				<div class="pr-3 ${colorClass}">
-					${iconHomeTrophy}
+					${index < 3 ? iconHomeTrophy: `<div class="min-w-6">${index + 1}</div>`}
 				</div>
 				<div class="flex-1">
 					<div class="font-medium">${item.username}</div>
@@ -129,7 +122,7 @@ export class TopPlayerCard extends HTMLElement {
 
 	private renderTabSections() {
 		return this.modes.map(mode => {
-			const items = (this.data[mode] || []).slice(0, 3)
+			const items = (this.data[mode] || [])
 
 			const players = items.length
 				? items.map((item, index) => this.renderPlayerItem(item, index)).join('')

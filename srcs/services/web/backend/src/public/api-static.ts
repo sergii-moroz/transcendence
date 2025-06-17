@@ -1,4 +1,5 @@
 import { JwtUserPayload } from "../types/user.js"
+import { GAME_MODES } from "./types/game-history.types.js"
 
 export class API {
 	static baseUrl: string
@@ -83,6 +84,11 @@ export class API {
 		return response.json()
 	}
 
+	static async passwordReset(currentPassword: string, password: string, repeated: string) {
+		const response = await this.post('/api/password/reset', { currentPassword, password, repeated }, { includeCSRF: true })
+		return response.json()
+	}
+
 	/**
 	 * Sends a logout request to the server with the provided credentials.
 	 * Automatically handles token refresh if the access token is expired or missing.
@@ -151,8 +157,8 @@ export class API {
 		return response
 	}
 
-	static async getTopPlayers() {
-		const response = await this.get('/api/stats/top-players')
+	static async getTopPlayers(limit: number = 3) {
+		const response = await this.get(`/api/stats/top-players?limit=${limit}`)
 		return response
 	}
 
@@ -161,8 +167,8 @@ export class API {
 		return response
 	}
 
-	static async getUserGameHistory(page: number = 1, pageSize: number = 5) {
-		const response = await this.get(`/api/history/ping-pong?page=${page}&page_size=${pageSize}`)
+	static async getUserGameHistory(page: number = 1, pageSize: number = 5, gameMode: GAME_MODES = GAME_MODES.Singleplayer) {
+		const response = await this.get(`/api/history/ping-pong?page=${page}&page_size=${pageSize}&game_mode=${gameMode}`)
 		return response
 	}
 
@@ -305,7 +311,7 @@ export class API {
 		try {
 			const res = await this.post('/api/addFriend', {name});
 			return res.json();
-			
+
 		} catch (error) {
 			console.error("Add Friend API call failed:", error);
 		}
@@ -315,7 +321,7 @@ export class API {
 		try {
 			const res = await this.post('/api/acceptFriend', {name});
 			return res.json();
-			
+
 		} catch (error) {
 			console.error("Accept Friend API call failed:", error);
 		}
@@ -325,7 +331,7 @@ export class API {
 		try {
 			const res = await this.post('/api/rejectFriend', {name});
 			return res.json();
-			
+
 		} catch (error) {
 			console.error("reject Friend API call failed:", error);
 		}
@@ -335,7 +341,7 @@ export class API {
 		try {
 			const res = await this.post('/api/deleteFriend', {name});
 			return res.json();
-			
+
 		} catch (error) {
 			console.error("delete Friend API call failed:", error);
 		}
@@ -345,7 +351,7 @@ export class API {
 		try {
 			const res = await this.post('/api/blockFriend', {name});
 			return res.json();
-			
+
 		} catch (error) {
 			console.error("delete Friend API call failed:", error);
 		}
@@ -355,7 +361,7 @@ export class API {
 		try {
 			const res = await this.post('/api/unblockFriend', {name});
 			return res.json();
-			
+
 		} catch (error) {
 			console.error("delete Friend API call failed:", error);
 		}

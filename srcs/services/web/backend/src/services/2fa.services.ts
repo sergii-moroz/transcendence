@@ -210,3 +210,17 @@ export const disable2FA = async (id: number): Promise<void> => {
 		)
 	})
 }
+
+export const passwordResetService = async (id: number, password: string): Promise<void> => {
+	return new Promise((resolve, reject) => {
+		db.run(
+			'UPDATE users SET password = ? WHERE id = ?',
+			[password, id],
+			function (err) {
+				if (err) return reject(err);
+				if (this.changes === 0) return reject(new UserNotFoundError())
+				resolve();
+			}
+		)
+	})
+}

@@ -31,10 +31,15 @@ import { UserGameHistory } from "./components/history/user-game-history.js";
 import { CollapsedView } from "./components/sidebar/sidebarCollapsed.js";
 import { FriendListView } from "./components/sidebar/sidebarFriendList.js";
 import { ChatView } from "./components/sidebar/sidebarChat.js";
+import { LeaderboardCard } from "./components/leaderboard/leaderboard-card.js";
+import { ButtonPasswordReset } from "./components/2fa/button-reset.js";
+import { PasswordResetForm } from "./components/settings/password-reset-form.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
 customElements.define('btn-theme-toggle', ButtonThemeToggle)
 customElements.define('btn-2fa', Button2FA)
+customElements.define('btn-password-reset', ButtonPasswordReset)
+customElements.define('password-reset-form', PasswordResetForm)
 
 // PAGE COMPONENTS
 customElements.define('register-form', RegisterForm)
@@ -43,6 +48,7 @@ customElements.define('play-card', PlayCard)
 customElements.define('stats-card', StatsCard)
 customElements.define('top-player-card', TopPlayerCard)
 customElements.define('user-game-history', UserGameHistory)
+customElements.define('leaderboard-card', LeaderboardCard)
 
 // 2FA
 customElements.define('two-fa-login-verify', TwoFALoginVerify)

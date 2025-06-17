@@ -30,8 +30,10 @@ export class ChatView extends HTMLElement {
 	async connectedCallback() {
 		this.name = this.getAttribute('friend') || '';
 		socialSocketManager.setMessageCallback((data: Message) => {
-			if (data.owner != this.name)
-				return socialSocketManager.addPopup(data);
+			if (data.owner != this.name) {
+				socialSocketManager.addPopup(data);
+				return;
+			}
 			this.addMessages(data);
 		});
 

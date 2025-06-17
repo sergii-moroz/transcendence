@@ -20,6 +20,7 @@ import { RegisterInputProps } from "../../types/registration.js";
 import { InvalidCredentialsError, UserNotFoundError } from "../../errors/login.errors.js";
 import { NoRefreshTokenError } from "../../errors/middleware.errors.js";
 import { handleLogout } from "../../controllers/auth.controllers.js";
+import { handlePasswordReset } from "../../controllers/api.controller.js";
 
 export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
 
@@ -148,5 +149,10 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 			throw err
 		}
 	});
+
+	app.post('/password/reset', {
+		preHandler: [authenticate, checkCsrf],
+		handler: handlePasswordReset
+	})
 
 }
