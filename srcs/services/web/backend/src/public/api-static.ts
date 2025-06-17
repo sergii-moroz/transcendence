@@ -84,6 +84,11 @@ export class API {
 		return response.json()
 	}
 
+	static async passwordReset(currentPassword: string, password: string, repeated: string) {
+		const response = await this.post('/settings/password/reset', { currentPassword, password, repeated})
+		return response.json()
+	}
+
 	/**
 	 * Sends a logout request to the server with the provided credentials.
 	 * Automatically handles token refresh if the access token is expired or missing.
