@@ -34,11 +34,13 @@ import { ChatView } from "./components/sidebar/sidebarChat.js";
 import { SingleplayerGame } from "./components/singleplayer.js";
 import { LeaderboardCard } from "./components/leaderboard/leaderboard-card.js";
 import { ButtonPasswordReset } from "./components/2fa/button-reset.js";
+import { PasswordResetForm } from "./components/settings/password-reset-form.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
 customElements.define('btn-theme-toggle', ButtonThemeToggle)
 customElements.define('btn-2fa', Button2FA)
 customElements.define('btn-password-reset', ButtonPasswordReset)
+customElements.define('password-reset-form', PasswordResetForm)
 
 // PAGE COMPONENTS
 customElements.define('register-form', RegisterForm)

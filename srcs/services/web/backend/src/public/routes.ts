@@ -143,4 +143,16 @@ export const routes: tRoutes = {
 		description: "Singleplayer mode"
 	},
 
+	"/settings/password/reset": {
+		template: "/templates/settings/password/reset.html",
+		title: `Password Reset | ${APP_TITLE}`,
+		description: "Password Reset"
+	},
+
+	"/settings/password/reset/verify": {
+		template: "/templates/settings/password/reset-verify.html",
+		title: `Password Reset Verify | ${APP_TITLE}`,
+		description: "Password Reset Verify"
+	},
+
 }
