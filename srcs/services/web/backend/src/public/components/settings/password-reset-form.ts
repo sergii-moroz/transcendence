@@ -150,6 +150,8 @@ export class PasswordResetForm extends HTMLElement {
 
 		if (res.success) {
 			return Router.navigateTo('/home')
+			// show confirmation "password was changed successfully"
+			// check for requires2FA
 		} else {
 			this.showError(this.repeatedError, res.message ?? 'Password reset failed')
 		}
