@@ -32,10 +32,12 @@ import { CollapsedView } from "./components/sidebar/sidebarCollapsed.js";
 import { FriendListView } from "./components/sidebar/sidebarFriendList.js";
 import { ChatView } from "./components/sidebar/sidebarChat.js";
 import { LeaderboardCard } from "./components/leaderboard/leaderboard-card.js";
+import { ButtonPasswordReset } from "./components/2fa/button-reset.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
 customElements.define('btn-theme-toggle', ButtonThemeToggle)
 customElements.define('btn-2fa', Button2FA)
+customElements.define('btn-password-reset', ButtonPasswordReset)
 
 // PAGE COMPONENTS
 customElements.define('register-form', RegisterForm)
