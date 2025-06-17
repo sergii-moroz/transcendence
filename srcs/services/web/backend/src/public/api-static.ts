@@ -163,7 +163,7 @@ export class API {
 	}
 
 	static async getUser(): Promise<JwtUserPayload> {
-		const response = await this.get('/user');
+		const response = await this.get('/api/user');
 		return response
 	}
 
