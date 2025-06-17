@@ -457,8 +457,8 @@ export class UserGameHistory extends HTMLElement {
 						peer-checked/${mode}:[&>div>span]:inline-block"
 				>
 					<div class="flex items-center gap-2">
-						<${iconElm} class="xl:hidden [&>svg]:size-4 sm:[&>svg]:size-5"></${iconElm}>
-						<span class="hidden text-xs sm:text-sm xl:block">${mode}</span>
+						<${iconElm} class="[&>svg]:size-4 sm:[&>svg]:size-5"></${iconElm}>
+						<span class="hidden text-xs sm:text-sm">${mode}</span>
 					</div>
 				</label>
 			`
