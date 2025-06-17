@@ -3,3 +3,9 @@ export interface RegisterInputProps {
 	password: string
 	repeated: string
 }
+
+export interface ResetPasswordProps {
+	currentPassword: string
+	password: string
+	repeated: string
+}

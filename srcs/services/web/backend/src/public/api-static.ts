@@ -85,7 +85,7 @@ export class API {
 	}
 
 	static async passwordReset(currentPassword: string, password: string, repeated: string) {
-		const response = await this.post('/settings/password/reset', { currentPassword, password, repeated})
+		const response = await this.post('/api/password/reset', { currentPassword, password, repeated }, { includeCSRF: true })
 		return response.json()
 	}
 
