@@ -41,12 +41,13 @@ export class StatsCard extends HTMLElement {
 	handleEvent(event: Event) {
 		event.preventDefault()
 		// console.log('Stats Card: button clicked')
-		Router.navigateTo('/history')
+		Router.navigateTo(`/profile/${Router.username}`);
 	}
 
 	private render() {
 		const tabs = this.renderTabButtons()
 		const sections = this.renderSections()
+		const mode = this.getAttribute('mode') || 'home'
 
 		this.innerHTML = `
 			<div class="tw-card">
@@ -55,7 +56,7 @@ export class StatsCard extends HTMLElement {
 						<div class="size-12 rounded-lg bg-blue-500/10 flex items-center justify-center mr-4">
 							${iconHomeStats}
 						</div>
-						<h3 class="text-xl font-bold">Your Stats</h3>
+						<h3 class="text-xl font-bold">${mode === 'profile' ? 'Game Stats' : 'Your Stats'}</h3>
 					</div>
 
 					<!-- Tabs -->
@@ -63,7 +64,7 @@ export class StatsCard extends HTMLElement {
 					${sections}
 				</div>
 
-				<div class="p-6 pt-0">
+				<div class="p-6 pt-0 ${mode === 'profile' ? 'hidden' : ''}">
 					<button class="w-full px-4 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-medium rounded-lg flex items-center justify-center transition-all duration-500 ease-out hover:scale-[1.04] hover:shadow-lg">
 						View Profile →
 					</button>

@@ -34,6 +34,8 @@ import { ChatView } from "./components/sidebar/sidebarChat.js";
 import { LeaderboardCard } from "./components/leaderboard/leaderboard-card.js";
 import { ButtonPasswordReset } from "./components/2fa/button-reset.js";
 import { PasswordResetForm } from "./components/settings/password-reset-form.js";
+import { ProfileData } from "./components/profile-data.js";
+import { simpleHeader } from "./components/simple-Header.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
 customElements.define('btn-theme-toggle', ButtonThemeToggle)
@@ -85,5 +87,11 @@ customElements.define('game-room', GameRoom)
 // Tournament
 customElements.define('tournament-list', TournamentList)
 customElements.define('tournament-room', Tournament)
+
+//Profile
+customElements.define('profile-user-data', ProfileData)
+
+//header
+customElements.define('simple-header', simpleHeader)
 
 Router.init()
