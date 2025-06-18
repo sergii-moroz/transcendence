@@ -74,6 +74,18 @@ const innerHTML = `
 			Reset
 		</button>
 	</form>
+
+	<!-- Mobile Menu Modal -->
+		<div
+			id="dlg-2fa-verify"
+			class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center z-50 flex flex-col pt-20
+			"
+		>
+		<div class="flex flex-col items-center justify-center px-6 py-8 mx-auto space-y-4">
+			<!-- CARD -->
+			<two-fa-reset-verify></two-fa-reset-verify>
+		</div>
+	</div>
 `
 
 export class PasswordResetForm extends HTMLElement {
@@ -84,6 +96,7 @@ export class PasswordResetForm extends HTMLElement {
 	private currentPasswordError: HTMLInputElement | null = null
 	private passwordError: HTMLInputElement | null = null
 	private repeatedError: HTMLInputElement | null = null
+	private dlg: HTMLElement | null = null
 
 	constructor() {
 		super()
@@ -99,6 +112,8 @@ export class PasswordResetForm extends HTMLElement {
 		this.currentPasswordError = this.querySelector('#current-password-error')
 		this.passwordError = this.querySelector('#password-error')
 		this.repeatedError = this.querySelector('#repeated-error')
+
+		this.dlg = this.querySelector('#dlg-2fa-verify')
 
 		this.form?.addEventListener('submit', this)
 	}
@@ -148,10 +163,14 @@ export class PasswordResetForm extends HTMLElement {
 
 		const res = await API.passwordReset(this.currentPassword.value, this.password.value, this.repeated.value)
 
+		if (res.requires2FA) {
+			sessionStorage.setItem('temp2faToken', res.token)
+			this.show2FADialog()
+		}
+
 		if (res.success) {
 			return Router.navigateTo('/home')
 			// show confirmation "password was changed successfully"
-			// check for requires2FA
 		} else {
 			this.showError(this.repeatedError, res.message ?? 'Password reset failed')
 		}
@@ -177,6 +196,10 @@ export class PasswordResetForm extends HTMLElement {
 
 	private render() {
 		this.innerHTML = innerHTML
+	}
+
+	private show2FADialog() {
+		this.dlg?.classList.remove('hidden')
 	}
 
 }
