@@ -1,6 +1,6 @@
 import { API } from "../api-static.js";
 import { profileData } from "../types/game-history.types.js";
-import { icon2FA, iconCalendar, iconCamera, iconChange, iconHomeStats, iconLockClose } from "./icons/icons.js"
+import { icon2FA, iconCalendar, iconCamera, iconChange, iconCheck, iconHomeStats, iconLock2, iconLockClose, iconSidebarCheck, iconX } from "./icons/icons.js"
 import { showErrorState } from "./sidebar/sidebarBase.js";
 
 
@@ -10,30 +10,77 @@ export class ProfileData extends HTMLElement {
 	maxSizeMB: number = 5;
 
 	changeAvatar: HTMLInputElement | null = null;
-	Avatar: HTMLImageElement | null = null;
+	avatar: HTMLImageElement | null = null;
+	changeBtn: HTMLElement | null = null;
+	cancelBtn: HTMLElement | null = null;
+	submitBtn: HTMLElement | null = null;
+	funFactInput: HTMLInputElement | null = null;
+	submitContainer: HTMLElement | null = null;
+	displayContainer: HTMLElement | null = null;
+	funFact: HTMLElement | null = null;
+
 
 	constructor() {
 		super()
 		const pathParts = window.location.pathname.split("/");
 		this.username = pathParts[pathParts.length - 1];
-		this.innerHTML = ' <div class="tw-card p-6 h-full w-full><h2 class="flex items-center justify-center">Loading...</h2></div.'
+		this.innerHTML = '<div id="parentContainer" class="tw-card p-6 h-full w-full><h2 class="flex items-center justify-center">Loading...</h2></div.'
 	}
 
 	async connectedCallback() {
 		await this.loadProfile();
 
 		this.changeAvatar = this.querySelector('#changeAvatar');
-		this.Avatar = this.querySelector('#avatar');
+		this.avatar = this.querySelector('#avatar');
+		this.cancelBtn = this.querySelector('#cancel-btn');
+		this.changeBtn = this.querySelector('#change-btn');
+		this.submitBtn = this.querySelector('#submit-btn');
+		this.submitContainer = this.querySelector('#submitContainer');
+		this.displayContainer = this.querySelector('#displayContainer');
+		this.funFactInput = this.querySelector('#funFactInput');
+		this.funFact = this.querySelector('#funFact');
 
 		this.changeAvatar?.addEventListener('change', this.handleAvatarChange);
+		this.cancelBtn?.addEventListener('click', this.changeToDisplay);
+		this.changeBtn?.addEventListener('click', this.changeToSubmit);
+		this.submitBtn?.addEventListener('click', this.handleFunFactSubmit);
 	}
 
 	disconnectedCallback() {
 		this.changeAvatar?.removeEventListener('change', this.handleAvatarChange);
+		this.cancelBtn?.removeEventListener('click', this.changeToDisplay);
+		this.changeBtn?.removeEventListener('click', this.changeToSubmit);
+		this.submitBtn?.removeEventListener('click', this.handleFunFactSubmit);
 	}
 
 	handleEvent(event: Event) {
 
+	}
+
+	handleFunFactSubmit = async (e: Event) => {
+		try {
+			const input = this.funFactInput?.value.trim();
+			if (input) {
+				const data = await API.updateFunFact(input);
+				if (!data.success) throw new Error('updating FunFact failed')
+				this.funFactInput!.value = '';
+				this.funFactInput!.blur();
+				this.funFact!.innerText = input;
+				this.changeToDisplay(e);
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	}
+
+	changeToDisplay = (e: Event) => {
+		this.submitContainer!.classList.replace("flex", "hidden");
+		this.displayContainer!.classList.replace("hidden", "flex");
+	}
+
+	changeToSubmit = (e: Event) => {
+		this.submitContainer!.classList.replace("hidden", "flex");
+		this.displayContainer!.classList.replace("flex", "hidden");
 	}
 
 	handleAvatarChange = async (event: Event) => {
@@ -45,11 +92,11 @@ export class ProfileData extends HTMLElement {
 	
 			const data = await API.uploadNewAvatar(file);
 			if (!data.success) throw Error(`upload failed: ${data.message}`);
-			if (this.Avatar)
-				this.Avatar.src = data.url;
+			if (this.avatar)
+				this.avatar.src = data.url;
 		} catch (err) {
 			console.error("changing avatar failed: ", err);
-			showErrorState(this.querySelector('#parentContainer'));
+			// this.querySelector('#parentContainer')!.innerHTML = '<h2 class="text-red-500 justify-center">Error</h2>';
 		}
 	}
 
@@ -60,7 +107,8 @@ export class ProfileData extends HTMLElement {
 			this.render(data);
 		} catch (error) {
 			console.error("Error loading profileData View: ", error);
-			showErrorState(this.querySelector('#parentContainer'));
+			this.querySelector('#parentContainer')!.innerHTML = '<h2 class="text-red-500 justify-center">Error</h2>';
+
 		}
 	}
 
@@ -74,7 +122,7 @@ export class ProfileData extends HTMLElement {
 					<h3 class="text-xl font-bold">Profile Data</h3>
 				</div>
 
-				<div class="flex p-4 space-x-6">
+				<div class="flex p-4 space-x-6 justify-center">
 					<div class="flex flex-col">
 						<div class="relative group">
 							<div class="size-40 overflow-hidden rounded-full border-4 border-white dark:border-gray-300 bg-gray-200 shadow-lg">
@@ -100,12 +148,31 @@ export class ProfileData extends HTMLElement {
 
 						<div class="space-y-0.5">
 							<label class="block whitespace-nowrap text-xs font-semibold tracking-wider text-gray-400 uppercase">Favorite Animal</label>
-							<div class="flex">
-								<p class="text-gray-700 dark:text-gray-200">${data.funFact}</p>
-								<button class="ml-2 text-gray-400 dark:text-gray-500 hover:text-blue-500">
-								${iconChange}
+							<div id='displayContainer' class="flex">
+								<p id="funFact" class="text-gray-700 dark:text-gray-200">${data.funFact}</p>
+								<button id='change-btn' class="ml-2 text-gray-400 dark:text-gray-500 hover:text-blue-500">
+									${iconChange}
 								</button>
 							</div>
+							<div id='submitContainer' class="hidden items-center mt-2">
+								<input
+									id='funFactInput'
+									type="text"
+									value="${data.funFact}"
+									class="px-2 py-1 w-30 h-6 text-sm text-gray-800 dark:text-gray-100 bg-gray-50 hover:bg-blue-50 border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
+								/>
+								<button id="submit-btn"
+									class="size-6 p-1 ml-2 flex items-center justify-center text-black bg-white border border-black hover:text-blue-500 rounded-full transition"
+								>
+									${iconSidebarCheck}
+								</button>
+								<button id="cancel-btn"
+									class="size-6 p-1 ml-1 flex items-center justify-center text-black bg-white border border-black hover:text-red-500 rounded-full transition"
+								>
+									${iconX}
+								</button>
+							</div>
+
 						</div>
 
 						<div class="space-y-0.5">
@@ -122,15 +189,9 @@ export class ProfileData extends HTMLElement {
 					</div> 
 				</div>
 
-				<div class='pt-4 border-t border-gray-100 dark:border-gray-700 space-y-3'>
-					<button class="flex items-center justify-center rounded-lg whitespace-nowrap bg-blue-500/20 hover:bg-blue-500/30 px-4 py-2 text-blue-600 dark:text-blue-300  transition-colors w-full">
-						${iconLockClose}
-						Change Password
-					</button>
-					<button class="flex items-center justify-center rounded-lg whitespace-nowrap bg-green-500/10 hover:bg-green-500/20 px-4 py-2 text-green-600 dark:text-green-300 transition-colors w-full">
-						${icon2FA}
-						Enable 2FA
-					</button>
+				<div class='flex flex-col pt-4 border-t border-gray-100 dark:border-gray-700 space-y-1'>
+					<btn-password-reset></btn-password-reset>
+					<btn-2fa></btn-2fa>
 				</div> 
 			</div>
 		`
