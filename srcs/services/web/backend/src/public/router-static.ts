@@ -6,6 +6,7 @@ export class Router {
 	private static currentRoute: tRoute | null = null;
 	static initSocket: boolean = false;
 	static username: string | null = null;
+	private static publicRoutes: string[] = ['/', '/register', '/login'] //add 2fa routes
 
 	static async init() {
 		window.addEventListener("popstate", () => this.handleRouteChange());
@@ -36,10 +37,12 @@ export class Router {
 		} else {
 			route = routes[path] ?? routes["404"]
 		}
-		if (!this.initSocket && route.description == 'Home page') {
+		if (!this.initSocket && !this.publicRoutes.includes(path)) {
 			this.username = (await API.getUser()).username;
-			socialSocketManager.init();
-			this.initSocket = true;
+			if (this.username) {
+				socialSocketManager.init();
+				this.initSocket = true;
+			}
 		}
 
 		try {
