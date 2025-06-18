@@ -41,3 +41,10 @@ export const GAME_MODE_MAP: Record<GameModeName, GAME_MODES> = {
 }
 
 export const PAGE_SIZE_OPTIONS = [5, 10, 15, 25, 50, 100]
+
+export interface profileData {
+	avatar: string,
+	username: string,
+	registerDate: string,
+	funFact: string
+}

@@ -367,4 +367,15 @@ export class API {
 		}
 	}
 
+	static async getProfileData(name: string) {
+		try {
+			const res = await this.post('/api/profileData', {name});
+			return res.json();
+
+		} catch (error) {
+			console.error("get profileData API call failed:", error);
+		}
+	}
+	
+
 }

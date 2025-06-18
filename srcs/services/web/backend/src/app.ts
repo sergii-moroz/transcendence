@@ -23,6 +23,7 @@ import { friends } from "./routes/v1/friends.js";
 import { chat } from "./routes/v1/chat.js";
 import { statsRoutes } from "./routes/v1/stats.routes.js";
 import { historyRoutes } from "./routes/v1/game-history.route.js";
+import { profile } from "./routes/v1/profile.js";
 
 export const build = async (opts: FastifyServerOptions) => {
 	const app = fastify(opts)
@@ -83,6 +84,7 @@ export const build = async (opts: FastifyServerOptions) => {
 	app.register(routes);
 	app.register(pages, {prefix: "api"});
 	app.register(friends, {prefix: "api"});
+	app.register(profile, {prefix: "api"});
 	app.register(chat);
 	app.register(matchmakingSock, {prefix: "ws"});
 	app.register(gameRoomSock, {prefix: "ws"});
