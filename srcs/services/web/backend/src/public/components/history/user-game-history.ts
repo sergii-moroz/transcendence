@@ -449,7 +449,7 @@ export class UserGameHistory extends HTMLElement {
 					class="hidden peer/${mode}" ${mode === currentMode ? "checked" : ""}
 				>
 				<label for="tab-stats-${mode}"
-					class="inline-block w-fit px-2 xl:px-4 py-2 mb-2 sm:mb-3 rounded-full cursor-pointer hover:bg-gray-500/20
+					class="inline-block w-fit p-2 mb-2 sm:mb-3 rounded-full cursor-pointer hover:bg-gray-500/20
 						peer-checked/${mode}:bg-blue-500/10
 						peer-checked/${mode}:hover:bg-blue-500/20
 						peer-checked/${mode}:text-blue-500
