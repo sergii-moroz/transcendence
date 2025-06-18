@@ -377,6 +377,15 @@ export class API {
 		}
 	}
 
+	static async updateFunFact(input: string) {
+		try {
+			const res = await this.post('/api/updateFunFact', {input});
+			return res.json();
+		} catch (error) {
+			console.error("update FunFact API call failed:", error);
+		}
+	}
+
 	static async uploadNewAvatar(file: File) {
 		try {
 			const formData = new FormData;

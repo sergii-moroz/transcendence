@@ -34,3 +34,16 @@ export const setNewAvatar = async (newPath: string, user_id: number): Promise<vo
 	});
 }
 
+export const updateFunFact = async (input: string, user_id: number): Promise<void> => {
+	await new Promise<void>((resolve, reject) => {
+		db.run(
+			'UPDATE users SET funFact = ? WHERE id = ?',
+			[input, user_id],
+			function (err) {
+				if (err) reject(err);
+				else resolve();
+			}
+		);
+	});
+}
+

@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
-import { newAvatarSchema, profileDataSchema } from "../../schemas/profile.schemas.js";
-import { handleGetProfileData, handleNewAvatar } from "../../controllers/profile.controller.js";
+import { newAvatarSchema, profileDataSchema, updateFunFactSchema } from "../../schemas/profile.schemas.js";
+import { handleGetProfileData, handleNewAvatar, handleUpdateFunFact } from "../../controllers/profile.controller.js";
 
 export const profile = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
 	app.post('/profileData', {
@@ -11,5 +11,10 @@ export const profile = async (app: FastifyInstance, opts: FastifyPluginOptions) 
 	app.post('/newAvatar', {
 		schema: newAvatarSchema,
 		handler: handleNewAvatar
+	});
+
+	app.post('/updateFunFact', {
+		schema: updateFunFactSchema,
+		handler: handleUpdateFunFact
 	});
 }

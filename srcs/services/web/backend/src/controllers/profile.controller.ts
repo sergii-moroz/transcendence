@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { getProfileData, setNewAvatar } from "../services/profile.services.js";
+import { getProfileData, setNewAvatar, updateFunFact } from "../services/profile.services.js";
 import { join } from "node:path";
 import { createWriteStream } from "node:fs";
 import { pipeline } from 'stream/promises';
@@ -52,6 +52,21 @@ export const handleNewAvatar = async (
 		await setNewAvatar(filePath, req.user.id);
 
 		reply.status(200).send({success: true, url: filePath});
+	} catch (error) {
+		throw error;
+	}
+}
+
+export const handleUpdateFunFact = async (
+	req:		FastifyRequest,
+	reply:	FastifyReply
+) => {
+	try {
+		const input = (req.body as { input: string }).input;
+
+		await updateFunFact(input, req.user.id);
+
+		reply.status(200).send({ success: true });
 	} catch (error) {
 		throw error;
 	}

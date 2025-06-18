@@ -37,3 +37,23 @@ export const newAvatarSchema = {
 		400: errorResponseSchema,
 	},
 }
+
+export const updateFunFactSchema = {
+	body: {
+		type: 'object',
+		required: ['input'],
+		properties: {
+			input: { type: 'string' },
+		},
+	},
+	response: {
+		200: {
+			type: 'object',
+      		required: ['success'],
+			properties: {
+				success: { type: 'boolean' },
+			},
+		},
+		400: errorResponseSchema,
+	},
+}
