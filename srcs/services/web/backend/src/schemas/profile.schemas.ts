@@ -23,3 +23,17 @@ export const profileDataSchema = {
 		400: errorResponseSchema,
 	},
 }
+
+export const newAvatarSchema = {
+	response: {
+		200: {
+			type: 'object',
+      		required: ['url', 'success'],
+			properties: {
+				success: { type: 'boolean' },
+				url: {type: "string"}
+			},
+		},
+		400: errorResponseSchema,
+	},
+}

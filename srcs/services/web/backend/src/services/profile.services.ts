@@ -20,3 +20,17 @@ export const getProfileData = async (name: string): Promise<profileData> => {
 
 	return data;
 }
+
+export const setNewAvatar = async (newPath: string, user_id: number): Promise<void> => {
+	await new Promise<void>((resolve, reject) => {
+		db.run(
+			'UPDATE users SET avatar = ? WHERE id = ?',
+			[newPath, user_id],
+			function (err) {
+				if (err) reject(err);
+				else resolve();
+			}
+		);
+	});
+}
+
