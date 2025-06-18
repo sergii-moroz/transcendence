@@ -40,10 +40,10 @@ export class API {
 	 * @param opts - Optional settings (e.g., whether to include CSRF token).
 	 * @returns A Promise resolving to the raw fetch Response object.
 	 */
-	static async post(endpoint: string, data: object, opts: { includeCSRF?: boolean} = {}) {
+	static async post(endpoint: string, data: object | FormData, opts: { includeCSRF?: boolean} = {}) {
 		const response = await this.tryWithRefresh(
 			async () => {
-				const postRequestInit = this.postRequestInit(data, opts)
+				const postRequestInit = this.postRequestInit(data, opts);
 				return await fetch(endpoint, postRequestInit);
 			}
 		)
@@ -222,10 +222,10 @@ export class API {
 	 * @param opts - Optional configuration. If `includeCSRF` is `true`, the CSRF token will be added to the headers.
 	 * @returns A `RequestInit` object suitable for use with a `fetch` POST request.
 	 */
-	private static postRequestInit = (data: object, opts: { includeCSRF?: boolean} = {}): RequestInit => {
-		const headers: Record<string, string> = {
-			'Content-Type': 'application/json'
-		}
+	private static postRequestInit = (data: object | FormData, opts: { includeCSRF?: boolean} = {}): RequestInit => {
+		const headers: Record<string, string> = {};
+		const isFormData = data instanceof FormData;
+		if (!isFormData) headers['Content-Type'] = 'application/json';
 
 		if (opts.includeCSRF) {
 			const csrfToken = this.getCSRFToken()
@@ -236,7 +236,7 @@ export class API {
 			method: 'POST',
 			headers: headers,
 			credentials: 'include',
-			body: JSON.stringify(data)
+			body: (isFormData ? data : JSON.stringify(data))
 		}
 	}
 
@@ -309,7 +309,7 @@ export class API {
 
 	static async addFriend(name: string) {
 		try {
-			const res = await this.post('/api/addFriend', {name});
+			const res = await this.post('/api/addFriend', {name}, { includeCSRF: true });
 			return res.json();
 
 		} catch (error) {
@@ -319,7 +319,7 @@ export class API {
 
 	static async acceptFriend(name: string) {
 		try {
-			const res = await this.post('/api/acceptFriend', {name});
+			const res = await this.post('/api/acceptFriend', {name}, { includeCSRF: true });
 			return res.json();
 
 		} catch (error) {
@@ -329,7 +329,7 @@ export class API {
 
 	static async rejectFriend(name: string) {
 		try {
-			const res = await this.post('/api/rejectFriend', {name});
+			const res = await this.post('/api/rejectFriend', {name}, { includeCSRF: true });
 			return res.json();
 
 		} catch (error) {
@@ -339,7 +339,7 @@ export class API {
 
 	static async deleteFriend(name: string) {
 		try {
-			const res = await this.post('/api/deleteFriend', {name});
+			const res = await this.post('/api/deleteFriend', {name}, { includeCSRF: true });
 			return res.json();
 
 		} catch (error) {
@@ -349,7 +349,7 @@ export class API {
 
 	static async blockFriend(name: string) {
 		try {
-			const res = await this.post('/api/blockFriend', {name});
+			const res = await this.post('/api/blockFriend', {name}, { includeCSRF: true });
 			return res.json();
 
 		} catch (error) {
@@ -359,7 +359,7 @@ export class API {
 
 	static async unblockFriend(name: string) {
 		try {
-			const res = await this.post('/api/unblockFriend', {name});
+			const res = await this.post('/api/unblockFriend', {name}, { includeCSRF: true });
 			return res.json();
 
 		} catch (error) {
@@ -374,6 +374,17 @@ export class API {
 
 		} catch (error) {
 			console.error("get profileData API call failed:", error);
+		}
+	}
+
+	static async uploadNewAvatar(file: File) {
+		try {
+			const formData = new FormData;
+			formData.append('file', file);
+			const res = await this.post('/api/newAvatar', formData, { includeCSRF: true });
+			return res.json();
+		} catch (error) {
+			console.error("upload new Avatar API call failed:", error);
 		}
 	}
 	
