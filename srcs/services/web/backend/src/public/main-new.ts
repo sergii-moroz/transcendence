@@ -31,6 +31,7 @@ import { UserGameHistory } from "./components/history/user-game-history.js";
 import { CollapsedView } from "./components/sidebar/sidebarCollapsed.js";
 import { FriendListView } from "./components/sidebar/sidebarFriendList.js";
 import { ChatView } from "./components/sidebar/sidebarChat.js";
+import { SingleplayerGame } from "./components/singleplayer.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
 customElements.define('btn-theme-toggle', ButtonThemeToggle)
@@ -75,6 +76,7 @@ customElements.define('match-making', Matchmaking)
 
 // Game
 customElements.define('game-room', GameRoom)
+customElements.define('singleplayer-game', SingleplayerGame);
 
 // Tournament
 customElements.define('tournament-list', TournamentList)
