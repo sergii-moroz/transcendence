@@ -35,6 +35,7 @@ import { SingleplayerGame } from "./components/singleplayer.js";
 import { LeaderboardCard } from "./components/leaderboard/leaderboard-card.js";
 import { ButtonPasswordReset } from "./components/2fa/button-reset.js";
 import { PasswordResetForm } from "./components/settings/password-reset-form.js";
+import { SingleplayerGame } from "./components/singleplayer.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
 customElements.define('btn-theme-toggle', ButtonThemeToggle)
