@@ -76,14 +76,26 @@ const innerHTML = `
 	</form>
 
 	<!-- Mobile Menu Modal -->
-		<div
-			id="dlg-2fa-verify"
-			class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center z-50 flex flex-col pt-20
-			"
-		>
+	<div
+		id="dlg-2fa-verify"
+		class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center z-50 flex flex-col pt-20
+		"
+	>
 		<div class="flex flex-col items-center justify-center px-6 py-8 mx-auto space-y-4">
 			<!-- CARD -->
 			<two-fa-reset-verify></two-fa-reset-verify>
+		</div>
+	</div>
+
+	<!-- Mobile Menu Modal -->
+	<div
+		id="dlg-confirmation"
+		class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center z-50 flex flex-col pt-20
+		"
+	>
+		<div class="flex flex-col items-center justify-center px-6 py-8 mx-auto space-y-4">
+			<!-- CARD -->
+			<password-reset-confirmation></password-reset-confirmation>
 		</div>
 	</div>
 `
@@ -97,6 +109,7 @@ export class PasswordResetForm extends HTMLElement {
 	private passwordError: HTMLInputElement | null = null
 	private repeatedError: HTMLInputElement | null = null
 	private dlg: HTMLElement | null = null
+	private dlgConf: HTMLElement | null = null
 
 	constructor() {
 		super()
@@ -114,6 +127,7 @@ export class PasswordResetForm extends HTMLElement {
 		this.repeatedError = this.querySelector('#repeated-error')
 
 		this.dlg = this.querySelector('#dlg-2fa-verify')
+		this.dlgConf = this.querySelector('#dlg-confirmation')
 
 		this.form?.addEventListener('submit', this)
 	}
@@ -169,8 +183,8 @@ export class PasswordResetForm extends HTMLElement {
 		}
 
 		if (res.success) {
-			return Router.navigateTo('/home')
-			// show confirmation "password was changed successfully"
+			sessionStorage.removeItem('temp2faToken')
+			this.showConfirmation()
 		} else {
 			this.showError(this.repeatedError, res.message ?? 'Password reset failed')
 		}
@@ -200,6 +214,11 @@ export class PasswordResetForm extends HTMLElement {
 
 	private show2FADialog() {
 		this.dlg?.classList.remove('hidden')
+	}
+
+	private showConfirmation() {
+		this.dlg?.classList.add('hidden')
+		this.dlgConf?.classList.remove('hidden')
 	}
 
 }

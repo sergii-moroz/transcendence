@@ -49,6 +49,7 @@ const innerHTML = `
 			</div>
 		</div>
 	</form>
+	<password-reset-confirmation class="hidden"></password-reset-confirmation>
 `
 
 export class TwoFAResetVerify extends HTMLElement {
@@ -56,6 +57,7 @@ export class TwoFAResetVerify extends HTMLElement {
 	private btnSubmit: HTMLButtonElement | null = null
 	private inputElm: HTMLInputElement | null = null
 	private messageError: HTMLElement | null = null
+	private dlgConf: HTMLElement | null = null
 
 
 	constructor() {
@@ -68,6 +70,7 @@ export class TwoFAResetVerify extends HTMLElement {
 		this.inputElm = this.querySelector('input')
 		this.btnSubmit = this.querySelector('button')
 		this.messageError = this.querySelector('#message-error')
+		this.dlgConf = this.querySelector('password-reset-confirmation')
 
 		this.form?.addEventListener('submit', this.handleSubmit)
 		this.inputElm?.addEventListener('input', this.handleInput)
@@ -95,7 +98,8 @@ export class TwoFAResetVerify extends HTMLElement {
 			const res = await API.twoFAResetVerify(code)
 
 			if (res.success) {
-				Router.navigateTo('/home')
+				sessionStorage.removeItem('temp2faToken')
+				this.showConfirmation()
 			} else {
 				this.showError(this.messageError, res.message ?? 'Verification failed')
 			}
@@ -150,5 +154,10 @@ export class TwoFAResetVerify extends HTMLElement {
 			element.innerHTML = ''
 			element.classList.add('hidden')
 		}, 4000)
+	}
+
+	private showConfirmation() {
+		this.form?.classList.add('hidden')
+		this.dlgConf?.classList.remove('hidden')
 	}
 }
