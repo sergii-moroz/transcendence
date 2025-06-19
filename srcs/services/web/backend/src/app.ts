@@ -22,6 +22,8 @@ import { friends } from "./routes/v1/friends.js";
 import { chat } from "./routes/v1/chat.js";
 import { statsRoutes } from "./routes/v1/stats.routes.js";
 import { historyRoutes } from "./routes/v1/game-history.route.js";
+import { singlePlayerRoutes } from "./routes/v1/singleplayer.route.js";
+
 import { profile } from "./routes/v1/profile.js";
 import fastifyMultipart from "@fastify/multipart";
 import { verifyAccessToken } from "./services/tokenService.js";
@@ -102,6 +104,7 @@ export const build = async (opts: FastifyServerOptions) => {
 	app.register(twoFARoutes, {prefix: 'api/2fa'});
 	app.register(statsRoutes, {prefix: 'api/stats'});
 	app.register(historyRoutes, {prefix: 'api/history'});
+	app.register(singlePlayerRoutes, {prefix: 'api/singleplayer'});
 
 	// GLOBAL ERROR HANDLING
 	app.setErrorHandler( async (error, request, reply) => {
