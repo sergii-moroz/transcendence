@@ -1,4 +1,5 @@
 import { API } from "../api-static.js";
+import { Router } from "../router-static.js";
 import { profileData } from "../types/game-history.types.js";
 import { icon2FA, iconCalendar, iconCamera, iconChange, iconCheck, iconHomeStats, iconLock2, iconLockClose, iconSidebarCheck, iconX } from "./icons/icons.js"
 import { showErrorState } from "./sidebar/sidebarBase.js";
@@ -113,6 +114,7 @@ export class ProfileData extends HTMLElement {
 	}
 
 	private render(data: profileData) {
+		const isOwner = Router.username === this.username;
 		this.innerHTML = `
 			<div id='parentContainer' class="tw-card p-6">
 				<div class="flex items-center mb-6">
@@ -132,10 +134,10 @@ export class ProfileData extends HTMLElement {
 									class="h-full w-full object-cover" 
 								/>
 							</div>
-							<div class="absolute inset-0 flex items-center justify-center rounded-full bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
+							<div class="absolute inset-0 ${isOwner ? 'flex' : ' hidden'} items-center justify-center rounded-full bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
 								${iconCamera}
+								<input type="file" id="changeAvatar" accept="image/jpeg, image/png, image/jpg" class="absolute inset-0 h-full w-full cursor-pointer opacity-0" />
 							</div>
-							<input type="file" id="changeAvatar" accept="image/jpeg, image/png, image/jpg" class="absolute inset-0 h-full w-full cursor-pointer opacity-0" />
 							<div class="absolute bottom-3 right-3 size-5 ${data.online ? 'bg-green-500 ': 'bg-red-500'} border-3 border-white dark:border-gray-300 rounded-full"></div>
 						</div>
 					</div>
@@ -150,7 +152,7 @@ export class ProfileData extends HTMLElement {
 							<label class="block whitespace-nowrap text-xs font-semibold tracking-wider text-gray-400 uppercase">Favorite Animal</label>
 							<div id='displayContainer' class="flex">
 								<p id="funFact" class="text-gray-700 dark:text-gray-200">${data.funFact}</p>
-								<button id='change-btn' class="ml-2 text-gray-400 dark:text-gray-500 hover:text-blue-500">
+								<button id='change-btn' class="${isOwner ? '' : 'hidden'} ml-2 text-gray-400 dark:text-gray-500 hover:text-blue-500">
 									${iconChange}
 								</button>
 							</div>
@@ -189,7 +191,7 @@ export class ProfileData extends HTMLElement {
 					</div> 
 				</div>
 
-				<div class='flex flex-col pt-4 border-t border-gray-100 dark:border-gray-700 space-y-1'>
+				<div class='${isOwner ? 'flex flex-col' : 'hidden'} pt-4 border-t border-gray-100 dark:border-gray-700 space-y-1'>
 					<btn-password-reset></btn-password-reset>
 					<btn-2fa></btn-2fa>
 				</div> 
