@@ -8,6 +8,7 @@ export class Game3D extends HTMLElement {
 	private latestState: GameState | null = null
 	private gameOver: boolean = false
 	private gameOverMessage: { message: string, winner: string } | null = null
+	private ballTrail: TrailMesh | null = null
 
 	// Babylon.js components
 	private canvas: HTMLCanvasElement | null = null
@@ -16,6 +17,9 @@ export class Game3D extends HTMLElement {
 	private resizeObserver: ResizeObserver | null = null
 
 	// Game objects
+	private ball: Mesh | null = null
+	private paddle1: Mesh | null = null
+	private paddle2: Mesh | null = null
 	private fieldWidth = 250
 	private fieldHeight = 150
 
@@ -101,6 +105,11 @@ export class Game3D extends HTMLElement {
 		new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene)
 		new HemisphericLight('light2', new Vector3(0 -1, 0), this.scene)
 
+		// create game objects
+		this.createField()
+		this.createPaddles()
+		this.createBall()
+
 		// Handle resize
 		this.resizeObserver = new ResizeObserver(() => {
 			this.engine?.resize()
@@ -110,8 +119,108 @@ export class Game3D extends HTMLElement {
 		// Run render loop
 		this.engine.runRenderLoop(() => {
 			this.scene?.render()
-
+			this.updateGameObjects()
 		})
+	}
+
+	private createField() {
+		if (!this.scene) return
+		// Create field boundaries
+		const linePoints = [
+			new Vector3(-this.fieldWidth, -this.fieldHeight, 0),
+			new Vector3(-this.fieldWidth, this.fieldHeight, 0),
+			new Vector3(this.fieldWidth, this.fieldHeight, 0),
+			new Vector3(this.fieldWidth, -this.fieldHeight, 0),
+			new Vector3(-this.fieldWidth, -this.fieldHeight, 0)
+		]
+		MeshBuilder.CreateLines("walls", { points: linePoints }, this.scene)
+
+		// Create floor
+		const ground = MeshBuilder.CreateGround("ground", {
+			width: this.fieldWidth * 2,
+			height: this.fieldHeight * 2
+		}, this.scene)
+		ground.position.z = 1
+		ground.rotate(new Vector3(1, 0, 0), -Math.PI/2)
+
+		const groundMat = new StandardMaterial("groundMat", this.scene)
+		groundMat.diffuseColor = new Color3(0.2, 0.2, 0.2)
+		ground.material = groundMat
+	}
+
+	private createBall() {
+		if (!this.scene) return
+
+		this.ball = MeshBuilder.CreateSphere("ball", { diameter: 10 }, this.scene)
+		const ballMat = new StandardMaterial("ballMat", this.scene)
+		// ballMat.diffuseColor = new Color3(1, 1, 1)
+		ballMat.emissiveColor = new Color3(1, 1, 1)
+		ballMat.specularPower = 100
+		this.ball.material = ballMat
+
+		// Create ball trail
+		this.ballTrail = new TrailMesh("ballTrail", this.ball, this.scene, 0.5, 30, true)
+		const trailMat = new StandardMaterial("trailMat", this.scene)
+		trailMat.emissiveColor = new Color3(0.8, 0.8, 1)
+		trailMat.alpha = 0.6
+		this.ballTrail.material = trailMat
+	}
+
+	private createPaddles() {
+		if (!this.scene) return
+
+		// Player 1 paddle (blue)
+		this.paddle1 = MeshBuilder.CreateBox("paddle1", {
+			width: 10,
+			height: 60,
+			depth: 5
+		}, this.scene)
+		this.paddle1.position.x = -this.fieldWidth + 5
+
+		const paddle1Mat = new StandardMaterial("paddle1Mat", this.scene)
+		paddle1Mat.diffuseColor = new Color3(0, 0.5, 1)
+		this.paddle1.material = paddle1Mat
+
+		// Player 2 paddle (red)
+		this.paddle2 = MeshBuilder.CreateBox("paddle2", {
+			width: 10,
+			height: 60,
+			depth: 5
+		}, this.scene)
+		this.paddle2.position.x = this.fieldWidth - 5
+
+		const paddle2Mat = new StandardMaterial("paddle2Mat", this.scene)
+		paddle2Mat.diffuseColor = new Color3(1, 0, 0.5)
+		this.paddle2.material = paddle2Mat
+	}
+
+	private updateGameObjects() {
+		if (!this.latestState || !this.ball || !this.paddle1 || !this.paddle2) return
+
+		// update ball position
+		this.ball.position.x = this.latestState.ball.x
+		this.ball.position.y = this.latestState.ball.y
+		this.ball.position.z = 0
+
+		// Update paddle1
+		this.paddle1.position.y = this.latestState.paddles.player1.y
+		this.paddle2.position.y = this.latestState.paddles.player2.y
+
+		// Update scores
+		const player1Score = this.querySelector('#player1-score');
+		const player2Score = this.querySelector('#player2-score');
+		const player1Name = this.querySelector('#player1-name');
+		const player2Name = this.querySelector('#player2-name');
+
+		if (player1Score && player2Score && player1Name && player2Name) {
+			player1Score.textContent = this.latestState.scores.player1.toString();
+			player2Score.textContent = this.latestState.scores.player2.toString();
+			player1Name.textContent = this.latestState.scores.user1;
+			player2Name.textContent = this.latestState.scores.user2;
+		}
+
+		// Handle gameover
+
 	}
 
 	handleSocket = () => {
