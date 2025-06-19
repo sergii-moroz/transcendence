@@ -136,7 +136,7 @@ export class ProfileData extends HTMLElement {
 								${iconCamera}
 							</div>
 							<input type="file" id="changeAvatar" accept="image/jpeg, image/png, image/jpg" class="absolute inset-0 h-full w-full cursor-pointer opacity-0" />
-							<div class="absolute bottom-3 right-3 size-5 bg-green-500 border-3 border-white dark:border-gray-300 rounded-full"></div>
+							<div class="absolute bottom-3 right-3 size-5 ${data.online ? 'bg-green-500 ': 'bg-red-500'} border-3 border-white dark:border-gray-300 rounded-full"></div>
 						</div>
 					</div>
 

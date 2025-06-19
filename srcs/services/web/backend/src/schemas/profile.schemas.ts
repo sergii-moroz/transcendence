@@ -11,13 +11,14 @@ export const profileDataSchema = {
 	response: {
 		200: {
 			type: 'object',
-      		required: ['success', 'avatar', 'username', 'registerDate', 'funFact'],
+      		required: ['success', 'avatar', 'username', 'registerDate', 'funFact', 'online'],
 			properties: {
 				success: { type: 'boolean' },
 				avatar: {type: 'string'},
 				username: {type: 'string'},
 				registerDate: {type: 'string'},
-				funFact: {type: "string"}
+				funFact: {type: "string"},
+				online: {type: "boolean"}
 			},
 		},
 		400: errorResponseSchema,

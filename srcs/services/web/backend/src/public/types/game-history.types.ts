@@ -46,5 +46,6 @@ export interface profileData {
 	avatar: string,
 	username: string,
 	registerDate: string,
-	funFact: string
+	funFact: string,
+	online: boolean
 }

@@ -11,13 +11,13 @@ export const handleGetProfileData = async (
 ) => {
 	try {
 		const profileName = (req.body as { name: string }).name;
-
 		const data = await getProfileData(profileName);
 		const answer = {
 			avatar: data.avatar,
 			username: data.username,
 			registerDate: data.registerDate,
 			funFact: data.funFact,
+			online: req.server.onlineUsers.has(data.username),
 			success: true
 		}
 		reply.status(200).send(answer);
