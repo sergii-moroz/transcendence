@@ -1,8 +1,7 @@
 import { API } from "../api-static.js";
 import { Router } from "../router-static.js";
 import { profileData } from "../types/game-history.types.js";
-import { icon2FA, iconCalendar, iconCamera, iconChange, iconCheck, iconHomeStats, iconLock2, iconLockClose, iconSidebarCheck, iconX } from "./icons/icons.js"
-import { showErrorState } from "./sidebar/sidebarBase.js";
+import { iconCalendar, iconCamera, iconChange, iconHomeSingleplayer, iconSidebarCheck, iconX } from "./icons/icons.js"
 
 
 
@@ -18,6 +17,7 @@ export class ProfileData extends HTMLElement {
 	funFactInput: HTMLInputElement | null = null;
 	submitContainer: HTMLElement | null = null;
 	displayContainer: HTMLElement | null = null;
+	parentContainer: HTMLElement | null = null;
 	funFact: HTMLElement | null = null;
 
 
@@ -25,10 +25,25 @@ export class ProfileData extends HTMLElement {
 		super()
 		const pathParts = window.location.pathname.split("/");
 		this.username = pathParts[pathParts.length - 1];
-		this.innerHTML = '<div id="parentContainer" class="tw-card p-6 h-full w-full><h2 class="flex items-center justify-center">Loading...</h2></div.'
+		this.innerHTML = `
+			<div class="tw-card p-6 h-full w-full flex flex-col">
+				<div class="flex items-center mb-6">
+					<div class="size-12 rounded-lg bg-blue-500/10 flex items-center justify-center mr-4 text-blue-400">
+						${iconHomeSingleplayer}
+					</div>
+					<h3 class="text-xl font-bold whitespace-nowrap">Profile Data</h3>
+				</div>
+				<div id="parentContainer">
+					<div class="flex-1 flex p-4 items-center justify-center">
+						<h2>Loading...</h2>
+					</div>
+				</div>
+			</div>
+		`
 	}
 
 	async connectedCallback() {
+		this.parentContainer = this.querySelector('#parentContainer');
 		await this.loadProfile();
 
 		this.changeAvatar = this.querySelector('#changeAvatar');
@@ -108,22 +123,16 @@ export class ProfileData extends HTMLElement {
 			this.render(data);
 		} catch (error) {
 			console.error("Error loading profileData View: ", error);
-			this.querySelector('#parentContainer')!.innerHTML = '<h2 class="text-red-500 justify-center">Error</h2>';
+			this.parentContainer!.innerHTML = 	`<div class="flex-1 flex p-4 items-center justify-center">
+													<h2 class="text-red-500">Error loading data</h2>
+												</div>`
 
 		}
 	}
 
 	private render(data: profileData) {
 		const isOwner = Router.username === this.username;
-		this.innerHTML = `
-			<div id='parentContainer' class="tw-card p-6">
-				<div class="flex items-center mb-6">
-					<div class="size-12 rounded-lg bg-blue-500/10 flex items-center justify-center mr-4">
-						${iconHomeStats}
-					</div>
-					<h3 class="text-xl font-bold">Profile Data</h3>
-				</div>
-
+		this.parentContainer!.innerHTML = `
 				<div class="flex p-4 space-x-6 justify-center">
 					<div class="flex flex-col">
 						<div class="relative group">

@@ -10,7 +10,7 @@ import {
 
 import {
 	iconChevronRight,
-	iconHomeStats,
+	iconHistory,
 	iconMinus,
 	iconPlus
 } from "../icons/icons.js";
@@ -176,7 +176,7 @@ export class UserGameHistory extends HTMLElement {
 				<div class="p-6 flex-1">
 					<div class="flex items-center mb-6">
 						<div class="size-12 rounded-lg bg-blue-500/10 flex items-center justify-center mr-4">
-							${iconHomeStats}
+							${iconHistory}
 						</div>
 						<h3 class="text-xl font-bold">Game History</h3>
 					</div>
