@@ -161,15 +161,15 @@ export class ProfileData extends HTMLElement {
 									id='funFactInput'
 									type="text"
 									value="${data.funFact}"
-									class="px-2 py-1 w-30 h-6 text-sm text-gray-800 dark:text-gray-100 bg-gray-50 hover:bg-blue-50 border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
+									class="px-2 py-1 w-30 h-6 text-sm text-gray-700 dark:text-gray-200 bg-gray-50 hover:bg-blue-50 dark:bg-gray-700 dark:hover:bg-blue-900/50 border-b border-gray-300 dark:border-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
 								/>
 								<button id="submit-btn"
-									class="size-6 p-1 ml-2 flex items-center justify-center text-black bg-white border border-black hover:text-blue-500 rounded-full transition"
+									class="size-6 p-1 ml-2 flex items-center justify-center text-black dark:text-white bg-white dark:bg-gray-700 border border-black dark:border-gray-200 hover:text-blue-500 rounded-full transition"
 								>
 									${iconSidebarCheck}
 								</button>
 								<button id="cancel-btn"
-									class="size-6 p-1 ml-1 flex items-center justify-center text-black bg-white border border-black hover:text-red-500 rounded-full transition"
+									class="size-6 p-1 ml-1 flex items-center justify-center text-black dark:text-white bg-white dark:bg-gray-700 border border-black dark:border-gray-200 hover:text-red-500 rounded-full transition"
 								>
 									${iconX}
 								</button>

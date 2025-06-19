@@ -445,7 +445,7 @@ export class UserGameHistory extends HTMLElement {
 			return `
 				<input type="radio"
 					id="tab-stats-${mode}"
-					name="stats-tabs"
+					name="stats-tabs-history"
 					class="hidden peer/${mode}" ${mode === currentMode ? "checked" : ""}
 				>
 				<label for="tab-stats-${mode}"
