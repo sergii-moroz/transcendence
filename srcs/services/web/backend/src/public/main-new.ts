@@ -34,6 +34,8 @@ import { ChatView } from "./components/sidebar/sidebarChat.js";
 import { LeaderboardCard } from "./components/leaderboard/leaderboard-card.js";
 import { ButtonPasswordReset } from "./components/2fa/button-reset.js";
 import { PasswordResetForm } from "./components/settings/password-reset-form.js";
+import { Test3d } from "./components/test3d.js";
+import { Game3D } from "./components/GameRoom3D.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
 customElements.define('btn-theme-toggle', ButtonThemeToggle)
@@ -85,5 +87,8 @@ customElements.define('game-room', GameRoom)
 // Tournament
 customElements.define('tournament-list', TournamentList)
 customElements.define('tournament-room', Tournament)
+
+customElements.define('test-3d', Test3d)
+customElements.define('game-3d', Game3D)
 
 Router.init()
