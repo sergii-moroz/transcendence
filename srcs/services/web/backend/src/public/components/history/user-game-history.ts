@@ -239,9 +239,13 @@ export class UserGameHistory extends HTMLElement {
 
 			return `
 			<tr class="odd:bg-blue-500/10 text-blue-900 dark:text-blue-100 hover:bg-blue-500/20 [&>td]:px-1 [&>td]:py-2 sm:[&>td]:px-4 sm:[&>td]:py-2 text-center">
-				<td class='rounded-l-lg ${row.score1 > row.score2 && "font-bold"}'>${row.player1_name}</td>
+				<td class='rounded-l-lg ${row.score1 > row.score2 && "font-bold"}'>
+					${this.username === row.player1_name ? row.player1_name : `<a href="./${row.player1_name}" data-link class="underline hover:underline-offset-4 transition-all">${row.player1_name}`}
+				</td>
 				<td>${row.score1} - ${row.score2}</td>
-				<td ${row.score1 < row.score2 && 'class="font-bold"'}>${row.player2_name}</td>
+				<td ${row.score1 < row.score2 && 'class="font-bold"'}>
+					${this.username === row.player2_name ? row.player2_name : `<a href="./${row.player2_name}" data-link class="underline hover:underline-offset-4">${row.player2_name}`}
+				</td>
 				<td>${this.formatDuration(row.duration)}</td>
 				<td class="rounded-r-lg">${this.formatDate(row.finished_at)}</td>
 			</tr>

@@ -2,8 +2,8 @@
 export type Game = {
 	id: string
 	game_mode_id: number
-	player1_name: number
-	player2_name: number
+	player1_name: string
+	player2_name: string
 	score1: number
 	score2: number
 	tech_win: boolean
