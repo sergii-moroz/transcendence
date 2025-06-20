@@ -23,7 +23,7 @@ export const handleGetUserPerformance = async (
 		if (!user) throw UserNotFoundError()
 
 		const stats = await getUserPerformance(user.id)
-		reply.send(stats)
+		reply.send({ success: true, data: stats })
 	} catch (err) {
 		throw err
 	}
