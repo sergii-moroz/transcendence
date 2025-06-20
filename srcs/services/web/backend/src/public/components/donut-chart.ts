@@ -23,7 +23,6 @@
 
 	getIntAttribute(name: string, defaultValue = 0) {
 		const value = this.getAttribute(name);
-		console.log("value:", value)
 		if (value === null) return defaultValue;
 
 		const parsed = parseInt(value, 10);

@@ -22,7 +22,14 @@ export class StatsCard extends HTMLElement {
 	}
 
 	async connectedCallback() {
-		this.data = await API.getUserPerformance()
+		const opts = this.getAttribute('data-owner')
+		if (opts === null) {
+			const pathParts = window.location.pathname.split("/");
+			const username = pathParts[pathParts.length - 1];
+			this.data = await API.getUserPerformance(username)
+		} else {
+			this.data = await API.getUserPerformance(null)
+		}
 		this.data2 = {
 			singleplayer: {wins: this.data.s_wins, losses: this.data.s_losses},
 			multiplayer: {wins: this.data.m_wins, losses: this.data.m_losses},

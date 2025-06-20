@@ -152,8 +152,9 @@ export class API {
 		return response.json()
 	}
 
-	static async getUserPerformance() {
-		const response = await this.get('/api/stats/user/performance')
+	static async getUserPerformance(username: string | null) {
+		const opts = username ? `?username=${username}` : ''
+		const response = await this.get(`/api/stats/user/performance${opts}`)
 		return response
 	}
 
@@ -396,6 +397,6 @@ export class API {
 			console.error("upload new Avatar API call failed:", error);
 		}
 	}
-	
+
 
 }
