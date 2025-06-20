@@ -105,7 +105,7 @@ export class ProfileData extends HTMLElement {
 			if (files?.length !== 1) return alert('wrong amount of images selected');
 			const file = files[0];
 			if (file.size > this.maxSizeMB * 1024 * 1024) return alert(`file size too large. Must be smaller than ${this.maxSizeMB}mb`);
-	
+
 			const data = await API.uploadNewAvatar(file);
 			if (!data.success) throw Error(`upload failed: ${data.message}`);
 			if (this.avatar)
@@ -136,11 +136,11 @@ export class ProfileData extends HTMLElement {
 				<div class="flex p-4 space-x-6 justify-center">
 					<div class="flex flex-col">
 						<div class="relative group">
-							<div class="size-40 overflow-hidden rounded-full border-4 border-white dark:border-gray-300 bg-gray-200 shadow-lg">
+							<div class="size-36 sm:size-40 overflow-hidden rounded-full border-4 border-white dark:border-gray-300 bg-gray-200 shadow-lg">
 								<img
 									id="avatar"
-									src=${data.avatar} 
-									class="h-full w-full object-cover" 
+									src=${data.avatar}
+									class="h-full w-full object-cover"
 								/>
 							</div>
 							<div class="absolute inset-0 ${isOwner ? 'flex' : ' hidden'} items-center justify-center rounded-full bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
@@ -197,13 +197,13 @@ export class ProfileData extends HTMLElement {
 								})}
 							</p>
 						</div>
-					</div> 
+					</div>
 				</div>
 
-				<div class='${isOwner ? 'flex flex-col' : 'hidden'} pt-4 border-t border-gray-100 dark:border-gray-700 space-y-1'>
+				<div class='${isOwner ? 'flex flex-col' : 'hidden'} pt-4 border-t border-gray-100 dark:border-gray-700 space-y-2'>
 					<btn-password-reset></btn-password-reset>
 					<btn-2fa></btn-2fa>
-				</div> 
+				</div>
 			</div>
 		`
 	}

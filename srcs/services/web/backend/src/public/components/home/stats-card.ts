@@ -40,7 +40,6 @@ export class StatsCard extends HTMLElement {
 
 	handleEvent(event: Event) {
 		event.preventDefault()
-		// console.log('Stats Card: button clicked')
 		Router.navigateTo(`/profile/${Router.username}`);
 	}
 
@@ -50,7 +49,7 @@ export class StatsCard extends HTMLElement {
 		const mode = this.getAttribute('mode') || 'home'
 
 		this.innerHTML = `
-			<div class="tw-card">
+			<div class="tw-card h-full">
 				<div class="p-6 flex-1">
 					<div class="flex items-center mb-6">
 						<div class="size-12 rounded-lg bg-blue-500/10 flex items-center justify-center mr-4">
@@ -59,9 +58,17 @@ export class StatsCard extends HTMLElement {
 						<h3 class="text-xl font-bold">${mode === 'profile' ? 'Game Stats' : 'Your Stats'}</h3>
 					</div>
 
+					<three-ring-donut class="${mode === 'profile' ? '' : 'hidden'}"
+						singleplayer="${this.calculateWinRate(this.data2.singleplayer)}"
+						multiplayer="${this.calculateWinRate(this.data2.multiplayer)}"
+						tournament="${this.calculateWinRate(this.data2.tournament)}"
+					></three-ring-donut>
+
 					<!-- Tabs -->
-					${tabs}
-					${sections}
+					<div>
+						${tabs}
+						${sections}
+					</div>
 				</div>
 
 				<div class="p-6 pt-0 ${mode === 'profile' ? 'hidden' : ''}">
@@ -129,11 +136,17 @@ export class StatsCard extends HTMLElement {
 			const block = this.renderModeStats(this.data2[mode])
 
 			return `
-				<div class="grid grid-cols-3 gap-4 mb-6 hidden peer-checked/${mode}:grid" data-section="${mode}">
+				<div class="grid grid-cols-3 gap-4 hidden peer-checked/${mode}:grid" data-section="${mode}">
 					${block}
 				</div>
 			`
 		}).join('')
+	}
+
+	private calculateWinRate(item: {wins: number, losses: number}): string {
+		const total = item.wins + item.losses
+		const winRate = total > 0 ? (item.wins / total * 100).toFixed(1) : "0.0"
+		return winRate
 	}
 }
 
