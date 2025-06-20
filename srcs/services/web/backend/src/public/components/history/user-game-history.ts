@@ -20,6 +20,7 @@ import { API } from "../../api-static.js";
 export class UserGameHistory extends HTMLElement {
 	private modes: GameModeName[] = ['Singleplayer', 'Multiplayer', 'Tournament']
 	private isLoading = false
+	private username = window.location.pathname.split("/").pop()!
 	private state: GameHistoryState = {
 		Singleplayer: {
 			data: [],
@@ -68,9 +69,9 @@ export class UserGameHistory extends HTMLElement {
 		try {
 			// load data for all game modes in parallel
 			const [single, multi, tournament] = await Promise.all([
-				await API.getUserGameHistory(this.state.Singleplayer.currentPage, this.state.Singleplayer.pageSize, GAME_MODES.Singleplayer),
-				await API.getUserGameHistory(this.state.Multiplayer.currentPage, this.state.Multiplayer.pageSize, GAME_MODES.Multiplayer),
-				await API.getUserGameHistory(this.state.Tournament.currentPage, this.state.Tournament.pageSize, GAME_MODES.Tournament),
+				await API.getUserGameHistory(this.username, this.state.Singleplayer.currentPage, this.state.Singleplayer.pageSize, GAME_MODES.Singleplayer),
+				await API.getUserGameHistory(this.username, this.state.Multiplayer.currentPage, this.state.Multiplayer.pageSize, GAME_MODES.Multiplayer),
+				await API.getUserGameHistory(this.username, this.state.Tournament.currentPage, this.state.Tournament.pageSize, GAME_MODES.Tournament),
 			])
 
 			this.state.Singleplayer = {
@@ -115,6 +116,7 @@ export class UserGameHistory extends HTMLElement {
 		try {
 			const currentState = this.state[mode]
 			const response = await API.getUserGameHistory(
+				this.username,
 				currentState.currentPage,
 				currentState.pageSize,
 				GAME_MODE_MAP[mode]

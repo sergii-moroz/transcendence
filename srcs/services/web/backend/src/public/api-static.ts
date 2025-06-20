@@ -168,8 +168,8 @@ export class API {
 		return response
 	}
 
-	static async getUserGameHistory(page: number = 1, pageSize: number = 5, gameMode: GAME_MODES = GAME_MODES.Singleplayer) {
-		const response = await this.get(`/api/history/ping-pong?page=${page}&page_size=${pageSize}&game_mode=${gameMode}`)
+	static async getUserGameHistory(username: string, page: number = 1, pageSize: number = 5, gameMode: GAME_MODES = GAME_MODES.Singleplayer) {
+		const response = await this.get(`/api/history/ping-pong?username=${username}&page=${page}&page_size=${pageSize}&game_mode=${gameMode}`)
 		return response
 	}
 
