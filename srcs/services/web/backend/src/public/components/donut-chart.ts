@@ -76,7 +76,7 @@
 						<span class="inline-block size-3 bg-blue-500 rounded-full mr-1 sm:mr-2"></span>
 						<span>Multiplayer</span>
 					</div>
-					<div>
+					<div class="whitespace-nowrap">
 						<span class="inline-block size-3 bg-purple-500 rounded-full mr-1 sm:mr-2"></span>
 						<span>Tournament</span>
 					</div>
