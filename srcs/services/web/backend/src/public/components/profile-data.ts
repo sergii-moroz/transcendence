@@ -33,7 +33,7 @@ export class ProfileData extends HTMLElement {
 					</div>
 					<h3 class="text-xl font-bold whitespace-nowrap">Profile Data</h3>
 				</div>
-				<div id="parentContainer">
+				<div id="parentContainer" class="flex-1 flex flex-col h-full">
 					<div class="flex-1 flex p-4 items-center justify-center">
 						<h2>Loading...</h2>
 					</div>
@@ -200,7 +200,7 @@ export class ProfileData extends HTMLElement {
 					</div>
 				</div>
 
-				<div class='${isOwner ? 'flex flex-col' : 'hidden'} pt-4 border-t border-gray-100 dark:border-gray-700 space-y-2'>
+				<div class='${isOwner ? 'flex flex-col' : 'hidden'} mt-auto pt-4 border-t border-gray-100 dark:border-gray-700 space-y-2'>
 					<btn-password-reset></btn-password-reset>
 					<btn-2fa></btn-2fa>
 				</div>

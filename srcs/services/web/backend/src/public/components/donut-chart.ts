@@ -39,31 +39,31 @@
 	private renderChart() {
 
 		this.innerHTML = `
-			<div class="flex gap-4 sm:gap-8 mb-4">
+			<div class="flex p-4 mb-3 gap-4 justify-center md:justify-start">
 
-				<svg width="200" height="200" viewBox="0 0 200 200" class="size-44">
+				<svg viewBox="0 0 200 200" class="size-36 sm:size-40 shrink-0 border-4 border-white dark:border-gray-300 rounded-full shadow-lg">
 					<!-- Outer Ring -->
-					<circle id="outer-bg" r="80" cx="100" cy="100" stroke="#4caf5033" stroke-width="20" fill="none"
-									stroke-dasharray="${this.calculateDashArray(80, 100)}"
+					<circle id="outer-bg" r="90" cx="100" cy="100" stroke="#4caf5033" stroke-width="20" fill="none"
+									stroke-dasharray="${this.calculateDashArray(90, 100)}"
 									transform="rotate(-90 100 100)"/>
-					<circle id="outer-fill" r="80" cx="100" cy="100" stroke="#4caf50" stroke-width="20" fill="none"
-									stroke-dasharray="${this.calculateDashArray(80, this.winrates.singleplayer)}"
+					<circle id="outer-fill" r="90" cx="100" cy="100" stroke="#4caf50" stroke-width="20" fill="none"
+									stroke-dasharray="${this.calculateDashArray(90, this.winrates.singleplayer)}"
 									transform="rotate(-90 100 100)"/>
 
 					<!-- Middle Ring -->
-					<circle id="middle-bg" r="60" cx="100" cy="100" stroke="#2196f333" stroke-width="20" fill="none"
-									stroke-dasharray="${this.calculateDashArray(60, 100)}"
+					<circle id="middle-bg" r="70" cx="100" cy="100" stroke="#2196f333" stroke-width="20" fill="none"
+									stroke-dasharray="${this.calculateDashArray(70, 100)}"
 									transform="rotate(-90 100 100)"/>
-					<circle id="middle-fill" r="60" cx="100" cy="100" stroke="#2196f3" stroke-width="20" fill="none"
-									stroke-dasharray="${this.calculateDashArray(60, this.winrates.multiplayer)}"
+					<circle id="middle-fill" r="70" cx="100" cy="100" stroke="#2196f3" stroke-width="20" fill="none"
+									stroke-dasharray="${this.calculateDashArray(70, this.winrates.multiplayer)}"
 									transform="rotate(-90 100 100)"/>
 
 					<!-- Inner Ring -->
-					<circle id="inner-bg" r="40" cx="100" cy="100" stroke="#9c27b033" stroke-width="20" fill="none"
-									stroke-dasharray="${this.calculateDashArray(40, 100)}"
+					<circle id="inner-bg" r="50" cx="100" cy="100" stroke="#9c27b033" stroke-width="20" fill="none"
+									stroke-dasharray="${this.calculateDashArray(50, 100)}"
 									transform="rotate(-90 100 100)"/>
-					<circle id="inner-fill" r="40" cx="100" cy="100" stroke="#9c27b0" stroke-width="20" fill="none"
-									stroke-dasharray="${this.calculateDashArray(40, this.winrates.tournament)}"
+					<circle id="inner-fill" r="50" cx="100" cy="100" stroke="#9c27b0" stroke-width="20" fill="none"
+									stroke-dasharray="${this.calculateDashArray(50, this.winrates.tournament)}"
 									transform="rotate(-90 100 100)"/>
 				</svg>
 
