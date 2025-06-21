@@ -7,7 +7,7 @@
     "build:bundle": "node build.mjs",
     "build:ts": "tsc -p tsconfig.json",
     "build:css": "npx @tailwindcss/cli -i src/public/style.css -o dist/public/style.css",
-    "build:assets": "cpy src/public/**/*.{html,css,jpg} dist/public",
+    "build:assets": "cpy src/public/**/*.{html,css,jpg,glb} dist/public",
     "build:assets2": "rsync -av --include='*/' --include='*.html' --include='*.css' --include='*.jpg' --exclude='*' src/public/ dist/public",
     "build": "npm run build:ts && npm run build:assets && npm run build:css && npm run build:bundle",
     "build2": "npm run build:ts && npm run build:assets2 && npm run build:css",
@@ -37,6 +37,7 @@
   },
   "devDependencies": {
     "@babylonjs/core": "^8.12.1",
+	"@babylonjs/loaders": "^8.12.1",
     "@babylonjs/inspector": "^8.12.1",
     "@tailwindcss/cli": "^4.1.6",
     "@tailwindcss/postcss": "^4.1.5",
