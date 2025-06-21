@@ -18,7 +18,7 @@ export class VictoryScreen extends HTMLElement {
 
 	render() {
 		this.innerHTML = `
-			<canvas id="modelCanvas" style="width: 100%; height: 400px; outline: none;"></canvas>
+			<canvas id="modelCanvas" style="width: 100%; height: 40vh; display: block; outline: none;"></canvas>
 		`;
 	}
 
