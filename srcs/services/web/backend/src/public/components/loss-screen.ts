@@ -42,6 +42,7 @@ export class LossScreen extends HTMLElement {
 			this.scene
 		);
 		camera.attachControl(this.canvas, true);
+		camera.inputs.removeByType("ArcRotateCameraMouseWheelInput");
 
 		new HemisphericLight("light", new Vector3(0, 1, 0), this.scene);
 
