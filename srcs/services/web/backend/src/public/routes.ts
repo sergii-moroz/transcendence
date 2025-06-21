@@ -156,4 +156,10 @@ export const routes: tRoutes = {
 		description: "Singleplayer"
 	},
 
+	"/loss-screen": {
+		template: "/templates/loss-screen.html",
+		title: `Loss Screen | ${APP_TITLE}`,
+		description: "Loss screen after a game"
+	},
+
 }
