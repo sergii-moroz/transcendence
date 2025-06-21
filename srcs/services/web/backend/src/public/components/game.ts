@@ -78,7 +78,7 @@ export class GameRoom extends HTMLElement {
 						console.log("Redirecting to tournament:", data.tournamentId);
 						Router.navigateTo(`/tournament/${data.tournamentId}`);
 					} else {
-						Router.navigateTo('/home');
+						Router.navigateTo('/loss-screen');
 					}
 				}, 3000);
 			}
