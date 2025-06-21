@@ -162,4 +162,16 @@ export const routes: tRoutes = {
 		description: "Loss screen after a game"
 	},
 
+	"/victory-screen": {
+		template: "/templates/victory-screen.html",
+		title: `Victory Screen | ${APP_TITLE}`,
+		description: "Victory screen after a game"
+	},
+
+	"/tournament-victory-screen": {
+		template: "/templates/t-victory-screen.html",
+		title: `Tournament Victory Screen | ${APP_TITLE}`,
+		description: "Victory screen after a tournament"
+	},
+
 }
