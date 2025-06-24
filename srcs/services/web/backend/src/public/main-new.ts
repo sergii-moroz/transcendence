@@ -36,6 +36,9 @@ import { ButtonPasswordReset } from "./components/2fa/button-reset.js";
 import { PasswordResetForm } from "./components/settings/password-reset-form.js";
 import { TwoFAResetVerify } from "./components/2fa/2fa-reset-verify.js";
 import { DlgResetConfirmation } from "./components/2fa/dlg-reset-confirmation.js";
+import { ProfileData } from "./components/profile-data.js";
+import { simpleHeader } from "./components/simple-Header.js";
+import { ThreeRingDonut } from "./components/donut-chart.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
 customElements.define('btn-theme-toggle', ButtonThemeToggle)
@@ -89,5 +92,12 @@ customElements.define('game-room', GameRoom)
 // Tournament
 customElements.define('tournament-list', TournamentList)
 customElements.define('tournament-room', Tournament)
+
+//Profile
+customElements.define('profile-user-data', ProfileData)
+
+//header
+customElements.define('simple-header', simpleHeader)
+customElements.define('three-ring-donut', ThreeRingDonut);
 
 Router.init()

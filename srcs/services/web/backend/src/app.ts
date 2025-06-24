@@ -22,6 +22,8 @@ import { friends } from "./routes/v1/friends.js";
 import { chat } from "./routes/v1/chat.js";
 import { statsRoutes } from "./routes/v1/stats.routes.js";
 import { historyRoutes } from "./routes/v1/game-history.route.js";
+import { profile } from "./routes/v1/profile.js";
+import fastifyMultipart from "@fastify/multipart";
 
 export const build = async (opts: FastifyServerOptions) => {
 	const app = fastify(opts)
@@ -42,6 +44,13 @@ export const build = async (opts: FastifyServerOptions) => {
 		console.custom('INFO', "SQLite plugin is loaded successfully.");
 		initializeDB()
 	})
+
+	app.register(fastifyMultipart, {
+		limits: {
+			files: 1,
+			fileSize: 5 * 1024 * 1024,
+		}
+	});
 
 	const __filename = fileURLToPath(import.meta.url);
 	const __dirname = path.dirname(__filename);
@@ -82,6 +91,7 @@ export const build = async (opts: FastifyServerOptions) => {
 	app.register(routes);
 	app.register(pages, {prefix: "api"});
 	app.register(friends, {prefix: "api"});
+	app.register(profile, {prefix: "api"});
 	app.register(chat);
 	app.register(matchmakingSock, {prefix: "ws"});
 	app.register(gameRoomSock, {prefix: "ws"});

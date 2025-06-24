@@ -10,7 +10,7 @@ import {
 
 import {
 	iconChevronRight,
-	iconHomeStats,
+	iconHistory,
 	iconMinus,
 	iconPlus
 } from "../icons/icons.js";
@@ -20,6 +20,7 @@ import { API } from "../../api-static.js";
 export class UserGameHistory extends HTMLElement {
 	private modes: GameModeName[] = ['Singleplayer', 'Multiplayer', 'Tournament']
 	private isLoading = false
+	private username = window.location.pathname.split("/").pop()!
 	private state: GameHistoryState = {
 		Singleplayer: {
 			data: [],
@@ -68,9 +69,9 @@ export class UserGameHistory extends HTMLElement {
 		try {
 			// load data for all game modes in parallel
 			const [single, multi, tournament] = await Promise.all([
-				await API.getUserGameHistory(this.state.Singleplayer.currentPage, this.state.Singleplayer.pageSize, GAME_MODES.Singleplayer),
-				await API.getUserGameHistory(this.state.Multiplayer.currentPage, this.state.Multiplayer.pageSize, GAME_MODES.Multiplayer),
-				await API.getUserGameHistory(this.state.Tournament.currentPage, this.state.Tournament.pageSize, GAME_MODES.Tournament),
+				await API.getUserGameHistory(this.username, this.state.Singleplayer.currentPage, this.state.Singleplayer.pageSize, GAME_MODES.Singleplayer),
+				await API.getUserGameHistory(this.username, this.state.Multiplayer.currentPage, this.state.Multiplayer.pageSize, GAME_MODES.Multiplayer),
+				await API.getUserGameHistory(this.username, this.state.Tournament.currentPage, this.state.Tournament.pageSize, GAME_MODES.Tournament),
 			])
 
 			this.state.Singleplayer = {
@@ -115,6 +116,7 @@ export class UserGameHistory extends HTMLElement {
 		try {
 			const currentState = this.state[mode]
 			const response = await API.getUserGameHistory(
+				this.username,
 				currentState.currentPage,
 				currentState.pageSize,
 				GAME_MODE_MAP[mode]
@@ -176,9 +178,9 @@ export class UserGameHistory extends HTMLElement {
 				<div class="p-6 flex-1">
 					<div class="flex items-center mb-6">
 						<div class="size-12 rounded-lg bg-blue-500/10 flex items-center justify-center mr-4">
-							${iconHomeStats}
+							${iconHistory}
 						</div>
-						<h3 class="text-xl font-bold">Your Stats</h3>
+						<h3 class="text-xl font-bold">Game History</h3>
 					</div>
 
 					<!-- Tabs -->
@@ -237,9 +239,13 @@ export class UserGameHistory extends HTMLElement {
 
 			return `
 			<tr class="odd:bg-blue-500/10 text-blue-900 dark:text-blue-100 hover:bg-blue-500/20 [&>td]:px-1 [&>td]:py-2 sm:[&>td]:px-4 sm:[&>td]:py-2 text-center">
-				<td class='rounded-l-lg ${row.score1 > row.score2 && "font-bold"}'>${row.player1_name}</td>
+				<td class='rounded-l-lg ${row.score1 > row.score2 && "font-bold"}'>
+					${this.username === row.player1_name ? row.player1_name : `<a href="./${row.player1_name}" data-link class="underline hover:underline-offset-4 transition-all">${row.player1_name}`}
+				</td>
 				<td>${row.score1} - ${row.score2}</td>
-				<td ${row.score1 < row.score2 && 'class="font-bold"'}>${row.player2_name}</td>
+				<td ${row.score1 < row.score2 && 'class="font-bold"'}>
+					${this.username === row.player2_name ? row.player2_name : `<a href="./${row.player2_name}" data-link class="underline hover:underline-offset-4">${row.player2_name}`}
+				</td>
 				<td>${this.formatDuration(row.duration)}</td>
 				<td class="rounded-r-lg">${this.formatDate(row.finished_at)}</td>
 			</tr>
@@ -445,7 +451,7 @@ export class UserGameHistory extends HTMLElement {
 			return `
 				<input type="radio"
 					id="tab-stats-${mode}"
-					name="stats-tabs"
+					name="stats-tabs-history"
 					class="hidden peer/${mode}" ${mode === currentMode ? "checked" : ""}
 				>
 				<label for="tab-stats-${mode}"

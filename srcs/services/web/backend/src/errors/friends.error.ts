@@ -30,5 +30,17 @@ export const MessageInvalid = createError(
 	400
 );
 
+export const FileInvalid = createError(
+	'INVALID_FILE',
+	'file cant be uploaded. File is not valid',
+	400
+);
+
+export const FileTypeInvalid = createError(
+	'INVALID_FILE_TYPE',
+	'file cant be uploaded. FileType is not valid',
+	400
+);
+
 
 

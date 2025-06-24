@@ -5,15 +5,25 @@ import {
 	getTopPlayers,
 	getUserPerformance
 } from "../services/stats.services.js";
+import { findUserByUsername } from "../services/userService.js";
+import { UserNotFoundError } from "../errors/login.errors.js";
 
 export const handleGetUserPerformance = async (
-	req:		FastifyRequest,
+	req:		FastifyRequest<{
+		Querystring: {
+			username?: string
+		}
+	}>,
 	reply:	FastifyReply
 ) => {
 	try {
-		const user = req.user as JwtUserPayload
+		const username = req.query.username || null
+		const user = username ? await findUserByUsername(username) : req.user as JwtUserPayload
+
+		if (!user) throw UserNotFoundError()
+
 		const stats = await getUserPerformance(user.id)
-		reply.send(stats)
+		reply.send({ success: true, data: stats })
 	} catch (err) {
 		throw err
 	}

@@ -17,6 +17,11 @@ export const routes: tRoutes = {
 		title: `404 | ${APP_TITLE}`,
 		description: "Page not found"
 	},
+	"error": {
+		template: 'error',
+		title: `error | ${APP_TITLE}`,
+		description: "there was an error"
+	},
 
 	"/": {
 		template: "/templates/index.html",
@@ -73,55 +78,55 @@ export const routes: tRoutes = {
 	},
 
 	"/settings": {
-		template: "/templates/settings/index.html",
+		template: "/templates/profile/index.html",
 		title: `Settings | ${APP_TITLE}`,
 		description: "Settings page"
 	},
 
 	"/settings/2fa/method": {
-		template: "/templates/settings/2fa/method.html",
+		template: "/templates/profile/2fa/method.html",
 		title: `2FA Method | ${APP_TITLE}`,
 		description: "Select two factor authentification method"
 	},
 
 	"/settings/2fa/ga/register": {
-		template: "/templates/settings/2fa/ga-register.html",
+		template: "/templates/profile/2fa/ga-register.html",
 		title: `2FA Register | ${APP_TITLE}`,
 		description: "Register Google Authenticator"
 	},
 
 	"/settings/2fa/ga/verify": {
-		template: "/templates/settings/2fa/ga-verify.html",
+		template: "/templates/profile/2fa/ga-verify.html",
 		title: `2FA Verify | ${APP_TITLE}`,
 		description: "Verify Google Authenticator"
 	},
 
 	"/settings/2fa/ga/backup": {
-		template: "/templates/settings/2fa/ga-backup.html",
+		template: "/templates/profile/2fa/ga-backup.html",
 		title: `2FA Backup | ${APP_TITLE}`,
 		description: "Backup codes"
 	},
 
 	"/settings/2fa/completed": {
-		template: "/templates/settings/2fa/completed.html",
+		template: "/templates/profile/2fa/completed.html",
 		title: `2FA Competed | ${APP_TITLE}`,
 		description: "2FA setup is completed"
 	},
 
 	"/settings/2fa/already-enabled": {
-		template: "/templates/settings/2fa/already-enabled.html",
+		template: "/templates/profile/2fa/already-enabled.html",
 		title: `2FA Competed | ${APP_TITLE}`,
 		description: "2FA setup is completed"
 	},
 
 	"/settings/2fa/disable-verify": {
-		template: "/templates/settings/2fa/disable-verify.html",
+		template: "/templates/profile/2fa/disable-verify.html",
 		title: `2FA Disable | ${APP_TITLE}`,
 		description: "Disable 2FA"
 	},
 
 	"/settings/2fa/disabled/confirmation": {
-		template: "/templates/settings/2fa/disabled-confirmation.html",
+		template: "/templates/profile/2fa/disabled-confirmation.html",
 		title: `2FA Disabled | ${APP_TITLE}`,
 		description: "Confirmation of disabling 2FA"
 	},
@@ -139,13 +144,18 @@ export const routes: tRoutes = {
 	},
 
 	"/settings/password/reset": {
-		template: "/templates/settings/password/reset.html",
+		template: "/templates/profile/password/reset.html",
 		title: `Password Reset | ${APP_TITLE}`,
 		description: "Password Reset"
 	},
 
 	"/settings/password/reset/verify": {
-		template: "/templates/settings/password/reset-verify.html",
+		template: "/templates/profile/password/reset-verify.html",
+		title: `Password Reset Verify | ${APP_TITLE}`,
+		description: "Password Reset Verify"
+	},
+	"/profile/:username": {
+		template: "/templates/profile/profile.html",
 		title: `Password Reset Verify | ${APP_TITLE}`,
 		description: "Password Reset Verify"
 	},
