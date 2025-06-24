@@ -31,9 +31,6 @@ import { UserGameHistory } from "./components/history/user-game-history.js";
 import { CollapsedView } from "./components/sidebar/sidebarCollapsed.js";
 import { FriendListView } from "./components/sidebar/sidebarFriendList.js";
 import { ChatView } from "./components/sidebar/sidebarChat.js";
-import { LeaderboardCard } from "./components/leaderboard/leaderboard-card.js";
-import { ButtonPasswordReset } from "./components/2fa/button-reset.js";
-import { PasswordResetForm } from "./components/settings/password-reset-form.js";
 import { Game3D } from "./components/GameRoom3D.js";
 import { LossScreen } from "./components/loss-screen.js";
 import { VictoryScreen } from "./components/victory-screen.js";
@@ -43,6 +40,10 @@ import { DlgResetConfirmation } from "./components/2fa/dlg-reset-confirmation.js
 import { ProfileData } from "./components/profile-data.js";
 import { simpleHeader } from "./components/simple-Header.js";
 import { ThreeRingDonut } from "./components/donut-chart.js";
+import { SinglePlayerRoom } from "./components/singleplayer.js";
+import { LeaderboardCard } from "./components/leaderboard/leaderboard-card.js";
+import { ButtonPasswordReset } from "./components/2fa/button-reset.js";
+import { PasswordResetForm } from "./components/settings/password-reset-form.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
 customElements.define('btn-theme-toggle', ButtonThemeToggle)
@@ -94,6 +95,7 @@ customElements.define('match-making', Matchmaking)
 customElements.define('game-room', GameRoom)
 customElements.define('loss-screen', LossScreen)
 customElements.define('victory-screen', VictoryScreen)
+customElements.define('singleplayer-game', SinglePlayerRoom);
 
 // Tournament
 customElements.define('tournament-list', TournamentList)

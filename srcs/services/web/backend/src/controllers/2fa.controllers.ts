@@ -27,7 +27,9 @@ import {
 } from "../errors/middleware.errors.js";
 
 import { JwtUserPayload } from "../types/user.js";
-import { TwoFAAlreadyEnabledError } from "../errors/2fa.errors.js";
+import { TwoFAAlreadyEnabledError, TwoFANotEnabledError } from "../errors/2fa.errors.js";
+import jwt from "jsonwebtoken";
+import { findUserById } from "../services/userService.js";
 
 export const handleGARegister = async (
 	req:		FastifyRequest,
