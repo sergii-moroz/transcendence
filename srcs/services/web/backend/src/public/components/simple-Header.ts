@@ -2,41 +2,46 @@ import { Router } from "../router-static.js";
 import { iconHomeStats } from "./icons/icons.js"
 
 export class simpleHeader extends HTMLElement {
-	
+	backBtn: HTMLInputElement | null = null;
+	backTo: string | null = null;
+
 	constructor() {
 		super()
 		this.render();
 	}
 
 	async connectedCallback() {
-
+		this.backTo = this.getAttribute('backTo');
+		if (this.backTo == '/profile') {
+			this.backTo = `/profile/${Router.username}`
+		}
+		this.backBtn = this.querySelector("#back-btn");
+		this.backBtn!.addEventListener('click', this.clickHandler);
 	}
 
 	disconnectedCallback() {
+		this.backBtn!.removeEventListener('click', this.clickHandler);
 	}
 
-	handleEvent(event: Event) {
+	clickHandler = (event: Event) => {
+		if (this.backTo) return Router.navigateTo(this.backTo);
+		history.back();
 	}
 
 	private render() {
 		const title = this.getAttribute('title') || '';
-		let backTo = this.getAttribute('backTo') || 'home';
-		if (backTo == 'profile') {
-			backTo = `profile/${Router.username}`
-		}
-		// console.log(backTo);
 		
 		this.innerHTML = `
 			<div class="sticky top-0 z-20 bg-white/90 dark:bg-gray-800/90 border-b border-gray-200 dark:border-gray-700 shadow-sm">
 				<div class="px-6 py-4 flex items-center">
-					<a href="/${backTo}" data-link class="flex items-center gap-2 group cursor-pointer mr-6 hover:underline hover:underline-offset-4">
+					<button id="back-btn" class="flex items-center gap-2 group cursor-pointer mr-6 hover:underline hover:underline-offset-4">
 						<div class="size-8 flex items-center justify-center rounded-full border border-gray-400 transition-colors group-hover:border-black group-hover:dark:border-white bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
 							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
 								<path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
 							</svg>
 						</div>
 						<span class="text-gray-700 dark:text-gray-200">Back</span>
-					</a>
+					</button>
 
 					
 					<!-- Page title with separators -->
