@@ -3,8 +3,11 @@ import {
 	FastifyRequest
 } from "fastify";
 import {
+	addGameInvite,
 	addMessage,
+	deleteGameInvite,
 	getFriendChat,
+	getGameInviteID,
 	getOldMessages,
 	isBlocked
 } from "../services/chat.services.js";
@@ -14,6 +17,7 @@ import { MessageToServer } from "../types/user.js";
 import { findUserIdByUsername } from "../services/userService.js";
 import { sendMessage } from "../services/utils.js";
 import { FriendInvalid } from "../errors/friends.error.js";
+import { Game } from "../services/game.js";
 
 export const handleChatInit = async (
 	req:		FastifyRequest,
@@ -25,9 +29,10 @@ export const handleChatInit = async (
 		const answer = {
 			friend,
 			messages: await getOldMessages(friendName, req.user.id, friend.blocked),
-			gameInvite: true, //TODO
+			gameInvite: friend.game_invite_from && friend.game_invite_from !== req.user.id,
 			success: true
 		};
+		// console.custom('WARN', `db ${friend.game_invite_from}, user: ${req.user.id}`);
 		// console.log(`Chat Init response: `, answer);
 		reply.status(200).send(answer);
 	} catch (error) {
@@ -83,5 +88,49 @@ export const handleSocialSocket = async (
 	} catch (error) {
 		socket.close(1011, 'Unexpected error');
     	console.custom("ERROR", `Fatal error on socket: ${error}`);
+	}
+}
+
+export const handleGameInviteCreation = async (
+	req:		FastifyRequest,
+	reply:	FastifyReply
+) => {
+	try {
+		const friendName = (req.body as { name: string }).name;
+		const game = new Game();
+		req.server.gameInstances.set(game.gameRoomId, game);
+		await addGameInvite(friendName, req.user.id, game.gameRoomId);
+		reply.status(200).send( { success: true, gameID: game.gameRoomId });
+	} catch (error) {
+		throw error;
+	}
+}
+
+export const handleAcceptGameInvite = async (
+	req:		FastifyRequest,
+	reply:	FastifyReply
+) => {
+	try {
+		const friendName = (req.body as { name: string }).name;
+		const gameID = await getGameInviteID(friendName, req.user.id);
+		await deleteGameInvite(friendName, req.user.id);
+		reply.status(200).send( { success: true, gameID});
+	} catch (error) {
+		throw error;
+	}
+}
+
+export const handleDenyGameInvite = async (
+	req:		FastifyRequest,
+	reply:	FastifyReply
+) => {
+	try {
+		const friendName = (req.body as { name: string }).name;
+		const gameID = await getGameInviteID(friendName, req.user.id);
+		await deleteGameInvite(friendName, req.user.id);
+		req.server.gameInstances.delete(gameID);
+		reply.status(200).send( { success: true });
+	} catch (error) {
+		throw error;
 	}
 }
