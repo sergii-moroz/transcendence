@@ -117,7 +117,10 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 		handler:		handleLogout
 	})
 
-	app.get('/user', (req, reply) => {
+	app.get('/user', {
+		preHandler:	[authenticate]
+	},
+	(req, reply) => {
 		reply.send(req.user);
 	});
 

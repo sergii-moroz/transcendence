@@ -1,0 +1,70 @@
+<simple-header
+	title="Two-Factor-Authentification"
+	backTo="profile">
+</simple-header>
+
+<section>
+	<div class="flex flex-col items-center justify-center px-6 py-8 mx-auto">
+
+		<div class="tw-card w-full sm:max-w-sm md:mt-0 md:max-w-md xl:p-0">
+			<div class="p-6 space-y-4 md:space-y-6">
+				<h1 class="text-xl text-center font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white
+					border border-transparent border-b-gray-200 dark:border-b-gray-700 pb-4 sm:pb-6">
+						Chose Verification Method
+				</h1>
+
+				<div class="space-y-4 md:space-y-6">
+					<div class="grid gap-2">
+						<div class="tw-btn text-left flex items-center gap-2">
+							<input type="radio" id="html" name="verification_method" value="app" checked >
+							<label for="html">Google Authenticator (recommended)</label>
+						</div>
+
+						<div class="tw-btn-disabled text-left flex items-center gap-2">
+							<input type="radio" id="email" name="verification_method" value="email" disabled>
+							<label for="email">E-Mail (soon avilable)</label>
+						</div>
+
+						<div class="tw-btn-disabled text-left flex items-center gap-2">
+							<input type="radio" id="sms" name="verification_method" value="sms" disabled>
+							<label for="sms">SMS (in develepment)</label>
+						</div>
+					</div>
+
+					<div class="text-center border border-transparent border-y-gray-200 dark:border-y-gray-700 py-4 mt-12 sm:py-6">
+						<div class="font-bold">Don't have the app?</div>
+						<div class="text-xs mt-4 mb-2 sm:mt-6 sm:mb-4">Google Authenticator is free 2FA App. Download it on your mobile device by searching for "Google Autenticator" on the Play Store or App Store.</div>
+						<div class="flex items-center justify-center text-primary">
+							<a class="flex items-center gap-1 hover:underline" href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank">
+								Play Store
+								<div class="[&_svg]:size-4"><icon-square-arrow-up-right></icon-square-arrow-up-right></div>
+							</a>
+							<p class="mx-2">|</p>
+							<a class="flex items-center gap-1 hover:underline" href="https://apps.apple.com/de/app/google-authenticator/id388497605" target="_blank">
+								App Store
+								<div class="[&_svg]:size-4"><icon-square-arrow-up-right></icon-square-arrow-up-right></div>
+							</a>
+						</div>
+					</div>
+
+					<div class="flex items-center justify-between">
+						<a
+							href="/settings"
+							data-link
+							class="tw-btn-outline w-24"
+						>
+							Cancel
+						</a>
+						<a
+							class="tw-btn w-24"
+							href="/settings/2fa/ga/register"
+							data-link
+						>
+							Next
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

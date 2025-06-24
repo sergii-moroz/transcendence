@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  ft_transcendence:
+    container_name: ft_transcendence
+    image: ft_transcendence
+    build:
+      context: ./services/web
+      dockerfile: Dockerfile
+    ports:
+      - "4242:4242"
+    env_file:
+      - ./services/web/backend/.env
+    networks:
+      - transnet
+    # volumes:
+    #   - ./backend:/app
+    #   - /app/node_modules
+
+networks:
+  transnet:
+    driver: bridge
+    name: transnet

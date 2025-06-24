@@ -30,6 +30,12 @@ export const NoCSRFTokenError = createError(
 	403
 )
 
+export const NoTemporaryTokenError = createError(
+	'FST_MIDDLEWARE_NO_TEMPORARY_TOKEN',
+	'No temporary token provided',
+	401
+)
+
 export const AccessTokenInvalidError = createError(
 	'FST_MIDDLEWARE_INVALID_ACCESS_TOKEN',
 	'Invalid access token provided',

@@ -41,3 +41,9 @@ export const TwoFANotEnabledError = createError(
 	'Two-factor authentication is not enabled on this account',
 	400
 )
+
+export const NoPasswordIntentError = createError(
+	'FST_2FA_NO_PASSWORD_INTENT',
+	'Invalid or expired temporary token',
+	401
+)

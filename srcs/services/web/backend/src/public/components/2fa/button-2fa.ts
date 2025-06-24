@@ -1,8 +1,12 @@
 import { API } from "../../api-static.js"
 import { Router } from "../../router-static.js"
+import { icon2FA } from "../icons/icons.js"
 
 const innerHTML = `
-	<button id="btn-enable" class="tw-btn w-full flex items-center justify-center lg:text-base"></button>
+	<button id="btn-enable" class="flex items-center justify-center rounded-lg whitespace-nowrap bg-green-500/20 hover:bg-green-500/30 px-4 py-2 text-green-600 dark:text-green-300 transition-colors w-full">
+		<span id="icon">${icon2FA}</span>
+		<span id="text">loading...</span>
+	</button>
 
 	<!-- Mobile Menu Modal -->
 	<div
@@ -42,7 +46,7 @@ export class Button2FA extends HTMLElement {
 		this.is2FAEnabled = enabled
 
 		if (!this.btnEnable) return
-		this.btnEnable.innerText = this.is2FAEnabled ? 'Disable 2FA' : 'Enable 2FA'
+		this.btnEnable.querySelector('#text')!.textContent = this.is2FAEnabled ? 'Disable 2FA' : 'Enable 2FA'
 		this.btnEnable?.addEventListener('click', this)
 		this.btnCancel?.addEventListener('click', this.handleOnClickBtnCancel)
 		this.btnConfirm?.addEventListener('click', this.handleOnClickBtnConfirm)

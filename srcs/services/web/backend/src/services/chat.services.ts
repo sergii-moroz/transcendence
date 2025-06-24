@@ -24,9 +24,9 @@ export const getFriendChat = async (friendName: string, req: FastifyRequest): Pr
 	const user_id = req.user.id;
 	const friend_id = await findUserIdByUsername(friendName);
 	if (!friend_id) throw new FriendInvalid(friendName);
-	const FriendData = await new Promise<Friend & { blocked_by_inviter: string | null, blocked_by_recipient: string | null, inviter_id: number, recipient_id: number }>((resolve, reject) => {
-		db.get<Friend & { blocked_by_inviter: string | null, blocked_by_recipient: string | null, inviter_id: number, recipient_id: number }>(' \
-			SELECT username as name, avatar as picture, blocked_by_inviter, blocked_by_recipient, recipient_id, inviter_id from friends f \
+	const FriendData = await new Promise<Friend & { blocked_by_inviter: string | null, blocked_by_recipient: string | null, inviter_id: number, recipient_id: number, game_invite_from: number | null }>((resolve, reject) => {
+		db.get<Friend & { blocked_by_inviter: string | null, blocked_by_recipient: string | null, inviter_id: number, recipient_id: number, game_invite_from: number | null }>(' \
+			SELECT username as name, avatar as picture, blocked_by_inviter, blocked_by_recipient, recipient_id, inviter_id, game_invite_from from friends f \
 			JOIN users u on u.id = \
 				case \
 					when f.inviter_id = ? then f.recipient_id \
@@ -43,12 +43,12 @@ export const getFriendChat = async (friendName: string, req: FastifyRequest): Pr
 	})
 
 	const blockStatus = (FriendData.inviter_id == user_id ? FriendData.blocked_by_inviter : FriendData.blocked_by_recipient)
-
 	return {
 		name: FriendData.name,
 		picture: FriendData.picture || DEFAULT_PICTURE_PATH,
 		blocked: blockStatus,
-		online: req.server.onlineUsers.has(FriendData.name)
+		online: req.server.onlineUsers.has(FriendData.name),
+		game_invite_from: FriendData.game_invite_from
 	};
 }
 
@@ -108,4 +108,59 @@ export const isBlocked = async (sender_id: number, receiver_name: string): Promi
 
 	const blocked = data?.inviter_id == sender_id ? data?.blocked_by_recipient : data?.blocked_by_inviter;
 	return (blocked ? true : false); 
+}
+
+export const addGameInvite = async (friendName: string, user_id: number, gameID: string): Promise<void> => {
+	const friend_id = await findUserIdByUsername(friendName);
+	if (!friend_id) throw new FriendInvalid(friendName);
+	await new Promise<void>((resolve, reject) => {
+		db.run(
+			'UPDATE friends SET game_invite_from = ?, game_invite_id = ? \
+			 WHERE status = "accepted" \
+			AND ((inviter_id = ? AND recipient_id = ?) \
+				OR (inviter_id = ? AND recipient_id = ?))',
+			[user_id, gameID, friend_id, user_id, user_id, friend_id],
+			function (err) {
+				if (err) reject(err);
+				else if (this.changes === 0) reject(new FriendshipInvalid())
+				else resolve();
+			}
+		);
+	});
+}
+
+export const getGameInviteID = async (friendName: string, user_id: number): Promise<string> => {
+	const friend_id = await findUserIdByUsername(friendName);
+	if (!friend_id) throw new FriendInvalid(friendName);
+	return new Promise((resolve, reject) => {
+		db.get<{ game_invite_id: string }>(' \
+			SELECT game_invite_id from friends \
+			WHERE status = "accepted" \
+			AND ((inviter_id = ? AND recipient_id = ?) \
+				OR (inviter_id = ? AND recipient_id = ?))',
+			[friend_id, user_id, user_id, friend_id],
+			(err, row) => {
+				if (err) return reject(err);
+				resolve(row.game_invite_id);
+			})
+	})
+}
+
+export const deleteGameInvite = async (friendName: string, user_id: number): Promise<void> => {
+	const friend_id = await findUserIdByUsername(friendName);
+	if (!friend_id) throw new FriendInvalid(friendName);
+	await new Promise<void>((resolve, reject) => {
+		db.run(
+			'UPDATE friends SET game_invite_from = ?, game_invite_id = ? \
+			 WHERE status = "accepted" \
+			AND ((inviter_id = ? AND recipient_id = ?) \
+				OR (inviter_id = ? AND recipient_id = ?))',
+			[null, null, friend_id, user_id, user_id, friend_id],
+			function (err) {
+				if (err) reject(err);
+				else if (this.changes === 0) reject(new FriendshipInvalid())
+				else resolve();
+			}
+		);
+	});
 }

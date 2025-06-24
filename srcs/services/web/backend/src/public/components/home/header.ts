@@ -26,7 +26,7 @@ export class HomeHeader extends HTMLElement {
 		const target = event.target as HTMLElement;
 
 		if (target.closest('#profile-btn')) {
-			Router.navigateTo('/settings');
+			Router.navigateTo(`/profile/${Router.username}`);
 		}
 		else if (target.closest('#leaderboard-btn')) {
 			Router.navigateTo('/leaderboard');

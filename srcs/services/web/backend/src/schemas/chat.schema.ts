@@ -44,3 +44,44 @@ export const chatInitSchema = {
 		400: errorResponseSchema,
 	},
 }
+
+export const gameInviteSchema = {
+	body: {
+		type: 'object',
+		required: ['name'],
+		properties: {
+			name: { type: 'string' },
+		},
+	},
+	response: {
+		200: {
+			type: 'object',
+      required: ['success'],
+			properties: {
+        success: { type: 'boolean' },
+			},
+		},
+		400: errorResponseSchema,
+	},
+}
+
+export const acceptGameInviteSchema = {
+	body: {
+		type: 'object',
+		required: ['name'],
+		properties: {
+			name: { type: 'string' },
+		},
+	},
+	response: {
+		200: {
+			type: 'object',
+      required: ['success', 'gameID'],
+			properties: {
+        success: { type: 'boolean' },
+        gameID: { type: 'string' }
+			},
+		},
+		400: errorResponseSchema,
+	},
+}

@@ -9,7 +9,7 @@ import { GameRoomRequest } from "../../types/game.js";
 export const gameRoomSock = async (app: FastifyInstance) => {
 
 	const disconnectTimeouts = new Map<string, NodeJS.Timeout>();
-	
+
 	app.get('/game/:gameRoomId', { websocket: true }, (socket, req: GameRoomRequest) => {
 		console.custom("INFO", `New WebSocket connection from ${req.user.id}`);
 		const gameRoomId = req.params.gameRoomId;
@@ -53,9 +53,12 @@ export const gameRoomSock = async (app: FastifyInstance) => {
 			console.custom('INFO', `User: ${req.user.username} disconnected from game room: ${gameRoomId}`);
 
 			const timeout = setTimeout(() => {
-				if (app.gameInstances.has(gameRoomId)) {
+				if (app.gameInstances.has(gameRoomId) && app.gameInstances.get(gameRoomId).isRunning) { // Player disconnected before the game ended
 					game.removePlayer(socket);
 					console.custom('INFO', `Game room ${gameRoomId} closed due to inactivity`);
+				} else if (app.gameInstances.has(gameRoomId) && !app.gameInstances.get(gameRoomId).isRunning) { // Player disconnected after the game ended, graceful delete
+					app.gameInstances.delete(gameRoomId);
+					console.custom('INFO', `Game room ${gameRoomId} closed gracefully`);
 				}
 				disconnectTimeouts.delete(userId);
 			}, 10000);

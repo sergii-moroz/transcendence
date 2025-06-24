@@ -2,8 +2,8 @@
 export type Game = {
 	id: string
 	game_mode_id: number
-	player1_name: number
-	player2_name: number
+	player1_name: string
+	player2_name: string
 	score1: number
 	score2: number
 	tech_win: boolean
@@ -41,3 +41,11 @@ export const GAME_MODE_MAP: Record<GameModeName, GAME_MODES> = {
 }
 
 export const PAGE_SIZE_OPTIONS = [5, 10, 15, 25, 50, 100]
+
+export interface profileData {
+	avatar: string,
+	username: string,
+	registerDate: string,
+	funFact: string,
+	online: boolean
+}

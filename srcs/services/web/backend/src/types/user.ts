@@ -43,6 +43,7 @@ export interface Friend {
 export interface FriendInChat extends Friend {
 	online: boolean;
 	blocked: string | null;
+	game_invite_from: number | null;
 }
 
 export interface SidebarResponse {

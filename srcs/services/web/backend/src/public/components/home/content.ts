@@ -78,7 +78,7 @@ export class HomeContent extends HTMLElement {
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
 					<!-- Your Stats container -->
-					<stats-card></stats-card>
+					<stats-card data-owner></stats-card>
 
 					<!-- Leaderboard Container -->
 					<top-player-card></top-player-card>

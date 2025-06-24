@@ -31,6 +31,15 @@ import { UserGameHistory } from "./components/history/user-game-history.js";
 import { CollapsedView } from "./components/sidebar/sidebarCollapsed.js";
 import { FriendListView } from "./components/sidebar/sidebarFriendList.js";
 import { ChatView } from "./components/sidebar/sidebarChat.js";
+import { Game3D } from "./components/GameRoom3D.js";
+import { LossScreen } from "./components/loss-screen.js";
+import { VictoryScreen } from "./components/victory-screen.js";
+import { TournamentVictoryScreen } from "./components/t-victory-screen.js";
+import { TwoFAResetVerify } from "./components/2fa/2fa-reset-verify.js";
+import { DlgResetConfirmation } from "./components/2fa/dlg-reset-confirmation.js";
+import { ProfileData } from "./components/profile-data.js";
+import { simpleHeader } from "./components/simple-Header.js";
+import { ThreeRingDonut } from "./components/donut-chart.js";
 import { SinglePlayerRoom } from "./components/singleplayer.js";
 import { LeaderboardCard } from "./components/leaderboard/leaderboard-card.js";
 import { ButtonPasswordReset } from "./components/2fa/button-reset.js";
@@ -41,6 +50,7 @@ customElements.define('btn-theme-toggle', ButtonThemeToggle)
 customElements.define('btn-2fa', Button2FA)
 customElements.define('btn-password-reset', ButtonPasswordReset)
 customElements.define('password-reset-form', PasswordResetForm)
+customElements.define('password-reset-confirmation', DlgResetConfirmation)
 
 // PAGE COMPONENTS
 customElements.define('register-form', RegisterForm)
@@ -53,6 +63,7 @@ customElements.define('leaderboard-card', LeaderboardCard)
 
 // 2FA
 customElements.define('two-fa-login-verify', TwoFALoginVerify)
+customElements.define('two-fa-reset-verify', TwoFAResetVerify)
 customElements.define('two-fa-register-ga', TwoFARegisterGA)
 customElements.define('two-fa-verify-ga', TwoFAVerifyGA)
 customElements.define('two-fa-backup-ga', TwoFABackupGA)
@@ -82,10 +93,22 @@ customElements.define('match-making', Matchmaking)
 
 // Game
 customElements.define('game-room', GameRoom)
+customElements.define('loss-screen', LossScreen)
+customElements.define('victory-screen', VictoryScreen)
 customElements.define('singleplayer-game', SinglePlayerRoom);
 
 // Tournament
 customElements.define('tournament-list', TournamentList)
 customElements.define('tournament-room', Tournament)
+customElements.define('tournament-victory-screen', TournamentVictoryScreen)
+
+customElements.define('game-3d', Game3D)
+
+//Profile
+customElements.define('profile-user-data', ProfileData)
+
+//header
+customElements.define('simple-header', simpleHeader)
+customElements.define('three-ring-donut', ThreeRingDonut);
 
 Router.init()

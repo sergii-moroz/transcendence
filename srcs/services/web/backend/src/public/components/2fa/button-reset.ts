@@ -1,4 +1,5 @@
 import { Router } from "../../router-static.js"
+import { iconLock2 } from "../icons/icons.js"
 
 export class ButtonPasswordReset extends HTMLElement {
 	private btnReset: HTMLButtonElement | null = null
@@ -16,7 +17,7 @@ export class ButtonPasswordReset extends HTMLElement {
 		this.dlgConfirm = this.querySelector('#dlg-confirm-reset')
 		this.btnConfirm = this.querySelector('#btn-confirm-reset')
 		this.btnCancel = this.querySelector('#btn-cancel-reset')
-		console.log("connected:", this.dlgConfirm)
+		// console.log("connected:", this.dlgConfirm)
 
 		this.btnReset?.addEventListener('click', this.handleOnClickBtnReset)
 		this.btnCancel?.addEventListener('click', this.handleOnClickBtnCancel)
@@ -46,7 +47,10 @@ export class ButtonPasswordReset extends HTMLElement {
 
 	private render() {
 		this.innerHTML = `
-		<button id="btn-reset" class="tw-btn w-full flex items-center justify-center lg:text-base">Reset</button>
+		<button id="btn-reset" class="flex items-center justify-center rounded-lg whitespace-nowrap bg-blue-500/20 hover:bg-blue-500/30 px-4 py-2 text-blue-600 dark:text-blue-300  transition-colors w-full">
+			${iconLock2}
+			Change Password
+		</button>
 
 		<!-- Mobile Menu Modal -->
 		<div

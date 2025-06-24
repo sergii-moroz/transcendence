@@ -13,7 +13,7 @@ export class GameRoom extends HTMLElement {
 	constructor() {
 		super();
 	}
-	
+
 	connectedCallback() {
 		this.gameRoomId = window.location.pathname.split('/')[2];
 		this.render();
@@ -65,7 +65,7 @@ export class GameRoom extends HTMLElement {
 				Router.navigateTo('/home');
 			}
 
-			if (data.type === 'gameOver') {
+			if (data.type === 'victory') {
 				this.gameOver = true;
 				this.gameOverMessage = {
 					message: data.message as string,
@@ -73,13 +73,26 @@ export class GameRoom extends HTMLElement {
 				};
 				console.log('Game over:', data.message, data.winner, data.tournamentId);
 				setTimeout(() => {
-					this.socket?.send(JSON.stringify({ type: 'exit' }));
+					// this.socket?.send(JSON.stringify({ type: 'exit' }));
 					if(data.tournamentId !== null) {
 						console.log("Redirecting to tournament:", data.tournamentId);
 						Router.navigateTo(`/tournament/${data.tournamentId}`);
 					} else {
-						Router.navigateTo('/home');
+						Router.navigateTo('/victory-screen');
 					}
+				}, 3000);
+			}
+
+			if (data.type === 'defeat') {
+				this.gameOver = true;
+				this.gameOverMessage = {
+					message: data.message as string,
+					winner: data.winner as string
+				};
+				console.log('Game over:', data.message, data.winner, data.tournamentId);
+				setTimeout(() => {
+					// this.socket?.send(JSON.stringify({ type: 'exit' }));
+					Router.navigateTo('/loss-screen');
 				}, 3000);
 			}
 		};
@@ -196,7 +209,7 @@ export class GameRoom extends HTMLElement {
 		this.ctx.font = "30px Arial"
 		this.ctx.textAlign = "center";
 		this.ctx.textBaseline = "top";
-		
+
 		this.ctx.fillText(score.toString(), pos_x, pos_y);
 		this.ctx.font = "15px Arial"
 		this.ctx.fillText(username, pos_x, pos_y + 30);

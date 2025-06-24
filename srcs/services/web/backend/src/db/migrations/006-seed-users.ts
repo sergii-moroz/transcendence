@@ -17,7 +17,7 @@ export async function up() {
 			for (const user of users) {
 				const hashed = bcrypt.hashSync(user.password, 10);
 				db.run(
-					`INSERT INTO users (username, password, bio, avatar) VALUES (?, ?, ?, ?)`,
+					`INSERT INTO users (username, password, funFact, avatar) VALUES (?, ?, ?, ?)`,
 					[user.username, hashed, user.bio, user.avatar],
 					(err) => {
 						if (err) reject(err);
