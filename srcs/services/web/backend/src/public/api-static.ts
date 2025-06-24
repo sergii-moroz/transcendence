@@ -147,6 +147,12 @@ export class API {
 		return res.json()
 	}
 
+	static async twoFAResetVerify(code: string) {
+		const token = sessionStorage.getItem('temp2faToken')
+		const res = await this.post('/api/2fa/password/reset/verify', {token, code})
+		return res.json()
+	}
+
 	static async disable2FA(code: string) {
 		const response = await this.post('/api/2fa/disable', { code }, { includeCSRF: true })
 		return response.json()

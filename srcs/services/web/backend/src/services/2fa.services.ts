@@ -2,18 +2,21 @@ import {
 	HashingError,
 	Invalid2FACodeError,
 	Missing2FACodeError,
+	NoPasswordIntentError,
 	SecretNotFoundError,
 	TwoFANotEnabledError,
 	UserNotFoundError
 } from "../errors/2fa.errors.js";
 
-import { JwtUserPayload, User } from "../types/user.js";
-import { db } from "../db/connections.js";
 import { authenticator } from "otplib";
+import { db } from "../db/connections.js";
+import { findUserById } from "./userService.js";
+import { JwtUserPayload, User } from "../types/user.js";
+import { PasswordResetIntent } from "../types/registration.js";
+import { verify2FAAccessToken } from "./tokenService.js";
+
 import QRCode from 'qrcode'
 import bcrypt from 'bcrypt'
-import { verify2FAAccessToken } from "./tokenService.js";
-import { findUserById } from "./userService.js";
 
 export const update2FASecret = async (username: string, secret: string): Promise<void> => {
 	return new Promise((resolve, reject) => {
@@ -88,20 +91,6 @@ export const mark2FAVerified = async (id: number): Promise<void> => {
 		);
 	});
 };
-
-// export const is2FAVerified = async (id: number): Promise<boolean> => {
-// 	return new Promise((resolve, reject) => {
-// 		db.get<User>(
-// 			'SELECT two_factor_verified FROM users WHERE id = ?',
-// 			[id],
-// 			(err, row) => {
-// 				if (err) return reject(err)
-// 				if (!row) return resolve(false)
-// 				resolve(row.two_factor_verified)
-// 			}
-// 		)
-// 	})
-// }
 
 export const generateBackupCodes = (count = 10): string[] => {
 	return Array.from({ length: count }, () =>
@@ -220,6 +209,36 @@ export const passwordResetService = async (id: number, password: string): Promis
 				if (err) return reject(err);
 				if (this.changes === 0) return reject(new UserNotFoundError())
 				resolve();
+			}
+		)
+	})
+}
+
+export const savePasswordResetIntentService = async (token: string, user_id: number, hashedPassword: string, expiresAt: Date): Promise<void> => {
+	return new Promise((resolve, reject) => {
+		db.run(
+			`INSERT INTO password_reset_intents
+			(temp_token, user_id, hashed_password, expires_at)
+			VALUES (?, ?, ?, ?)`,
+			[token, user_id, hashedPassword, expiresAt],
+			function (err) {
+				if (err) return reject(err);
+				resolve();
+			}
+		)
+	})
+}
+
+export const getPasswordResetIntent = async (token: string): Promise<PasswordResetIntent> => {
+	return new Promise((resolve, reject) => {
+		db.get<PasswordResetIntent>(
+			`SELECT * FROM password_reset_intents
+			WHERE temp_token = ? AND expires_at > ?`,
+			[token, Date.now()],
+			(err, row) => {
+				if (err) return reject(err)
+				if (!row) return reject(new NoPasswordIntentError())
+				resolve(row)
 			}
 		)
 	})

@@ -47,7 +47,7 @@ export class HomeContent extends HTMLElement {
 						title="Singleplayer"
 						description="Play by yourself against our intelligent AI opponent"
 						button-text="Play vs AI"
-						href="/settings"
+						href="/singleplayer"
 						icon="icon-home-single-player"
 						accent-color="green"
 					></play-card>

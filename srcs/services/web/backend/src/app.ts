@@ -16,7 +16,6 @@ import { tournamentRoomSock } from "./routes/v1/tournamentRoom.js";
 import { initializeDB } from "./db/init.js";
 import { Game } from "./services/game.js";
 import { Tournament } from "./services/tournament.js";
-import { verifyAccessToken } from "./services/tokenService.js";
 import { twoFARoutes } from "./routes/v1/2fa.routes.js";
 import { normalizeError } from "./errors/error.js";
 import { friends } from "./routes/v1/friends.js";
@@ -25,6 +24,7 @@ import { statsRoutes } from "./routes/v1/stats.routes.js";
 import { historyRoutes } from "./routes/v1/game-history.route.js";
 import { profile } from "./routes/v1/profile.js";
 import fastifyMultipart from "@fastify/multipart";
+import { verifyAccessToken } from "./services/tokenService.js";
 
 export const build = async (opts: FastifyServerOptions) => {
 	const app = fastify(opts)

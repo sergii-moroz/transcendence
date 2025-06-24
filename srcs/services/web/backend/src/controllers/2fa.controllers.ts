@@ -2,9 +2,11 @@ import {
 	disable2FAService,
 	generate2FASecretAndQRCode,
 	generateBackupCodesService,
+	getPasswordResetIntent,
 	is2FAEnabled,
 	loginVerify2FAService,
 	mark2FAEnabled,
+	passwordResetService,
 	verifyGACode
 } from "../services/2fa.services.js";
 
@@ -19,8 +21,12 @@ import {
 	FastifyRequest
 } from "fastify";
 
+import {
+	NoAccessTokenError,
+	NoTemporaryTokenError
+} from "../errors/middleware.errors.js";
+
 import { JwtUserPayload } from "../types/user.js";
-import { NoAccessTokenError } from "../errors/middleware.errors.js";
 import { TwoFAAlreadyEnabledError } from "../errors/2fa.errors.js";
 
 export const handleGARegister = async (
@@ -145,6 +151,25 @@ export const handleDisable2FA = async (
 
 		await disable2FAService(user.id, code)
 		reply.send({ success: true })
+	} catch (err) {
+		throw err
+	}
+}
+
+export const handleResetVerify2FA = async (
+	req:		FastifyRequest,
+	reply:	FastifyReply
+) => {
+	const { token, code } = req.body as { token: string, code: string }
+
+	if (!token) throw new NoTemporaryTokenError()
+
+	try {
+		const user = await loginVerify2FAService(token, code) // TODO: Rename
+		const intent = await getPasswordResetIntent(token)
+		await passwordResetService(intent.user_id, intent.hashed_password)
+
+		return reply.send({ success: true })
 	} catch (err) {
 		throw err
 	}

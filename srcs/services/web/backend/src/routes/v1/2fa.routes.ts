@@ -25,6 +25,7 @@ import {
 	handleGenerateBackupCodes,
 	handleIs2FAEnabled,
 	handleLoginVerify2FA,
+	handleResetVerify2FA,
 	handleSet2FAEnabled
 } from "../../controllers/2fa.controllers.js";
 
@@ -69,6 +70,11 @@ export const twoFARoutes = async (app: FastifyInstance, opts: FastifyPluginOptio
 		schema:			disable2FASchema,
 		preHandler:	[authenticate, checkCsrf],
 		handler:		handleDisable2FA
+	})
+
+		app.post('/password/reset/verify', {
+		schema:			loginVerify2FASchema,
+		handler:		handleResetVerify2FA
 	})
 
 }

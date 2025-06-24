@@ -68,28 +68,33 @@ export class Game {
 		}
 	}
 
-	removePlayer(player?: WebSocket) {
+	removePlayer(player: WebSocket) {
+		let winner;
+		let loser;
+
 		for (const [role, user] of this.players.entries()) {
 			if (user.socket === player) {
 				user.socket.close();
-				this.players.delete(role);
+				loser = user;
 			} else {
 				user.socket.send(JSON.stringify({
-					type: 'gameOver',
+					type: 'victory',
 					message: `${user.username} wins!`,
 					winner: role,
 					tournamentId: this.tournamentId,
 				}));
-				this.players.delete(role);
+				winner = user;
 			}
 		}
+		if(winner && loser)
+			this.updateDatabase(winner, loser);
 	}
 
 	removeAllPlayers() {
 		// console.custom("WARN", "aaa");
 		for (const [role, user] of this.players.entries()) {
 			user.socket.send(JSON.stringify({
-				type: 'gameOver',
+				type: 'victory',
 				message: `game was closed`
 			}));
 			this.players.delete(role);
@@ -169,7 +174,7 @@ export class Game {
 			// Send gameOver message
 			if (winner) {
 				winner.socket.send(JSON.stringify({
-					type: 'gameOver',
+					type: 'victory',
 					message: `${winnerRole === 'player1'
 						? this.players.get('player1')!.username
 						: this.players.get('player2')!.username} wins!`,
@@ -179,7 +184,7 @@ export class Game {
 			}
 			if (loser) {
 				loser.socket.send(JSON.stringify({
-					type: 'gameOver',
+					type: 'defeat',
 					message: `${winnerRole === 'player1'
 						? this.players.get('player1')!.username
 						: this.players.get('player2')!.username} wins!`,
