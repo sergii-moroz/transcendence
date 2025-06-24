@@ -1,0 +1,21 @@
+<simple-header title="Profile Page"></simple-header>
+
+<!-- <div class="flex flex-col max-w-4xl mx-auto min-h-dvh space-y-6 p-4">
+	<div class="flex flex-col md:flex-row md:items-stretch md:space-x-6 space-y-6 md:space-y-0">
+		<profile-user-data></profile-user-data>
+		<div class="flex w-full flex-col justify-end">
+			<stats-card mode="profile"></stats-card>
+		</div>
+	</div>
+	<user-game-history></user-game-history>
+</div> -->
+<main class="flex flex-col gap-4 p-4 max-w-4xl mx-auto">
+
+	<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+		<profile-user-data></profile-user-data>
+		<stats-card mode="profile"></stats-card>
+		<user-game-history class="col-span-1 md:col-span-2"></user-game-history>
+	</div>
+
+</main>
+

@@ -19,10 +19,18 @@ export class StatsCard extends HTMLElement {
 
 	constructor() {
 		super()
+		this.render()
 	}
 
 	async connectedCallback() {
-		this.data = await API.getUserPerformance()
+		const opts = this.getAttribute('data-owner')
+		const response = opts === null
+			? await API.getUserPerformance(window.location.pathname.split("/").pop()!)
+			: await API.getUserPerformance(null)
+
+		if (!response.success) return
+
+		this.data = response.data
 		this.data2 = {
 			singleplayer: {wins: this.data.s_wins, losses: this.data.s_losses},
 			multiplayer: {wins: this.data.m_wins, losses: this.data.m_losses},
@@ -40,30 +48,38 @@ export class StatsCard extends HTMLElement {
 
 	handleEvent(event: Event) {
 		event.preventDefault()
-		// console.log('Stats Card: button clicked')
-		Router.navigateTo('/history')
+		Router.navigateTo(`/profile/${Router.username}`);
 	}
 
 	private render() {
 		const tabs = this.renderTabButtons()
 		const sections = this.renderSections()
+		const mode = this.getAttribute('mode') || 'home'
 
 		this.innerHTML = `
-			<div class="tw-card">
+			<div class="tw-card h-full">
 				<div class="p-6 flex-1">
 					<div class="flex items-center mb-6">
 						<div class="size-12 rounded-lg bg-blue-500/10 flex items-center justify-center mr-4">
 							${iconHomeStats}
 						</div>
-						<h3 class="text-xl font-bold">Your Stats</h3>
+						<h3 class="text-xl font-bold">${mode === 'profile' ? 'Game Stats' : 'Your Stats'}</h3>
 					</div>
 
+					<three-ring-donut class="${mode === 'profile' ? '' : 'hidden'}"
+						singleplayer="${this.calculateWinRate(this.data2.singleplayer)}"
+						multiplayer="${this.calculateWinRate(this.data2.multiplayer)}"
+						tournament="${this.calculateWinRate(this.data2.tournament)}"
+					></three-ring-donut>
+
 					<!-- Tabs -->
-					${tabs}
-					${sections}
+					<div>
+						${tabs}
+						${sections}
+					</div>
 				</div>
 
-				<div class="p-6 pt-0">
+				<div class="p-6 pt-0 ${mode === 'profile' ? 'hidden' : ''}">
 					<button class="w-full px-4 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 font-medium rounded-lg flex items-center justify-center transition-all duration-500 ease-out hover:scale-[1.04] hover:shadow-lg">
 						View Profile →
 					</button>
@@ -128,11 +144,17 @@ export class StatsCard extends HTMLElement {
 			const block = this.renderModeStats(this.data2[mode])
 
 			return `
-				<div class="grid grid-cols-3 gap-4 mb-6 hidden peer-checked/${mode}:grid" data-section="${mode}">
+				<div class="grid grid-cols-3 gap-4 hidden peer-checked/${mode}:grid" data-section="${mode}">
 					${block}
 				</div>
 			`
 		}).join('')
+	}
+
+	private calculateWinRate(item: {wins: number, losses: number}): string {
+		const total = item.wins + item.losses
+		const winRate = total > 0 ? (item.wins / total * 100).toFixed(1) : "0.0"
+		return winRate
 	}
 }
 
