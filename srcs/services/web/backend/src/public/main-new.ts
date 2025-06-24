@@ -34,6 +34,8 @@ import { ChatView } from "./components/sidebar/sidebarChat.js";
 import { LeaderboardCard } from "./components/leaderboard/leaderboard-card.js";
 import { ButtonPasswordReset } from "./components/2fa/button-reset.js";
 import { PasswordResetForm } from "./components/settings/password-reset-form.js";
+import { TwoFAResetVerify } from "./components/2fa/2fa-reset-verify.js";
+import { DlgResetConfirmation } from "./components/2fa/dlg-reset-confirmation.js";
 import { ProfileData } from "./components/profile-data.js";
 import { simpleHeader } from "./components/simple-Header.js";
 import { ThreeRingDonut } from "./components/donut-chart.js";
@@ -43,6 +45,7 @@ customElements.define('btn-theme-toggle', ButtonThemeToggle)
 customElements.define('btn-2fa', Button2FA)
 customElements.define('btn-password-reset', ButtonPasswordReset)
 customElements.define('password-reset-form', PasswordResetForm)
+customElements.define('password-reset-confirmation', DlgResetConfirmation)
 
 // PAGE COMPONENTS
 customElements.define('register-form', RegisterForm)
@@ -55,6 +58,7 @@ customElements.define('leaderboard-card', LeaderboardCard)
 
 // 2FA
 customElements.define('two-fa-login-verify', TwoFALoginVerify)
+customElements.define('two-fa-reset-verify', TwoFAResetVerify)
 customElements.define('two-fa-register-ga', TwoFARegisterGA)
 customElements.define('two-fa-verify-ga', TwoFAVerifyGA)
 customElements.define('two-fa-backup-ga', TwoFABackupGA)
