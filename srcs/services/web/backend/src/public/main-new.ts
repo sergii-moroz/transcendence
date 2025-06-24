@@ -34,6 +34,10 @@ import { ChatView } from "./components/sidebar/sidebarChat.js";
 import { LeaderboardCard } from "./components/leaderboard/leaderboard-card.js";
 import { ButtonPasswordReset } from "./components/2fa/button-reset.js";
 import { PasswordResetForm } from "./components/settings/password-reset-form.js";
+import { Game3D } from "./components/GameRoom3D.js";
+import { LossScreen } from "./components/loss-screen.js";
+import { VictoryScreen } from "./components/victory-screen.js";
+import { TournamentVictoryScreen } from "./components/t-victory-screen.js";
 import { TwoFAResetVerify } from "./components/2fa/2fa-reset-verify.js";
 import { DlgResetConfirmation } from "./components/2fa/dlg-reset-confirmation.js";
 import { ProfileData } from "./components/profile-data.js";
@@ -88,10 +92,15 @@ customElements.define('match-making', Matchmaking)
 
 // Game
 customElements.define('game-room', GameRoom)
+customElements.define('loss-screen', LossScreen)
+customElements.define('victory-screen', VictoryScreen)
 
 // Tournament
 customElements.define('tournament-list', TournamentList)
 customElements.define('tournament-room', Tournament)
+customElements.define('tournament-victory-screen', TournamentVictoryScreen)
+
+customElements.define('game-3d', Game3D)
 
 //Profile
 customElements.define('profile-user-data', ProfileData)
