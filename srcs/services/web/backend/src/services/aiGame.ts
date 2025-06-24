@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import { db } from '../db/connections.js'
 import { GAME_MODES } from '../public/types/game-history.types.js';
-import { aiOpponent } from './aiOpponent.js';
+import { aiOpponent, resetAIState } from './aiOpponent.js';
 
 export class Game {
 	players: Map< string, {socket: WebSocket | null, id: string, username: string} >;
@@ -36,6 +36,9 @@ export class Game {
 		this.gameRoomId = crypto.randomBytes(16).toString('hex');
 		this.gameRunning = false;
 		this.game_mode = game_mode;
+		if (this.game_mode === GAME_MODES.Singleplayer) {
+			resetAIState();
+		}
 	}
 
 	addPlayer(socket: WebSocket, id: string, username: string) {
@@ -116,7 +119,7 @@ export class Game {
 			}
 
 			if (this.game_mode === GAME_MODES.Singleplayer) {
-				aiOpponent(this.state, frameCounter, ball);
+				aiOpponent(this.state.paddles.player2, frameCounter, this.state.ball);
 			}
 
 			// Ball collision with paddles (simplified)
