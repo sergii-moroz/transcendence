@@ -68,7 +68,7 @@ export class Game {
 		}
 	}
 
-	removePlayer(player: WebSocket) {
+	removePlayer(player?: WebSocket) {
 		for (const [role, user] of this.players.entries()) {
 			if (user.socket === player) {
 				user.socket.close();
@@ -82,6 +82,17 @@ export class Game {
 				}));
 				this.players.delete(role);
 			}
+		}
+	}
+
+	removeAllPlayers() {
+		// console.custom("WARN", "aaa");
+		for (const [role, user] of this.players.entries()) {
+			user.socket.send(JSON.stringify({
+				type: 'gameOver',
+				message: `game was closed`
+			}));
+			this.players.delete(role);
 		}
 	}
 

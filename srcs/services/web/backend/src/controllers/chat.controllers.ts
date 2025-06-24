@@ -126,8 +126,10 @@ export const handleDenyGameInvite = async (
 ) => {
 	try {
 		const friendName = (req.body as { name: string }).name;
+
 		const gameID = await getGameInviteID(friendName, req.user.id);
 		await deleteGameInvite(friendName, req.user.id);
+		req.server.gameInstances.get(gameID).removeAllPlayers();
 		req.server.gameInstances.delete(gameID);
 		reply.status(200).send( { success: true });
 	} catch (error) {
