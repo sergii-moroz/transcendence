@@ -398,5 +398,37 @@ export class API {
 		}
 	}
 
+	static async denyGameInvite(name: string) {
+		try {
+			const res = await this.post('/api/denyGameInvite', {name});
+			return res.json();
+
+		} catch (error) {
+			console.error("denyGameInvite API call failed:", error);
+		}
+	}
+
+	static async acceptGameInvite(name: string) {
+		try {
+			const res = await this.post('/api/acceptGameInvite', {name});
+			return res.json();
+
+		} catch (error) {
+			console.error("accept Game Invite API call failed:", error);
+		}
+	}
+
+	static async createGameInvite(name: string) {
+		try {
+			const res = await this.post('/api/createGameInvite', {name});
+			return res.json();
+
+		} catch (error) {
+			console.error("create Game Invite API call failed:", error);
+		}
+	}
+
+
+
 
 }
