@@ -1,5 +1,6 @@
 import { ChatInitResponse, Message } from "../../../types/user.js";
 import { API } from "../../api-static.js";
+import { Router } from "../../router-static.js";
 import { socialSocketManager } from "../../SocialWebSocket.js";
 import { iconSidebarCheck, iconX } from "../icons/icons.js";
 import { showErrorState } from "./sidebarBase.js";
@@ -224,11 +225,15 @@ export class ChatView extends HTMLElement {
 	}
 
 	acceptGameInvite = async () => {
-		alert("will be added");
+		const res = await API.acceptGameInvite(this.name);
+		if (!res.success) return showErrorState(this.querySelector('#sidebar-chat'));
+		Router.navigateTo(`/game/${res.gameID}`);
 	}
 
 	rejectGameInvite = async () => {
-		alert("will be added");
+		const res = await API.denyGameInvite(this.name);
+		if (!res.success) return showErrorState(this.querySelector('#sidebar-chat'));
+		this.el_gameInvitationSection!.innerHTML = '';
 	}
 
 	gameInvitation = async () => {
@@ -236,7 +241,9 @@ export class ChatView extends HTMLElement {
 			alert('there is already an invitation!');
 			return;
 		}
-		alert("will be added");
+		const res = await API.createGameInvite(this.name);
+		if (!res.success) return showErrorState(this.querySelector('#sidebar-chat'));
+		Router.navigateTo(`/game/${res.gameID}`);
 	}
 
 	sendMessage = (event: Event) => {
