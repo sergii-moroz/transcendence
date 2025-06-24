@@ -25,7 +25,7 @@ export class Game {
 		this.players = new Map();
 		this.standardBallSpeed = 4;
 		this.state = {
-			ball: { x: 0, y: 0, dx: 4, dy: 4 },
+			ball: { x: 0, y: 0, dx: 3, dy: 3 },
 			paddles: {
 				player1: { y: 0 },
 				player2: { y: 0 }
@@ -98,7 +98,6 @@ export class Game {
 	startLoop() {
 		this.gameRunning = true;
 		let frameCounter: number = 0;
-		let ball = this.state.ball;
 		const FIELD_X = 250, FIELD_Y = 150;
 		const PADDLE_X1 = -FIELD_X + 10, PADDLE_X2 = FIELD_X - 10;
 		const PADDLE_HEIGHT = 30;
@@ -108,15 +107,6 @@ export class Game {
 			// Update ball position
 			this.state.ball.x += this.state.ball.dx;
 			this.state.ball.y += this.state.ball.dy;
-			// AI opponent logic
-			if (frameCounter % 60 === 0) {
-				ball = {
-					x: this.state.ball.x,
-					y: this.state.ball.y,
-					dx: this.state.ball.dx,
-					dy: this.state.ball.dy
-				};
-			}
 
 			if (this.game_mode === GAME_MODES.Singleplayer) {
 				aiOpponent(this.state.paddles.player2, frameCounter, this.state.ball);
