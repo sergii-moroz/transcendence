@@ -8,7 +8,8 @@ export async function up() {
 				username TEXT UNIQUE NOT NULL,
 				password TEXT NOT NULL,
 				avatar TEXT DEFAULT NULL,
-				bio TEXT DEFAULT 'Hello, I am new here!'
+				funFact TEXT DEFAULT NULL,
+				created_at_user DATETIME DEFAULT CURRENT_TIMESTAMP
 			)
 		`, (err) => {
 			if (err) reject(err);

@@ -117,6 +117,7 @@ export class LoginForm extends HTMLElement {
 		}
 
 		if (res.success) {
+			Router.username = res.username;
 			return Router.navigateTo('/home')
 		} else {
 			this.showError(this.passwordError, res.message ?? 'Login failed')
