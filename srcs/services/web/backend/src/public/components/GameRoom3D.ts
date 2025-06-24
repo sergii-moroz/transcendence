@@ -244,7 +244,7 @@ export class Game3D extends HTMLElement {
 				Router.navigateTo('/home');
 			}
 
-			if (data.type === 'gameOver') {
+			if (data.type === 'victory') {
 				this.gameOver = true;
 				this.gameOverMessage = {
 					message: data.message as string,
@@ -252,13 +252,26 @@ export class Game3D extends HTMLElement {
 				};
 				console.log('Game over:', data.message, data.winner, data.tournamentId);
 				setTimeout(() => {
-					this.socket?.send(JSON.stringify({ type: 'exit' }));
+					// this.socket?.send(JSON.stringify({ type: 'exit' }));
 					if(data.tournamentId !== null) {
 						console.log("Redirecting to tournament:", data.tournamentId);
 						Router.navigateTo(`/tournament/${data.tournamentId}`);
 					} else {
-						Router.navigateTo('/home');
+						Router.navigateTo('/victory-screen');
 					}
+				}, 3000);
+			}
+
+			if (data.type === 'defeat') {
+				this.gameOver = true;
+				this.gameOverMessage = {
+					message: data.message as string,
+					winner: data.winner as string
+				};
+				console.log('Game over:', data.message, data.winner, data.tournamentId);
+				setTimeout(() => {
+					// this.socket?.send(JSON.stringify({ type: 'exit' }));
+					Router.navigateTo('/loss-screen');
 				}, 3000);
 			}
 		};
