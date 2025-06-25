@@ -58,12 +58,12 @@ export const build = async (opts: FastifyServerOptions) => {
 
 	app.addHook('preValidation', async (request: FastifyRequest, reply: FastifyReply) => {
 		const requestURL = request.url;
-		const publicRoutes = ['/api/login', '/api/register', '/api/2fa/verify-login'];
+		const publicRoutes = ['/api/login', '/api/register', '/api/2fa/login/verify'];
 		if ((!requestURL.startsWith('/api/') && !requestURL.startsWith('/ws/')) || publicRoutes.includes(requestURL)) {
 			console.custom('DEBUG', "No authentification required for this route");
 			return;
 		}
-		console.custom('DEBUG', 'Authentifying user...');
+		console.custom('DEBUG', `Authentifying user on url: ${requestURL}`);
 		const token = request.cookies.token;
 		if (!token) {
 			return reply.code(401).send({ type: 'error', message: 'Unauthorized: No token provided' });
