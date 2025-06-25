@@ -179,14 +179,14 @@ export class ChatView extends HTMLElement {
 		root.innerHTML = '';
 
 		const div = document.createElement('div');
-		div.classList = "flex items-center";
+		div.classList = "flex items-center group";
 		div.innerHTML = `
 			<img
 				src=${data.friend.picture}
-				class="w-10 h-10 rounded-full mr-3 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
+				class="w-10 h-10 rounded-full mr-3 transition-all duration-300 group-hover:scale-[1.05] group-hover:shadow-lg"
 			>
 			<div>
-				<div class="font-medium">
+				<div class="font-medium group-hover:text-blue-400 transition-colors">
 					${data.friend.name}
 				</div>
 				<div class="text-xs text-gray-400">${data.friend.online ? "online" : "offline"}</div>
@@ -206,7 +206,7 @@ export class ChatView extends HTMLElement {
 	}
 
 	switchToProfilePage = async () => {
-		alert("will be added");
+		Router.navigateTo(`/profile/${this.name}`);
 	}
 
 	switchToCollapseSidebar = () => {
