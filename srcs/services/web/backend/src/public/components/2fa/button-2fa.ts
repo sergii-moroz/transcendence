@@ -16,7 +16,7 @@ const innerHTML = `
 	>
 		<div class="tw-card text-center p-6 w-80 space-y-4 relative">
 			<h2 class="text-xl font-bold mb-4 dark:text-white">Disable two factor authentification?</h2>
-			<p>Disabling 2FA will remove <strong>all backup codes</strong> and make your account less secure.
+			<p>Disabling 2FA will remove <strong>all backup codes</strong> and make your account less secure.<br>
 				You can re-enable it later, but new backup codes will be generated.</p>
 			<button id="btn-confirm" class="tw-btn w-full">Disable 2FA</button>
 			<button id="btn-cancel" class="tw-btn-outline w-full">Cancel</button>

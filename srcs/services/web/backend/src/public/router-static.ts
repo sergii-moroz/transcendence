@@ -14,7 +14,8 @@ export class Router {
 			const target = (e.target as HTMLElement).closest("[data-link]") as HTMLAnchorElement | null;
 			if (target) {
 				e.preventDefault()
-				const href = target.getAttribute('href');
+				let href = target.getAttribute('href');
+				if (href === '/profile') href += `/${this.username}`;
 				if (href)
 					this.navigateTo(href);
 				return ;
