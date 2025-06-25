@@ -8,14 +8,23 @@ all: up
 
 up:
 	@docker compose -f $(COMPOSE_FILE) up --build -d
+	@docker compose -f $(MON_COMPOSE) up -d
 
 down:
+	@docker compose -f $(MON_COMPOSE) down
 	@docker compose -f $(COMPOSE_FILE) down
 
-monitoring:
-	@docker compose -f $(MON_COMPOSE) up -d
-mon-down:
-	@docker compose -f $(MON_COMPOSE) down
+
+# monitoring:
+	
+	
+# mon-down:
+	
+
+restart:
+	@docker compose -f $(COMPOSE_FILE) restart
+	@docker compose -f $(MON_COMPOSE) restart
+
 
 clean: down
 	@docker system prune -a -f

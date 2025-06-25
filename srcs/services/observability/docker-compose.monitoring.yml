@@ -48,6 +48,25 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
 
+  # ---------- Node Exporter ----------
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter
+    networks: [transnet]
+    ports:
+      - "9100:9100"
+    pid: host                  # share PID namespace (needed for some stats)
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/host/root:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/host/root'
+
+
+
 
 
 networks:
