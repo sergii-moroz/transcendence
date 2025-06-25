@@ -1,9 +1,8 @@
-import { Router } from "../router-static.js";
-import { iconHomeStats } from "./icons/icons.js"
+import { iconSmallArrowLeft } from "./icons/icons.js"
 
 export class simpleHeader extends HTMLElement {
 	backBtn: HTMLInputElement | null = null;
-	backTo: string | null = null;
+	amountPagesBack: string = '1';
 
 	constructor() {
 		super()
@@ -11,10 +10,8 @@ export class simpleHeader extends HTMLElement {
 	}
 
 	async connectedCallback() {
-		this.backTo = this.getAttribute('backTo');
-		if (this.backTo == '/profile') {
-			this.backTo = `/profile/${Router.username}`
-		}
+		this.amountPagesBack = this.getAttribute('amountPagesBack') || '1';
+
 		this.backBtn = this.querySelector("#back-btn");
 		this.backBtn!.addEventListener('click', this.clickHandler);
 	}
@@ -24,8 +21,7 @@ export class simpleHeader extends HTMLElement {
 	}
 
 	clickHandler = (event: Event) => {
-		if (this.backTo) return Router.navigateTo(this.backTo);
-		history.back();
+		history.go(Number(this.amountPagesBack) * -1);
 	}
 
 	private render() {
@@ -36,15 +32,11 @@ export class simpleHeader extends HTMLElement {
 				<div class="px-6 py-4 flex items-center">
 					<button id="back-btn" class="flex items-center gap-2 group cursor-pointer mr-6 hover:underline hover:underline-offset-4">
 						<div class="size-8 flex items-center justify-center rounded-full border border-gray-400 transition-colors group-hover:border-black group-hover:dark:border-white bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
-							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-								<path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-							</svg>
+							${iconSmallArrowLeft}
 						</div>
 						<span class="text-gray-700 dark:text-gray-200">Back</span>
 					</button>
 
-					
-					<!-- Page title with separators -->
 					<div class="flex-1 flex items-center">
 						<div class="h-8 w-0.5 bg-gray-300 dark:bg-gray-600 mr-4 rounded-full"></div>
 						<h1 class="text-2xl text-gray-900 dark:text-white tracking-tight font-bold">${title}</h1>
