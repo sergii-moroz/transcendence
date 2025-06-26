@@ -1,4 +1,4 @@
-import { Camera, Color3, Engine, HemisphericLight, Mesh, MeshBuilder, Scene, StandardMaterial, TrailMesh, UniversalCamera, Vector3 } from "@babylonjs/core"
+import { Camera, Color3, Engine, HDRCubeTexture, HemisphericLight, Mesh, MeshBuilder, PBRMaterial, Scene, StandardMaterial, TrailMesh, UniversalCamera, Vector3 } from "@babylonjs/core"
 import { gameJson, GameState } from "../types.js"
 import { Router } from "../router-static.js"
 
@@ -88,22 +88,26 @@ export class Game3D extends HTMLElement {
 
 		// Static camera setup - Orthographic projection
 		const camera = new UniversalCamera("camera", new Vector3(0, 0, -400), this.scene);
-		camera.mode = Camera.ORTHOGRAPHIC_CAMERA;
-		camera.orthoTop = this.fieldHeight;
-		camera.orthoBottom = -this.fieldHeight;
-		camera.orthoLeft = -this.fieldWidth;
-		camera.orthoRight = this.fieldWidth;
+		camera.mode = Camera.PERSPECTIVE_CAMERA//Camera.ORTHOGRAPHIC_CAMERA;
+		// camera.orthoTop = this.fieldHeight;
+		// camera.orthoBottom = -this.fieldHeight;
+		// camera.orthoLeft = -this.fieldWidth;
+		// camera.orthoRight = this.fieldWidth;
 		camera.rotation = new Vector3(0, 0, 0); // Lock rotation
 		camera.lockedTarget = Vector3.Zero(); // Look at center
 
 		// Alternative: Perspective camera fixed angle
-		// const camera = new Camera("camera", new Vector3(0, 250, -500), this.scene);
+		// const camera = new Camera("camera", new Vector3(0, 0, -500), this.scene);
 		// // camera.setTarget(Vector3.Zero());
-		// camera.fov = 0.5; // Narrow field of view
+		// camera.fov = 0.75; // Narrow field of view
 
 		// Lighting
-		new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene)
-		new HemisphericLight('light2', new Vector3(0 -1, 0), this.scene)
+		// new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene)
+		// new HemisphericLight('light2', new Vector3(0 -1, 0), this.scene)
+		const hdr = new HDRCubeTexture("../textures/abandoned_garage_1k.hdr", this.scene, 128, false, true, false, true);
+		this.scene.environmentTexture = hdr
+		// this.scene.createDefaultSkybox(hdr, true, 1000);
+		this.scene.environmentIntensity = 3.0;
 
 		// create game objects
 		this.createField()
@@ -143,19 +147,27 @@ export class Game3D extends HTMLElement {
 		ground.position.z = 1
 		ground.rotate(new Vector3(1, 0, 0), -Math.PI/2)
 
-		const groundMat = new StandardMaterial("groundMat", this.scene)
-		groundMat.diffuseColor = new Color3(0.2, 0.2, 0.2)
-		ground.material = groundMat
+		// const groundMat = new StandardMaterial("groundMat", this.scene)
+		// groundMat.diffuseColor = new Color3(0.2, 0.2, 0.2)
+		// ground.material = groundMat
+
+		const groundPBR = new PBRMaterial("groundPBR", this.scene)
+		groundPBR.albedoColor = new Color3(0.2, 0.2, 0.2)
+		groundPBR.metallic = 0.0
+		groundPBR.roughness = 0.5
+		ground.material = groundPBR
 	}
 
 	private createBall() {
 		if (!this.scene) return
 
 		this.ball = MeshBuilder.CreateSphere("ball", { diameter: 10 }, this.scene)
-		const ballMat = new StandardMaterial("ballMat", this.scene)
-		// ballMat.diffuseColor = new Color3(1, 1, 1)
-		ballMat.emissiveColor = new Color3(1, 1, 1)
-		ballMat.specularPower = 100
+		const ballMat = new PBRMaterial("ballMat", this.scene)
+		ballMat.albedoColor = new Color3(1, 1, 1)
+		ballMat.metallic = 0.0
+		ballMat.roughness = 0.5
+		// ballMat.emissiveColor = new Color3(1, 1, 1)
+		// ballMat.specularPower = 100
 		this.ball.material = ballMat
 
 		// Create ball trail
@@ -173,24 +185,28 @@ export class Game3D extends HTMLElement {
 		this.paddle1 = MeshBuilder.CreateBox("paddle1", {
 			width: 10,
 			height: 60,
-			depth: 5
+			depth: 10
 		}, this.scene)
 		this.paddle1.position.x = -this.fieldWidth + 5
 
-		const paddle1Mat = new StandardMaterial("paddle1Mat", this.scene)
-		paddle1Mat.diffuseColor = new Color3(0, 0.5, 1)
+		const paddle1Mat = new PBRMaterial("paddle1Mat", this.scene)
+		paddle1Mat.albedoColor = new Color3(0, 0.5, 1)
+		paddle1Mat.metallic = 0.0
+		paddle1Mat.roughness = 0.5
 		this.paddle1.material = paddle1Mat
 
 		// Player 2 paddle (red)
 		this.paddle2 = MeshBuilder.CreateBox("paddle2", {
 			width: 10,
 			height: 60,
-			depth: 5
+			depth: 10
 		}, this.scene)
 		this.paddle2.position.x = this.fieldWidth - 5
 
-		const paddle2Mat = new StandardMaterial("paddle2Mat", this.scene)
-		paddle2Mat.diffuseColor = new Color3(1, 0, 0.5)
+		const paddle2Mat = new PBRMaterial("paddle2Mat", this.scene)
+		paddle2Mat.albedoColor = new Color3(1, 0, 0.5)
+		paddle2Mat.metallic = 0.0
+		paddle2Mat.roughness = 0.5
 		this.paddle2.material = paddle2Mat
 	}
 
