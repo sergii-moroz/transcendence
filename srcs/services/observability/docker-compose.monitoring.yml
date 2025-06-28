@@ -21,13 +21,32 @@ services:
     ports: [ "5044:5044" ]
     depends_on: [elasticsearch]
 
+  
   kibana:
     image: docker.elastic.co/kibana/kibana:8.13.4
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     networks: [transnet]
-    ports: [ "5601:5601" ]
+    ports: ["5601:5601"]
+    volumes:
+      - ./kibana/ft_saved.ndjson:/tmp/ft_saved.ndjson:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
+      interval: 30s
+      retries: 20
+    command:
+      - bash
+      - -c
+      - |
+        /usr/local/bin/kibana-docker &
+        sleep 30
+        curl -s -X POST -H 'kbn-xsrf: true' \
+          http://localhost:5601/api/saved_objects/_import?overwrite=true \
+          --form file=@/tmp/ft_saved.ndjson
+        wait
     depends_on: [elasticsearch]
+  
+
 
   # ---------- Prometheus ----------
   prometheus:
@@ -48,6 +67,7 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
 
+
   # ---------- Node Exporter ----------
   node-exporter:
     image: prom/node-exporter:latest
@@ -55,7 +75,7 @@ services:
     networks: [transnet]
     ports:
       - "9100:9100"
-    pid: host                  # share PID namespace (needed for some stats)
+    pid: host                  
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
@@ -64,15 +84,5 @@ services:
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
       - '--path.rootfs=/host/root'
-
-
-
-
-
-networks:
-  transnet:               
-    external: true 
-
 volumes:
-  esdata:
-  grafana_data:
+  
