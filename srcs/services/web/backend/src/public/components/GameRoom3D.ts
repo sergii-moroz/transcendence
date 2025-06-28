@@ -1,6 +1,25 @@
-import { Camera, Color3, Engine, HDRCubeTexture, HemisphericLight, Mesh, MeshBuilder, PBRMaterial, Scene, StandardMaterial, TrailMesh, UniversalCamera, Vector3 } from "@babylonjs/core"
+import { ArcRotateCamera,
+	Camera,
+	Color3,
+	Color4,
+	Engine,
+	HDRCubeTexture,
+	Material,
+	Matrix,
+	Mesh,
+	MeshBuilder,
+	PBRMaterial,
+	Scene,
+	StandardMaterial,
+	Texture,
+	TrailMesh,
+	UniversalCamera,
+	Vector3
+} from "@babylonjs/core"
+
 import { gameJson, GameState } from "../types.js"
 import { Router } from "../router-static.js"
+import { HitEffect } from "../utils/hit-effect.js"
 
 export class Game3D extends HTMLElement {
 	private gameRoomId: string | null = null
@@ -22,6 +41,8 @@ export class Game3D extends HTMLElement {
 	private paddle2: Mesh | null = null
 	private fieldWidth = 250
 	private fieldHeight = 150
+
+	private hitEffect: HitEffect | null = null
 
 	constructor() {
 		super()
@@ -86,33 +107,39 @@ export class Game3D extends HTMLElement {
 		})
 		this.scene = new Scene(this.engine)
 
-		// Static camera setup - Orthographic projection
-		const camera = new UniversalCamera("camera", new Vector3(0, 0, -400), this.scene);
-		camera.mode = Camera.PERSPECTIVE_CAMERA//Camera.ORTHOGRAPHIC_CAMERA;
-		// camera.orthoTop = this.fieldHeight;
-		// camera.orthoBottom = -this.fieldHeight;
-		// camera.orthoLeft = -this.fieldWidth;
-		// camera.orthoRight = this.fieldWidth;
-		camera.rotation = new Vector3(0, 0, 0); // Lock rotation
-		camera.lockedTarget = Vector3.Zero(); // Look at center
+		// Static camera setup
+		// const camera = new UniversalCamera("camera", new Vector3(0, 0, -400), this.scene);
+		// camera.mode = Camera.PERSPECTIVE_CAMERA
+		// camera.rotation = new Vector3(0, 0, 0); // Lock rotation
+		// camera.lockedTarget = Vector3.Zero(); // Look at center
 
-		// Alternative: Perspective camera fixed angle
-		// const camera = new Camera("camera", new Vector3(0, 0, -500), this.scene);
-		// // camera.setTarget(Vector3.Zero());
-		// camera.fov = 0.75; // Narrow field of view
+		const camera = new ArcRotateCamera(
+			"camera",
+			-Math.PI / 2,
+			Math.PI / 2.5,
+			400,
+			Vector3.Zero(),
+			this.scene
+		);
+		camera.attachControl(this.canvas, true);
 
 		// Lighting
-		// new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene)
-		// new HemisphericLight('light2', new Vector3(0 -1, 0), this.scene)
-		const hdr = new HDRCubeTexture("../textures/abandoned_garage_1k.hdr", this.scene, 128, false, true, false, true);
+		const hdr = new HDRCubeTexture("../textures/citrus_orchard_road_puresky_1k.hdr", this.scene, 128, false, true, false, true);
+		const rotationMatrix = Matrix.RotationX(Math.PI / 2);
+		hdr.coordinatesMode = Texture.PROJECTION_MODE;
+		hdr.getReflectionTextureMatrix().multiplyToRef(rotationMatrix, hdr.getReflectionTextureMatrix());
+
 		this.scene.environmentTexture = hdr
-		// this.scene.createDefaultSkybox(hdr, true, 1000);
-		this.scene.environmentIntensity = 3.0;
+		// const skybox = this.scene.createDefaultSkybox(hdr, true, 1000, 0, true)
+		// if (!skybox) return
+		// skybox.rotation.x = -Math.PI / 2
+		// this.scene.environmentIntensity = 1.0;
 
 		// create game objects
 		this.createField()
 		this.createPaddles()
 		this.createBall()
+		this.hitEffect = new HitEffect(this.scene)
 
 		// Handle resize
 		this.resizeObserver = new ResizeObserver(() => {
@@ -144,12 +171,12 @@ export class Game3D extends HTMLElement {
 			width: this.fieldWidth * 2,
 			height: this.fieldHeight * 2
 		}, this.scene)
-		ground.position.z = 1
+		ground.position.z = 50
 		ground.rotate(new Vector3(1, 0, 0), -Math.PI/2)
 
-		// const groundMat = new StandardMaterial("groundMat", this.scene)
-		// groundMat.diffuseColor = new Color3(0.2, 0.2, 0.2)
-		// ground.material = groundMat
+		// // const groundMat = new StandardMaterial("groundMat", this.scene)
+		// // groundMat.diffuseColor = new Color3(0.2, 0.2, 0.2)
+		// // ground.material = groundMat
 
 		const groundPBR = new PBRMaterial("groundPBR", this.scene)
 		groundPBR.albedoColor = new Color3(0.2, 0.2, 0.2)
@@ -166,8 +193,6 @@ export class Game3D extends HTMLElement {
 		ballMat.albedoColor = new Color3(1, 1, 1)
 		ballMat.metallic = 0.0
 		ballMat.roughness = 0.5
-		// ballMat.emissiveColor = new Color3(1, 1, 1)
-		// ballMat.specularPower = 100
 		this.ball.material = ballMat
 
 		// Create ball trail
@@ -181,6 +206,8 @@ export class Game3D extends HTMLElement {
 	private createPaddles() {
 		if (!this.scene) return
 
+		// const pblue = new PointLight("pointLight1", new Vector3(-this.fieldWidth, 0, -3), this.scene)
+		// pblue.diffuse = new Color3(0, 0, 1)
 		// Player 1 paddle (blue)
 		this.paddle1 = MeshBuilder.CreateBox("paddle1", {
 			width: 10,
@@ -235,7 +262,12 @@ export class Game3D extends HTMLElement {
 			player2Name.textContent = this.latestState.scores.user2;
 		}
 
-		// Handle gameover
+		if (this.latestState.hit) {
+			this.hitEffect?.playHitEffect({
+				x: this.latestState.ball.x,
+				y: this.latestState.ball.y
+			})
+		}
 
 	}
 
@@ -327,4 +359,5 @@ export class Game3D extends HTMLElement {
 		this.scene = null
 		this.canvas = null
 	}
+
 }
