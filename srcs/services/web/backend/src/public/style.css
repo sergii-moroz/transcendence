@@ -100,7 +100,7 @@
 		@apply bg-primary text-gray-200 text-sm
 			font-bold rounded-md px-5 py-2.5 text-center border border-transparent
 			focus:ring-2 focus:outline-none focus:ring-primary cursor-pointer
-			hover:bg-primary/20 hover:text-primary hover:border-primary
+			hover:bg-gray-100 hover:text-primary hover:border-primary
 			dark:hover:bg-primary/10
 	}
 
