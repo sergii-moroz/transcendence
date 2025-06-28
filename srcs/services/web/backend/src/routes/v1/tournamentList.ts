@@ -5,11 +5,12 @@ import {
 } from "fastify"
 
 import { Tournament } from "../../services/tournament.js";
+import { authenticate } from "../../services/authService.js";
 
 export const tournamentListSock = async (app: FastifyInstance) => {
 	const tournamentListConns = new Array<[string, WebSocket]>();
 
-	app.get('/tournament-list', {websocket: true }, async (socket, req) => {
+	app.get('/tournament-list', {websocket: true, preHandler: [authenticate] }, async (socket, req) => {
 		let userId: string = req.user.id.toString();
 
 		connectUser(userId, socket);

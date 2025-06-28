@@ -1,19 +1,20 @@
 import {
 	FastifyInstance,
-	FastifyPluginOptions,
 	FastifyRequest
 } from "fastify"
-import { TournamentRoomRequest } from "../../types/tournament.js";
 import { Tournament } from "../../services/tournament.js";
+import { authenticate } from "../../services/authService.js";
 
 export const tournamentRoomSock = async (app: FastifyInstance) => {
 
-	app.get('/tournament/:tournamentId', { websocket: true }, (socket, req: TournamentRoomRequest) => {
+	app.get('/tournament/:tournamentId', { websocket: true, preHandler: [authenticate]}, (socket, req: FastifyRequest) => {
 		console.custom("INFO",`New WebSocket connection from ${req.user.id}`);
 		const userId = req.user.id.toString();
 		const userName = req.user.username;
-		const tournamentId = req.params.tournamentId;
+		const { tournamentId } = req.params as { tournamentId: string };
 		const tournament = app.tournaments.get(tournamentId) as Tournament;
+
+		// console.custom("WARN", `name: ${userName}, id: ${tournamentId}`);
 
 		if (!tournament) {
 			console.custom("WARN", 'User: ' + userName + ' tried to connect to a non-existing tournament: ' + tournamentId);
