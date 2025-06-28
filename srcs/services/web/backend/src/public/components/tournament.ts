@@ -26,7 +26,7 @@ export class Tournament extends HTMLElement {
 		this.innerHTML = `
 			<div class="tw-card px-6 py-11 w-full max-w-md text-center">
 				<h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
-					Waiting for other players to join the Tournament
+					Waiting for other players to join<br>the Tournament
 				</h2>
 				<div class="flex justify-center space-x-1 mt-2">
 					<div class="h-2 w-2 bg-gray-600 dark:bg-gray-300 rounded-full animate-bounce [animation-delay:0ms]"></div>
