@@ -14,7 +14,7 @@ import { matchmakingSock } from "./routes/v1/matchmaking.js";
 import { tournamentListSock } from "./routes/v1/tournamentList.js";
 import { tournamentRoomSock } from "./routes/v1/tournamentRoom.js";
 import { initializeDB } from "./db/init.js";
-import { Game } from "./services/game.js";
+import { Game } from "./services/aiGame.js";
 import { Tournament } from "./services/tournament.js";
 import { twoFARoutes } from "./routes/v1/2fa.routes.js";
 import { normalizeError } from "./errors/error.js";
