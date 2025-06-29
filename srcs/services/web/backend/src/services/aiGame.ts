@@ -174,7 +174,7 @@ export class Game {
 			// Send gameOver message
 			if (winner) {
 				winner.socket?.send(JSON.stringify({
-					type: 'gameOver',
+					type: 'victory',
 					message: `${winnerRole === 'player1'
 						? this.players.get('player1')!.username
 						: this.players.get('player2')!.username} wins!`,
@@ -184,7 +184,7 @@ export class Game {
 			}
 			if (loser) {
 				loser.socket?.send(JSON.stringify({
-					type: 'gameOver',
+					type: 'defeat',
 					message: `${winnerRole === 'player1'
 						? this.players.get('player1')!.username
 						: this.players.get('player2')!.username} wins!`,
@@ -239,7 +239,7 @@ export class Game {
 				player = role;
 			}
 		}
-		const STEP = 20;
+		const STEP = 3;
 		const MIN_Y = -150 + 30, MAX_Y = 150 - 30;
 		if (player == "player1") {
 			if (input === 'up' && this.state.paddles.player1.y > MIN_Y) {
