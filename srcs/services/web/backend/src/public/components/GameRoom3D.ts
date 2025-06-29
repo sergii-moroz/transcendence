@@ -1,15 +1,18 @@
-import { ArcRotateCamera,
+import { AbstractMesh, ArcRotateCamera,
 	Camera,
 	Color3,
 	Color4,
 	Engine,
 	HDRCubeTexture,
+	ImportMeshAsync,
+	ISceneLoaderAsyncResult,
 	Material,
 	Matrix,
 	Mesh,
 	MeshBuilder,
 	PBRMaterial,
 	Scene,
+	Space,
 	StandardMaterial,
 	Texture,
 	TrailMesh,
@@ -20,6 +23,7 @@ import { ArcRotateCamera,
 import { gameJson, GameState } from "../types.js"
 import { Router } from "../router-static.js"
 import { HitEffect } from "../utils/hit-effect.js"
+import { clamp, loadRandomCharacter } from "../utils/utils.js"
 
 export class Game3D extends HTMLElement {
 	private gameRoomId: string | null = null
@@ -36,9 +40,11 @@ export class Game3D extends HTMLElement {
 	private resizeObserver: ResizeObserver | null = null
 
 	// Game objects
-	private ball: Mesh | null = null
-	private paddle1: Mesh | null = null
-	private paddle2: Mesh | null = null
+	private ball: AbstractMesh | null = null
+	private character1: AbstractMesh | null = null
+	private character2: AbstractMesh | null = null
+	private paddle1: AbstractMesh | undefined = undefined
+	private paddle2: AbstractMesh | null = null
 	private fieldWidth = 250
 	private fieldHeight = 150
 
@@ -137,9 +143,10 @@ export class Game3D extends HTMLElement {
 
 		// create game objects
 		this.createField()
-		this.createPaddles()
+		// this.createPaddles()
 		this.createBall()
 		this.hitEffect = new HitEffect(this.scene)
+		this.createCharacter()
 
 		// Handle resize
 		this.resizeObserver = new ResizeObserver(() => {
@@ -171,12 +178,8 @@ export class Game3D extends HTMLElement {
 			width: this.fieldWidth * 2,
 			height: this.fieldHeight * 2
 		}, this.scene)
-		ground.position.z = 50
+		ground.position.z = 30
 		ground.rotate(new Vector3(1, 0, 0), -Math.PI/2)
-
-		// // const groundMat = new StandardMaterial("groundMat", this.scene)
-		// // groundMat.diffuseColor = new Color3(0.2, 0.2, 0.2)
-		// // ground.material = groundMat
 
 		const groundPBR = new PBRMaterial("groundPBR", this.scene)
 		groundPBR.albedoColor = new Color3(0.2, 0.2, 0.2)
@@ -203,51 +206,51 @@ export class Game3D extends HTMLElement {
 		this.ballTrail.material = trailMat
 	}
 
-	private createPaddles() {
+	private async createCharacter() {
 		if (!this.scene) return
 
-		// const pblue = new PointLight("pointLight1", new Vector3(-this.fieldWidth, 0, -3), this.scene)
-		// pblue.diffuse = new Color3(0, 0, 1)
-		// Player 1 paddle (blue)
-		this.paddle1 = MeshBuilder.CreateBox("paddle1", {
-			width: 10,
-			height: 60,
-			depth: 10
-		}, this.scene)
+		this.character1 = await loadRandomCharacter(this.scene)
+		this.character1.rotate(new Vector3(0, 0, 1), Math.PI / 2, Space.WORLD);
+		this.character1.position.x = -this.fieldWidth - 5
+		this.character1.position.z = 30
+
+		this.character2 = await loadRandomCharacter(this.scene)
+		this.character2.rotate(new Vector3(0, 0, 1), -Math.PI / 2, Space.WORLD);
+		this.character2.position.x = this.fieldWidth + 5
+		this.character2.position.z = 30
+
+		this.paddle1 = await this.loadPaddle(this.scene)
+		this.paddle2 = await this.loadPaddle(this.scene)
+		this.paddle1.scaling = new Vector3(20, 20, 20)
+		this.paddle2.scaling = new Vector3(20, 20, 20)
 		this.paddle1.position.x = -this.fieldWidth + 5
-
-		const paddle1Mat = new PBRMaterial("paddle1Mat", this.scene)
-		paddle1Mat.albedoColor = new Color3(0, 0.5, 1)
-		paddle1Mat.metallic = 0.0
-		paddle1Mat.roughness = 0.5
-		this.paddle1.material = paddle1Mat
-
-		// Player 2 paddle (red)
-		this.paddle2 = MeshBuilder.CreateBox("paddle2", {
-			width: 10,
-			height: 60,
-			depth: 10
-		}, this.scene)
 		this.paddle2.position.x = this.fieldWidth - 5
-
-		const paddle2Mat = new PBRMaterial("paddle2Mat", this.scene)
-		paddle2Mat.albedoColor = new Color3(1, 0, 0.5)
-		paddle2Mat.metallic = 0.0
-		paddle2Mat.roughness = 0.5
-		this.paddle2.material = paddle2Mat
 	}
 
 	private updateGameObjects() {
-		if (!this.latestState || !this.ball || !this.paddle1 || !this.paddle2) return
+		if (!this.latestState || !this.ball || !this.character1 || !this.character2) return
+		if (!this.paddle1 || !this.paddle2) return
 
 		// update ball position
 		this.ball.position.x = this.latestState.ball.x
 		this.ball.position.y = this.latestState.ball.y
 		this.ball.position.z = 0
 
-		// Update paddle1
-		this.paddle1.position.y = this.latestState.paddles.player1.y
-		this.paddle2.position.y = this.latestState.paddles.player2.y
+		// Update paddles
+		this.character1.position.y = this.latestState.paddles.player1.y
+		this.character2.position.y = this.latestState.paddles.player2.y
+
+		const deltaY1 = this.ball.position.y - this.character1.position.y
+		const clampedY1 = clamp(deltaY1, -25, 25)
+		this.paddle1.position.y = this.character1.position.y + clampedY1
+		this.paddle1.rotationQuaternion = null
+		this.paddle1.rotation.x = (clampedY1 / 25) * (Math.PI / 2) + Math.PI
+
+		const deltaY2 = this.ball.position.y - this.character2.position.y
+		const clampedY2 = clamp(deltaY2, -25, 25)
+		this.paddle2.position.y = this.character2.position.y + clampedY2
+		this.paddle2.rotationQuaternion = null
+		this.paddle2.rotation.x = (clampedY2 / 25) * (Math.PI / 2) + Math.PI
 
 		// Update scores
 		const player1Score = this.querySelector('#player1-score');
@@ -300,7 +303,6 @@ export class Game3D extends HTMLElement {
 				};
 				console.log('Game over:', data.message, data.winner, data.tournamentId);
 				setTimeout(() => {
-					// this.socket?.send(JSON.stringify({ type: 'exit' }));
 					if(data.tournamentId !== null) {
 						console.log("Redirecting to tournament:", data.tournamentId);
 						Router.navigateTo(`/tournament/${data.tournamentId}`);
@@ -360,4 +362,15 @@ export class Game3D extends HTMLElement {
 		this.canvas = null
 	}
 
+	private async loadPaddle(scene: Scene):Promise<AbstractMesh> {
+		try {
+			const result: ISceneLoaderAsyncResult = await ImportMeshAsync(
+				"../models/paddle.glb", scene
+			)
+			const mesh = result.meshes[0]
+			return mesh
+		} catch (error) {
+			return MeshBuilder.CreateBox("paddle10", { width: 1, height: 10, depth: 10 }, this.scene )
+		}
+	}
 }
