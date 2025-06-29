@@ -53,12 +53,15 @@ export class Tournament {
 
 	handleReconnect(socket: WebSocket, id: string) {
 		if (this.knownIds.has(id) && this.knownIds.get(id) === false) {
+			if(this.deleteTimeout) {
+				clearTimeout(this.deleteTimeout);
+			}
 			this.players = this.players.filter(([pid]) => pid !== id);
 			this.players.push([id, socket]);
-			console.custom('INFO', `Tournament: Player ${id} reconnected`);
+			console.custom('DEBUG', `Tournament: Player ${id} reconnected`);
 
 			const remaining = Array.from(this.knownIds.entries()).filter(([_, eliminated]) => !eliminated);
-			console.custom('INFO', `Tournament: Remaining players after rejoin: ${remaining.map(([id]) => id).join(', ')}`);
+			console.custom('DEBUG', `Tournament: Remaining players after rejoin: ${remaining.map(([id]) => id).join(', ')}`);
 
 			if (remaining.length === 1) {
 				this.handleVictory(remaining[0][0]);
@@ -67,6 +70,24 @@ export class Tournament {
 			if(this.players.length === remaining.length && this.isRunning) {
 				console.custom('INFO', `Tournament: Starting next round...`);
 				this.startTournament();
+			} else if (this.isRunning) {
+				this.deleteTimeout = setTimeout(() => {
+					if (this.players.length == 1){
+						this.players.forEach(([pid, playerSocket]) => {
+							this.handleVictory(pid);
+						});
+					} else {
+						this.players.forEach(([pid, playerSocket]) => {
+							playerSocket.send(JSON.stringify({
+								type: 'Error',
+								message: `Tournament is inactive, stats will not be saved. Exiting...`,
+								tournamentId: this.id
+							}));
+						});
+						this.app.tournaments.delete(this.id);
+						console.custom('INFO', `Tournament: Inactive tournament ${this.id} deleted`);
+					}
+				}, 90000); // 90 seconds of inactivity before deletion
 			}
 		} else if (this.knownIds.has(id) && this.knownIds.get(id) === true) {
 			socket.send(JSON.stringify({
@@ -115,9 +136,28 @@ export class Tournament {
 
 			await new Promise(resolve => setTimeout(resolve, 50));
 
-			redirectToGameRoom(game.gameRoomId, [player1, player2]);
-			console.custom('INFO', `Tournament: Game room ${game.gameRoomId} created with players ${player1[0]} and ${player2[0]}`);
+			this.redirectToGameRoom(game.gameRoomId, player1, player2);
+			console.custom('DEBUG', `Tournament: Game room ${game.gameRoomId} created with players ${player1[0]} and ${player2[0]}`);
 		}
+	}
+
+	redirectToGameRoom(gameRoomId: string, player1: [string, WebSocket], player2: [string, WebSocket]) {
+		const message1 = JSON.stringify({
+			type: 'redirectingToGame',
+			gameRoomId: gameRoomId,
+			opponentId: player2[0],
+			message: `Redirecting to game room: ${gameRoomId}`
+		});
+
+		const message2 = JSON.stringify({
+			type: 'redirectingToGame',
+			gameRoomId: gameRoomId,
+			opponentId: player1[0],
+			message: `Redirecting to game room: ${gameRoomId}`
+		});
+
+		player1[1].send(message1);
+		player2[1].send(message2);
 	}
 
 	async detectWinners() {
@@ -146,9 +186,8 @@ export class Tournament {
 
 	async startTournament() {
 		this.isRunning = true;
-		// Check if the winner has not been found yet
 		await this.matchPlayers();
-		console.custom('INFO', `Tournament: Players matched, waiting for games to finish...`);
+		console.custom('DEBUG', `Tournament: Players matched, waiting for games to finish...`);
 		this.detectWinners();
 	}
 }

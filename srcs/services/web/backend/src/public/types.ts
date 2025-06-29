@@ -14,6 +14,7 @@ export interface WsMatchMakingMessage {
 	message?: string;
 	gameRoomId?: string;
 	tournamentId?: string;
+	opponentId?: string;
 }
 
 export interface GameState {
