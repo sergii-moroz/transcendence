@@ -2,7 +2,6 @@ import {
 	FastifyInstance,
 } from "fastify"
 
-// import { Game } from "../../services/game.js";
 import { GAME_MODES } from "../../public/types/game-history.types.js";
 import { Game } from "../../services/aiGame.js";
 
