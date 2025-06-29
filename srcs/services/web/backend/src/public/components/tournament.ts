@@ -24,8 +24,14 @@ export class Tournament extends HTMLElement {
 
 	render = () => {
 		this.innerHTML = `
-			<h2>In the tournament, waiting for other players...</h2>
-			<p id="waiting-message">Waiting for other players to join...</p>
+			<div class="flex flex-col items-center justify-center mb-8">
+				<h2 class="text-4xl text-center font-bold">TOURNAMENT</h2>
+			</div>
+			<div class="flex flex-col items-center mb-2">
+				<!-- Loading spinner -->
+				<div class="animate-spin rounded-full h-15 w-15 border-t-4 border-b-4 border-black-400 dark:border-white-400"></div>
+				<p id="waiting-message" class="text-sm text-gray-400 text-center mt-2">Waiting for other players...</p>
+			</div>
 		`;
 	}
 
@@ -52,15 +58,16 @@ export class Tournament extends HTMLElement {
 
 		if (data.type === 'redirectingToGame') {
 			console.log(`Redirecting to game room: ${data.gameRoomId}`);
+			document.getElementById('waiting-message')!.textContent = `Matching up against ${data.opponentId}...`;
+
 			setTimeout(() => {
 				Router.navigateTo('/game/' + data.gameRoomId);
-			}, 100);
+			}, 2000);
 		}
 
 		if (data.type === 'victory') {
 			console.log(`Victory message: ${data.message}`);
-			alert(`Victory! ${data.message}`);
-			Router.navigateTo('/home');
+			Router.navigateTo('/tournament-victory-screen');
 		}
 
 		if (data.type === 'Error') {
