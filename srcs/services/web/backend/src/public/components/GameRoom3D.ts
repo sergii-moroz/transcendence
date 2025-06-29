@@ -32,6 +32,7 @@ export class Game3D extends HTMLElement {
 	private gameOver: boolean = false
 	private gameOverMessage: { message: string, winner: string } | null = null
 	private ballTrail: TrailMesh | null = null
+	private keysPressed: { [key: string]: boolean } = {};
 
 	// Babylon.js components
 	private canvas: HTMLCanvasElement | null = null
@@ -59,7 +60,8 @@ export class Game3D extends HTMLElement {
 		this.render()
 		this.handleSocket()
 		this.initializeScene()
-		document.addEventListener('keydown', this.handleUserInput)
+		document.addEventListener('keydown', this.handleKeyDown);
+		document.addEventListener('keyup', this.handleKeyUp);
 	}
 
 	disconnectedCallback() {
@@ -67,7 +69,8 @@ export class Game3D extends HTMLElement {
 		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
 			this.socket.close()
 		}
-		document.removeEventListener('keydown', this.handleUserInput)
+		document.removeEventListener('keydown', this.handleKeyDown);
+		document.removeEventListener('keyup', this.handleKeyUp);
 	}
 
 	private render() {
@@ -158,6 +161,7 @@ export class Game3D extends HTMLElement {
 		this.engine.runRenderLoop(() => {
 			this.scene?.render()
 			this.updateGameObjects()
+			this.sendInput();
 		})
 	}
 
@@ -302,14 +306,12 @@ export class Game3D extends HTMLElement {
 					winner: data.winner as string
 				};
 				console.log('Game over:', data.message, data.winner, data.tournamentId);
-				setTimeout(() => {
-					if(data.tournamentId !== null) {
-						console.log("Redirecting to tournament:", data.tournamentId);
-						Router.navigateTo(`/tournament/${data.tournamentId}`);
-					} else {
-						Router.navigateTo('/victory-screen');
+				if (data.tournamentId !== null) {
+					console.log("Redirecting to tournament:", data.tournamentId);
+					Router.navigateTo(`/tournament/${data.tournamentId}`);
+				} else {
+					Router.navigateTo('/victory-screen');
 					}
-				}, 3000);
 			}
 
 			if (data.type === 'defeat') {
@@ -319,10 +321,7 @@ export class Game3D extends HTMLElement {
 					winner: data.winner as string
 				};
 				console.log('Game over:', data.message, data.winner, data.tournamentId);
-				setTimeout(() => {
-					// this.socket?.send(JSON.stringify({ type: 'exit' }));
-					Router.navigateTo('/loss-screen');
-				}, 3000);
+				Router.navigateTo('/loss-screen');
 			}
 		};
 
@@ -338,19 +337,34 @@ export class Game3D extends HTMLElement {
 		};
 	}
 
-	handleUserInput = (e: KeyboardEvent) => {
+	handleKeyDown = (e: KeyboardEvent) => {
 		if (this.gameOver) return;
-		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-			if (e.key === 'ArrowUp') {
-				e.preventDefault();
-				this.socket.send(JSON.stringify({ type: 'input', input: 'down' }));
-			}
-			if (e.key === 'ArrowDown') {
-				e.preventDefault();
-				this.socket.send(JSON.stringify({ type: 'input', input: 'up' }));
-			}
+		if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+			e.preventDefault();
+			this.keysPressed[e.key] = true;
 		}
 	};
+
+	handleKeyUp = (e: KeyboardEvent) => {
+		if (this.gameOver) return;
+		if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+			e.preventDefault();
+			this.keysPressed[e.key] = false;
+		}
+	};
+
+	sendInput = () => {
+		if (this.gameOver || !this.socket) {
+			return;
+		}
+
+		if (this.keysPressed['ArrowUp']) {
+			this.socket.send(JSON.stringify({ type: 'input', input: 'down' }));
+		}
+		if (this.keysPressed['ArrowDown']) {
+			this.socket.send(JSON.stringify({ type: 'input', input: 'up' }));
+		}
+	}
 
 	private cleanup() {
 		this.resizeObserver?.disconnect()

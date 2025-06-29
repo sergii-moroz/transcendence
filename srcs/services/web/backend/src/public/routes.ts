@@ -142,6 +142,11 @@ export const routes: tRoutes = {
 		title: `Play History | ${APP_TITLE}`,
 		description: "User's play history"
 	},
+	"/singleplayer": {
+		template: "/templates/singleplayer.html",
+		title: `Singleplayer | ${APP_TITLE}`,
+		description: "Singleplayer mode"
+	},
 
 	"/settings/password/reset": {
 		template: "/templates/profile/password/reset.html",
@@ -158,12 +163,6 @@ export const routes: tRoutes = {
 		template: "/templates/profile/profile.html",
 		title: `Password Reset Verify | ${APP_TITLE}`,
 		description: "Password Reset Verify"
-	},
-
-	"/singleplayer": {
-		template: "/templates/singleplayer.html",
-		title: `Singleplayer | ${APP_TITLE}`,
-		description: "Singleplayer"
 	},
 
 	"/loss-screen": {
