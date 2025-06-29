@@ -59,12 +59,12 @@ export class Tournament {
 
 			const remaining = Array.from(this.knownIds.entries()).filter(([_, eliminated]) => !eliminated);
 			console.custom('INFO', `Tournament: Remaining players after rejoin: ${remaining.map(([id]) => id).join(', ')}`);
+
 			if (remaining.length === 1) {
 				this.handleVictory(remaining[0][0]);
 				return;
 			}
-
-			if(this.isRunning) {
+			if(this.players.length === remaining.length && this.isRunning) {
 				console.custom('INFO', `Tournament: Starting next round...`);
 				this.startTournament();
 			}
