@@ -1,5 +1,4 @@
 import { FastifyInstance } from 'fastify';
-// import { Game } from './game.js';
 import crypto from 'crypto';
 import { redirectToGameRoom } from '../routes/v1/matchmaking.js';
 import { db } from '../db/connections.js';
