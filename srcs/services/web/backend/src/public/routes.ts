@@ -165,12 +165,6 @@ export const routes: tRoutes = {
 		description: "Password Reset Verify"
 	},
 
-	"/singleplayer": {
-		template: "/templates/singleplayer.html",
-		title: `Singleplayer | ${APP_TITLE}`,
-		description: "Singleplayer"
-	},
-
 	"/loss-screen": {
 		template: "/templates/loss-screen.html",
 		title: `Loss Screen | ${APP_TITLE}`,
