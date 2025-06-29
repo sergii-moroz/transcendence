@@ -27,8 +27,9 @@ export interface GameState {
 		player2: number;
 		user1: string;
 		user2: string;
-	};
-};
+	},
+	hit: boolean
+}
 
 export interface gameJson {
 	type: string;

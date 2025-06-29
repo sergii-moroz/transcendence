@@ -1,6 +1,29 @@
-import { Camera, Color3, Engine, HemisphericLight, Mesh, MeshBuilder, Scene, StandardMaterial, TrailMesh, UniversalCamera, Vector3 } from "@babylonjs/core"
+import { AbstractMesh, ArcRotateCamera,
+	Camera,
+	Color3,
+	Color4,
+	Engine,
+	HDRCubeTexture,
+	ImportMeshAsync,
+	ISceneLoaderAsyncResult,
+	Material,
+	Matrix,
+	Mesh,
+	MeshBuilder,
+	PBRMaterial,
+	Scene,
+	Space,
+	StandardMaterial,
+	Texture,
+	TrailMesh,
+	UniversalCamera,
+	Vector3
+} from "@babylonjs/core"
+
 import { gameJson, GameState } from "../types.js"
 import { Router } from "../router-static.js"
+import { HitEffect } from "../utils/hit-effect.js"
+import { clamp, loadRandomCharacter } from "../utils/utils.js"
 
 export class Game3D extends HTMLElement {
 	private gameRoomId: string | null = null
@@ -18,11 +41,15 @@ export class Game3D extends HTMLElement {
 	private resizeObserver: ResizeObserver | null = null
 
 	// Game objects
-	private ball: Mesh | null = null
-	private paddle1: Mesh | null = null
-	private paddle2: Mesh | null = null
+	private ball: AbstractMesh | null = null
+	private character1: AbstractMesh | null = null
+	private character2: AbstractMesh | null = null
+	private paddle1: AbstractMesh | undefined = undefined
+	private paddle2: AbstractMesh | null = null
 	private fieldWidth = 250
 	private fieldHeight = 150
+
+	private hitEffect: HitEffect | null = null
 
 	constructor() {
 		super()
@@ -89,29 +116,40 @@ export class Game3D extends HTMLElement {
 		})
 		this.scene = new Scene(this.engine)
 
-		// Static camera setup - Orthographic projection
-		const camera = new UniversalCamera("camera", new Vector3(0, 0, -400), this.scene);
-		camera.mode = Camera.ORTHOGRAPHIC_CAMERA;
-		camera.orthoTop = this.fieldHeight;
-		camera.orthoBottom = -this.fieldHeight;
-		camera.orthoLeft = -this.fieldWidth;
-		camera.orthoRight = this.fieldWidth;
-		camera.rotation = new Vector3(0, 0, 0); // Lock rotation
-		camera.lockedTarget = Vector3.Zero(); // Look at center
+		// Static camera setup
+		// const camera = new UniversalCamera("camera", new Vector3(0, 0, -400), this.scene);
+		// camera.mode = Camera.PERSPECTIVE_CAMERA
+		// camera.rotation = new Vector3(0, 0, 0); // Lock rotation
+		// camera.lockedTarget = Vector3.Zero(); // Look at center
 
-		// Alternative: Perspective camera fixed angle
-		// const camera = new Camera("camera", new Vector3(0, 250, -500), this.scene);
-		// // camera.setTarget(Vector3.Zero());
-		// camera.fov = 0.5; // Narrow field of view
+		const camera = new ArcRotateCamera(
+			"camera",
+			-Math.PI / 2,
+			Math.PI / 2.5,
+			400,
+			Vector3.Zero(),
+			this.scene
+		);
+		camera.attachControl(this.canvas, true);
 
 		// Lighting
-		new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene)
-		new HemisphericLight('light2', new Vector3(0 -1, 0), this.scene)
+		const hdr = new HDRCubeTexture("../textures/citrus_orchard_road_puresky_1k.hdr", this.scene, 128, false, true, false, true);
+		const rotationMatrix = Matrix.RotationX(Math.PI / 2);
+		hdr.coordinatesMode = Texture.PROJECTION_MODE;
+		hdr.getReflectionTextureMatrix().multiplyToRef(rotationMatrix, hdr.getReflectionTextureMatrix());
+
+		this.scene.environmentTexture = hdr
+		// const skybox = this.scene.createDefaultSkybox(hdr, true, 1000, 0, true)
+		// if (!skybox) return
+		// skybox.rotation.x = -Math.PI / 2
+		// this.scene.environmentIntensity = 1.0;
 
 		// create game objects
 		this.createField()
-		this.createPaddles()
+		// this.createPaddles()
 		this.createBall()
+		this.hitEffect = new HitEffect(this.scene)
+		this.createCharacter()
 
 		// Handle resize
 		this.resizeObserver = new ResizeObserver(() => {
@@ -144,22 +182,24 @@ export class Game3D extends HTMLElement {
 			width: this.fieldWidth * 2,
 			height: this.fieldHeight * 2
 		}, this.scene)
-		ground.position.z = 1
+		ground.position.z = 30
 		ground.rotate(new Vector3(1, 0, 0), -Math.PI/2)
 
-		const groundMat = new StandardMaterial("groundMat", this.scene)
-		groundMat.diffuseColor = new Color3(0.2, 0.2, 0.2)
-		ground.material = groundMat
+		const groundPBR = new PBRMaterial("groundPBR", this.scene)
+		groundPBR.albedoColor = new Color3(0.2, 0.2, 0.2)
+		groundPBR.metallic = 0.0
+		groundPBR.roughness = 0.5
+		ground.material = groundPBR
 	}
 
 	private createBall() {
 		if (!this.scene) return
 
 		this.ball = MeshBuilder.CreateSphere("ball", { diameter: 10 }, this.scene)
-		const ballMat = new StandardMaterial("ballMat", this.scene)
-		// ballMat.diffuseColor = new Color3(1, 1, 1)
-		ballMat.emissiveColor = new Color3(1, 1, 1)
-		ballMat.specularPower = 100
+		const ballMat = new PBRMaterial("ballMat", this.scene)
+		ballMat.albedoColor = new Color3(1, 1, 1)
+		ballMat.metallic = 0.0
+		ballMat.roughness = 0.5
 		this.ball.material = ballMat
 
 		// Create ball trail
@@ -170,45 +210,51 @@ export class Game3D extends HTMLElement {
 		this.ballTrail.material = trailMat
 	}
 
-	private createPaddles() {
+	private async createCharacter() {
 		if (!this.scene) return
 
-		// Player 1 paddle (blue)
-		this.paddle1 = MeshBuilder.CreateBox("paddle1", {
-			width: 10,
-			height: 60,
-			depth: 5
-		}, this.scene)
+		this.character1 = await loadRandomCharacter(this.scene)
+		this.character1.rotate(new Vector3(0, 0, 1), Math.PI / 2, Space.WORLD);
+		this.character1.position.x = -this.fieldWidth - 5
+		this.character1.position.z = 30
+
+		this.character2 = await loadRandomCharacter(this.scene)
+		this.character2.rotate(new Vector3(0, 0, 1), -Math.PI / 2, Space.WORLD);
+		this.character2.position.x = this.fieldWidth + 5
+		this.character2.position.z = 30
+
+		this.paddle1 = await this.loadPaddle(this.scene)
+		this.paddle2 = await this.loadPaddle(this.scene)
+		this.paddle1.scaling = new Vector3(20, 20, 20)
+		this.paddle2.scaling = new Vector3(20, 20, 20)
 		this.paddle1.position.x = -this.fieldWidth + 5
-
-		const paddle1Mat = new StandardMaterial("paddle1Mat", this.scene)
-		paddle1Mat.diffuseColor = new Color3(0, 0.5, 1)
-		this.paddle1.material = paddle1Mat
-
-		// Player 2 paddle (red)
-		this.paddle2 = MeshBuilder.CreateBox("paddle2", {
-			width: 10,
-			height: 60,
-			depth: 5
-		}, this.scene)
 		this.paddle2.position.x = this.fieldWidth - 5
-
-		const paddle2Mat = new StandardMaterial("paddle2Mat", this.scene)
-		paddle2Mat.diffuseColor = new Color3(1, 0, 0.5)
-		this.paddle2.material = paddle2Mat
 	}
 
 	private updateGameObjects() {
-		if (!this.latestState || !this.ball || !this.paddle1 || !this.paddle2) return
+		if (!this.latestState || !this.ball || !this.character1 || !this.character2) return
+		if (!this.paddle1 || !this.paddle2) return
 
 		// update ball position
 		this.ball.position.x = this.latestState.ball.x
 		this.ball.position.y = this.latestState.ball.y
 		this.ball.position.z = 0
 
-		// Update paddle1
-		this.paddle1.position.y = this.latestState.paddles.player1.y
-		this.paddle2.position.y = this.latestState.paddles.player2.y
+		// Update paddles
+		this.character1.position.y = this.latestState.paddles.player1.y
+		this.character2.position.y = this.latestState.paddles.player2.y
+
+		const deltaY1 = this.ball.position.y - this.character1.position.y
+		const clampedY1 = clamp(deltaY1, -25, 25)
+		this.paddle1.position.y = this.character1.position.y + clampedY1
+		this.paddle1.rotationQuaternion = null
+		this.paddle1.rotation.x = (clampedY1 / 25) * (Math.PI / 2) + Math.PI
+
+		const deltaY2 = this.ball.position.y - this.character2.position.y
+		const clampedY2 = clamp(deltaY2, -25, 25)
+		this.paddle2.position.y = this.character2.position.y + clampedY2
+		this.paddle2.rotationQuaternion = null
+		this.paddle2.rotation.x = (clampedY2 / 25) * (Math.PI / 2) + Math.PI
 
 		// Update scores
 		const player1Score = this.querySelector('#player1-score');
@@ -223,7 +269,13 @@ export class Game3D extends HTMLElement {
 			player2Name.textContent = this.latestState.scores.user2;
 		}
 
-		// Handle gameover
+		if (this.latestState.hit) {
+			this.hitEffect?.playHitEffect({
+				x: this.latestState.ball.x,
+				y: this.latestState.ball.y
+			})
+		}
+
 	}
 
 	handleSocket = () => {
@@ -322,5 +374,17 @@ export class Game3D extends HTMLElement {
 		}
 		this.scene = null
 		this.canvas = null
+	}
+
+	private async loadPaddle(scene: Scene):Promise<AbstractMesh> {
+		try {
+			const result: ISceneLoaderAsyncResult = await ImportMeshAsync(
+				"../models/paddle.glb", scene
+			)
+			const mesh = result.meshes[0]
+			return mesh
+		} catch (error) {
+			return MeshBuilder.CreateBox("paddle10", { width: 1, height: 10, depth: 10 }, this.scene )
+		}
 	}
 }
