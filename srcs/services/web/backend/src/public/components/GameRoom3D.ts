@@ -1,14 +1,13 @@
-import { AbstractMesh, ArcRotateCamera,
+import {
+	AbstractMesh,
+	ArcRotateCamera,
 	Camera,
 	Color3,
-	Color4,
 	Engine,
 	HDRCubeTexture,
 	ImportMeshAsync,
 	ISceneLoaderAsyncResult,
-	Material,
 	Matrix,
-	Mesh,
 	MeshBuilder,
 	PBRMaterial,
 	Scene,
@@ -17,13 +16,14 @@ import { AbstractMesh, ArcRotateCamera,
 	Texture,
 	TrailMesh,
 	UniversalCamera,
-	Vector3
+	Vector3,
 } from "@babylonjs/core"
 
 import { gameJson, GameState } from "../types.js"
 import { Router } from "../router-static.js"
 import { HitEffect } from "../utils/hit-effect.js"
 import { clamp, loadRandomCharacter } from "../utils/utils.js"
+import { ScoreBoard } from "../utils/score.js"
 
 export class Game3D extends HTMLElement {
 	private gameRoomId: string | null = null
@@ -50,6 +50,7 @@ export class Game3D extends HTMLElement {
 	private fieldHeight = 150
 
 	private hitEffect: HitEffect | null = null
+	private scoreBoard: ScoreBoard | null = null
 
 	constructor() {
 		super()
@@ -75,33 +76,9 @@ export class Game3D extends HTMLElement {
 
 	private render() {
 		this.innerHTML = `
-		<div class="relative z-0">
-			<canvas class="w-full h-full block "></canvas>
-			<!-- HUD Overlay -->
-			<div class="absolute inset-0 pointer-events-none z-10">
-				<!-- Score Display -->
-				<div class="flex justify-between p-5 w-full">
-					<!-- Player 1 Score -->
-					<div class="bg-black bg-opacity-50 text-white px-5 py-3 rounded-md border-2 border-blue-400 min-w-[120px] text-center">
-						<div id="player1-score" class="text-4xl font-bold">0</div>
-						<div id="player1-name" class="text-base mt-1">Player 1</div>
-					</div>
-
-					<!-- Player 2 Score -->
-					<div class="bg-black bg-opacity-50 text-white px-5 py-3 rounded-md border-2 border-pink-500 min-w-[120px] text-center">
-						<div id="player2-score" class="text-4xl font-bold">0</div>
-						<div id="player2-name" class="text-base mt-1">Player 2</div>
-					</div>
-				</div>
-
-				<!-- Game Message Center -->
-				<div id="game-message" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
-					bg-black bg-opacity-70 text-white px-10 py-5 rounded-xl text-center max-w-[80%] hidden">
-					<h2 class="text-2xl font-bold mb-2" id="message-text"></h2>
-					<h3 class="text-xl" id="winner-text"></h3>
-					<p class="mt-3">Redirecting in 3 seconds...</p>
-				</div>
-			</div></div>
+			<div class="relative z-0">
+				<canvas class="w-full h-full block "></canvas>
+			</div>
 		`
 	}
 
@@ -151,6 +128,8 @@ export class Game3D extends HTMLElement {
 		this.createBall()
 		this.hitEffect = new HitEffect(this.scene)
 		this.createCharacter()
+		this.scoreBoard = new ScoreBoard(this.scene)
+		this.scoreBoard.setPosition(0, 150, 0)
 
 		// Handle resize
 		this.resizeObserver = new ResizeObserver(() => {
@@ -166,7 +145,7 @@ export class Game3D extends HTMLElement {
 		})
 	}
 
-	private createField() {
+	private async createField() {
 		if (!this.scene) return
 		// Create field boundaries
 		const linePoints = [
@@ -179,18 +158,8 @@ export class Game3D extends HTMLElement {
 		MeshBuilder.CreateLines("walls", { points: linePoints }, this.scene)
 
 		// Create floor
-		const ground = MeshBuilder.CreateGround("ground", {
-			width: this.fieldWidth * 2,
-			height: this.fieldHeight * 2
-		}, this.scene)
+		const ground = await this.loadField(this.scene)
 		ground.position.z = 30
-		ground.rotate(new Vector3(1, 0, 0), -Math.PI/2)
-
-		const groundPBR = new PBRMaterial("groundPBR", this.scene)
-		groundPBR.albedoColor = new Color3(0.2, 0.2, 0.2)
-		groundPBR.metallic = 0.0
-		groundPBR.roughness = 0.5
-		ground.material = groundPBR
 	}
 
 	private createBall() {
@@ -257,18 +226,7 @@ export class Game3D extends HTMLElement {
 		this.paddle2.rotationQuaternion = null
 		this.paddle2.rotation.x = (clampedY2 / 25) * (Math.PI / 2) + Math.PI
 
-		// Update scores
-		const player1Score = this.querySelector('#player1-score');
-		const player2Score = this.querySelector('#player2-score');
-		const player1Name = this.querySelector('#player1-name');
-		const player2Name = this.querySelector('#player2-name');
-
-		if (player1Score && player2Score && player1Name && player2Name) {
-			player1Score.textContent = this.latestState.scores.player1.toString();
-			player2Score.textContent = this.latestState.scores.player2.toString();
-			player1Name.textContent = this.latestState.scores.user1;
-			player2Name.textContent = this.latestState.scores.user2;
-		}
+		this.scoreBoard?.updateScore(this.latestState.scores.player1, this.latestState.scores.player2, this.latestState.scores.user1, this.latestState.scores.user2)
 
 		if (this.latestState.hit) {
 			this.hitEffect?.playHitEffect({
@@ -306,7 +264,7 @@ export class Game3D extends HTMLElement {
 					message: data.message as string,
 					winner: data.winner as string
 				};
-				console.log('Game over:', data.message, data.winner, data.tournamentId);
+				// console.log('Game over:', data.message, data.winner, data.tournamentId);
 				if (data.tournamentId !== null) {
 					console.log("Redirecting to tournament:", data.tournamentId);
 					Router.navigateTo(`/tournament/${data.tournamentId}`);
@@ -321,7 +279,7 @@ export class Game3D extends HTMLElement {
 					message: data.message as string,
 					winner: data.winner as string
 				};
-				console.log('Game over:', data.message, data.winner, data.tournamentId);
+				// console.log('Game over:', data.message, data.winner, data.tournamentId);
 				Router.navigateTo('/loss-screen');
 			}
 		};
@@ -381,6 +339,18 @@ export class Game3D extends HTMLElement {
 		try {
 			const result: ISceneLoaderAsyncResult = await ImportMeshAsync(
 				"../models/paddle.glb", scene
+			)
+			const mesh = result.meshes[0]
+			return mesh
+		} catch (error) {
+			return MeshBuilder.CreateBox("paddle10", { width: 1, height: 10, depth: 10 }, this.scene )
+		}
+	}
+
+	private async loadField(scene: Scene):Promise<AbstractMesh> {
+		try {
+			const result: ISceneLoaderAsyncResult = await ImportMeshAsync(
+				"../models/field.glb", scene
 			)
 			const mesh = result.meshes[0]
 			return mesh
