@@ -1,4 +1,4 @@
-version: "3.9"
+#version: "3.9"
 
 services:
   # ---------- ELK ----------
@@ -84,5 +84,11 @@ services:
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
       - '--path.rootfs=/host/root'
+
 volumes:
-  
+  esdata:
+  grafana_data:
+
+networks:
+  transnet:
+    external: true
