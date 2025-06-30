@@ -21,6 +21,7 @@ export class Game {
 	winnerId: string | null;
 	tournamentId: string | null;
 	private game_mode: GAME_MODES = GAME_MODES.Multiplayer
+	private gameStartTime: number = 0
 
 	constructor(tournamentId: string | null = null, game_mode: GAME_MODES = GAME_MODES.Multiplayer) {
 		this.tournamentId = tournamentId;
@@ -100,6 +101,7 @@ export class Game {
 
 	startLoop() {
 		this.gameRunning = true;
+		this.gameStartTime = Date.now()
 		let frameCounter: number = 0;
 		const FIELD_X = 250, FIELD_Y = 150;
 		const PADDLE_X1 = -FIELD_X + 10, PADDLE_X2 = FIELD_X - 10;
@@ -228,7 +230,7 @@ export class Game {
 				player2Id: parseInt(this.players.get('player2')!.id),
 				score1: this.state.scores.player1,
 				score2: this.state.scores.player2,
-				duration: 42,
+				duration: Math.floor((Date.now() - this.gameStartTime) / 1000),
 				techWin: false
 			}
 			saveGameResults(gameResults)
