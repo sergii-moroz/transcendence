@@ -74,3 +74,20 @@ project/
 ├── tsconfig.json
 └── .env
 ```
+
+
+
+# log Grafana
+docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml logs -f grafana
+
+# log logstash
+docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml logs -f logstash
+
+
+#  health 
+docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml exec grafana \
+  curl -s localhost:3000/api/health
+
+# plagin
+docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml exec grafana \
+  grafana-cli plugins ls
