@@ -1,6 +1,5 @@
 import {
 	AbstractMesh,
-	ArcRotateCamera,
 	Camera,
 	Color3,
 	Engine,
@@ -39,6 +38,7 @@ export class Game3D extends HTMLElement {
 	private engine: Engine | null = null
 	private scene: Scene | null = null
 	private resizeObserver: ResizeObserver | null = null
+	private cameras: Camera[] = []
 
 	// Game objects
 	private ball: AbstractMesh | null = null
@@ -95,10 +95,25 @@ export class Game3D extends HTMLElement {
 
 		// Static camera setup
 		const alpha = 15
-		const camera = new UniversalCamera("camera", new Vector3(0, -400 * Math.sin(alpha * Math.PI / 180), -400 * Math.cos(alpha * Math.PI / 180)), this.scene);
+		const camera = new UniversalCamera("camera-1", new Vector3(0, -400 * Math.sin(alpha * Math.PI / 180), -400 * Math.cos(alpha * Math.PI / 180)), this.scene);
 		camera.mode = Camera.PERSPECTIVE_CAMERA
 		camera.rotation = new Vector3(0, 0, 0); // Lock rotation
 		camera.lockedTarget = Vector3.Zero(); // Look at center
+		this.cameras.push(camera)
+
+		const camera2 = new UniversalCamera("camera-2", new Vector3(400, 0, -400), this.scene);
+		camera2.mode = Camera.PERSPECTIVE_CAMERA
+		camera2.rotation.z = Math.PI/2
+		camera2.rotation.y = -40 / 90 * Math.PI/2
+		this.cameras.push(camera2)
+
+		const camera3 = new UniversalCamera("camera-3", new Vector3(-400, 0, -400), this.scene);
+		camera3.mode = Camera.PERSPECTIVE_CAMERA
+		camera3.rotation.z = -Math.PI/2
+		camera3.rotation.y = 40 / 90 * Math.PI/2
+		this.cameras.push(camera3)
+
+		// this.scene.activeCamera = camera2
 
 		// const camera = new ArcRotateCamera(
 		// 	"camera",
@@ -129,7 +144,7 @@ export class Game3D extends HTMLElement {
 		this.hitEffect = new HitEffect(this.scene)
 		this.createCharacter()
 		this.scoreBoard = new ScoreBoard(this.scene)
-		this.scoreBoard.setPosition(0, 150, 0)
+		this.scoreBoard.setPosition(0, 149.5, 0)
 
 		// Handle resize
 		this.resizeObserver = new ResizeObserver(() => {
@@ -297,41 +312,78 @@ export class Game3D extends HTMLElement {
 	}
 
 	handleKeyDown = (e: KeyboardEvent) => {
-		if (this.gameOver) return;
-		if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+		if (!this.scene || this.gameOver) return;
+		// if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
 			e.preventDefault();
-			this.keysPressed[e.key] = true;
-		}
+			if (e.key === '1') {
+				this.scene.activeCamera = this.cameras[0]
+			} else if (e.key === '2') {
+				this.scene.activeCamera = this.cameras[1]
+			} else if (e.key === '3') {
+				this.scene.activeCamera = this.cameras[2]
+			} else {
+				this.keysPressed[e.key] = true;
+			}
+		// }
 	};
 
 	handleKeyUp = (e: KeyboardEvent) => {
 		if (this.gameOver) return;
-		if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+		// if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
 			e.preventDefault();
 			this.keysPressed[e.key] = false;
-		}
+		// }
 	};
 
 	sendInput = () => {
-		if (this.gameOver || !this.socket) {
-			return;
-		}
+		if (this.gameOver || !this.socket || !this.scene?.activeCamera) return
 
-		if (this.keysPressed['ArrowUp']) {
-			this.socket.send(JSON.stringify({ type: 'input', input: 'down' }));
+		const activeCameraName = this.scene.activeCamera.name
+		switch (activeCameraName) {
+			case "camera-1":
+				if (this.keysPressed['ArrowUp']) {
+					this.socket.send(JSON.stringify({ type: 'input', input: 'down' }));
+				}
+				if (this.keysPressed['ArrowDown']) {
+					this.socket.send(JSON.stringify({ type: 'input', input: 'up' }));
+				}
+				break
+			case "camera-2":
+				if (this.keysPressed['ArrowRight']) {
+					this.socket.send(JSON.stringify({ type: 'input', input: 'down' }));
+				}
+				if (this.keysPressed['ArrowLeft']) {
+					this.socket.send(JSON.stringify({ type: 'input', input: 'up' }));
+				}
+				break
+			case "camera-3":
+				if (this.keysPressed['ArrowRight']) {
+					this.socket.send(JSON.stringify({ type: 'input', input: 'up' }));
+				}
+				if (this.keysPressed['ArrowLeft']) {
+					this.socket.send(JSON.stringify({ type: 'input', input: 'down' }));
+				}
+				break
 		}
-		if (this.keysPressed['ArrowDown']) {
-			this.socket.send(JSON.stringify({ type: 'input', input: 'up' }));
-		}
+		// if (this.keysPressed['ArrowUp'] || this.keysPressed['ArrowRight']) {
+		// 	this.socket.send(JSON.stringify({ type: 'input', input: 'down' }));
+		// }
+		// if (this.keysPressed['ArrowDown'] || this.keysPressed['ArrowLeft']) {
+		// 	this.socket.send(JSON.stringify({ type: 'input', input: 'up' }));
+		// }
 	}
 
 	private cleanup() {
 		this.resizeObserver?.disconnect()
+
 		if (this.engine) {
 			this.engine.dispose()
 			this.engine = null
 		}
+
+		this.scene?.dispose()
 		this.scene = null
+
 		this.canvas = null
 	}
 
