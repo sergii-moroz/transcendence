@@ -117,20 +117,21 @@ export class Game3D extends HTMLElement {
 		this.scene = new Scene(this.engine)
 
 		// Static camera setup
-		// const camera = new UniversalCamera("camera", new Vector3(0, 0, -400), this.scene);
-		// camera.mode = Camera.PERSPECTIVE_CAMERA
-		// camera.rotation = new Vector3(0, 0, 0); // Lock rotation
-		// camera.lockedTarget = Vector3.Zero(); // Look at center
+		const alpha = 15
+		const camera = new UniversalCamera("camera", new Vector3(0, -400 * Math.sin(alpha * Math.PI / 180), -400 * Math.cos(alpha * Math.PI / 180)), this.scene);
+		camera.mode = Camera.PERSPECTIVE_CAMERA
+		camera.rotation = new Vector3(0, 0, 0); // Lock rotation
+		camera.lockedTarget = Vector3.Zero(); // Look at center
 
-		const camera = new ArcRotateCamera(
-			"camera",
-			-Math.PI / 2,
-			Math.PI / 2.5,
-			400,
-			Vector3.Zero(),
-			this.scene
-		);
-		camera.attachControl(this.canvas, true);
+		// const camera = new ArcRotateCamera(
+		// 	"camera",
+		// 	-Math.PI / 2,
+		// 	Math.PI / 2.5,
+		// 	400,
+		// 	Vector3.Zero(),
+		// 	this.scene
+		// );
+		// camera.attachControl(this.canvas, true);
 
 		// Lighting
 		const hdr = new HDRCubeTexture("../textures/citrus_orchard_road_puresky_1k.hdr", this.scene, 128, false, true, false, true);

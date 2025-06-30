@@ -12,7 +12,8 @@ export class Game {
 			player1: {y: number},
 			player2: {y: number}
 		},
-		scores: { player1: number, player2: number, user1: string, user2: string }
+		scores: { player1: number, player2: number, user1: string, user2: string },
+		hit: boolean
 	};
 	standardBallSpeed: number;
 	gameRoomId: string;
@@ -31,7 +32,8 @@ export class Game {
 				player1: { y: 0 },
 				player2: { y: 0 }
 			},
-			scores: { player1: 0, player2: 0, user1: 'bing', user2: 'AI' }
+			scores: { player1: 0, player2: 0, user1: 'bing', user2: 'AI' },
+			hit: false
 		};
 		this.winnerId = null;
 		this.gameRoomId = crypto.randomBytes(16).toString('hex');
@@ -105,6 +107,7 @@ export class Game {
 		setInterval(() => {
 			frameCounter++;
 			if(!this.gameRunning) return;
+			this.state.hit = false
 			// Update ball position
 			this.state.ball.x += this.state.ball.dx;
 			this.state.ball.y += this.state.ball.dy;
@@ -121,6 +124,7 @@ export class Game {
 				this.state.ball.dx *= -1;
 				this.state.ball.dx *= 1.05; // Increase speed after hitting paddle
 				this.state.ball.dy *= 1.05; // Increase speed after hitting paddle
+				this.state.hit = true
 			} else if (
 				this.state.ball.x >= PADDLE_X2 &&
 				Math.abs(this.state.ball.y - this.state.paddles.player2.y) < PADDLE_HEIGHT
@@ -128,11 +132,13 @@ export class Game {
 				this.state.ball.dx *= -1;
 				this.state.ball.dx *= 1.05; // Increase speed after hitting paddle
 				this.state.ball.dy *= 1.05; // Increase speed after hitting paddle
+				this.state.hit = true
 			}
 
 			// Ball collision with walls
 			if (this.state.ball.y <= -FIELD_Y || this.state.ball.y >= FIELD_Y) {
 				this.state.ball.dy *= -1;
+				this.state.hit = true
 			}
 
 			// Scoring
