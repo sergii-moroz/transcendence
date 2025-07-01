@@ -6,7 +6,7 @@ import { db } from '../db/connections.js';
 
 export class Tournament {
 	games: Map<string, Game>;
-	players: Array<[id: string, socket: WebSocket]>;
+	players: Array<[id: string, name: string, socket: WebSocket]>;
 	knownIds: Map<string, boolean>; // true = eliminated, false = not eliminated
 	allConnected: boolean;
 	activeGames: number;
@@ -15,26 +15,38 @@ export class Tournament {
 	maxPlayers: number;
 	app: FastifyInstance;
 	deleteTimeout: NodeJS.Timeout | null = null;
+	round: number = 0;
+	matchups: Array<{
+		gameId: string,
+		round: number,
+		p1:{id: string, name: string, score: number},
+		p2:{id: string, name: string, score: number},
+		winnerId: string | null
+	}>
 
 	constructor(app: FastifyInstance, maxPlayers: number) {
 		this.app = app;
+		this.id = crypto.randomBytes(16).toString('hex');
+
 		this.games = new Map();
 		this.players = new Array();
 		this.knownIds = new Map();
+		this.matchups = new Array();
+		
 		this.allConnected = false;
 		this.isRunning = false;
+		
 		this.activeGames = 0;
 		this.maxPlayers = maxPlayers || 4;
-		this.id = crypto.randomBytes(16).toString('hex');
 	}
 
-	addPlayer(socket: WebSocket, id: string) {
+	addPlayer(socket: WebSocket, id: string, name: string) {
 		if(this.allConnected){
-			this.handleReconnect(socket, id);
+			this.handleReconnect(socket, id, name);
 			return;
 		} else if(this.players.length !== this.maxPlayers) { // Add player
 			this.players = this.players.filter(([pid]) => pid !== id);
-			this.players.push([id, socket]);
+			this.players.push([id, name, socket]);
 			this.knownIds.set(id, false);
 			console.custom('INFO', `Tournament: Player ${id} joined (${this.players.length}/4)`);
 		} else if (this.players.length === this.maxPlayers) { // Forbid joining if full
@@ -51,13 +63,13 @@ export class Tournament {
 		}
 	}
 
-	handleReconnect(socket: WebSocket, id: string) {
+	handleReconnect(socket: WebSocket, id: string, name: string) {
 		if (this.knownIds.has(id) && this.knownIds.get(id) === false) {
 			if(this.deleteTimeout) {
 				clearTimeout(this.deleteTimeout);
 			}
 			this.players = this.players.filter(([pid]) => pid !== id);
-			this.players.push([id, socket]);
+			this.players.push([id, name, socket]);
 			console.custom('DEBUG', `Tournament: Player ${id} reconnected`);
 
 			const remaining = Array.from(this.knownIds.entries()).filter(([_, eliminated]) => !eliminated);
@@ -77,7 +89,7 @@ export class Tournament {
 							this.handleVictory(pid);
 						});
 					} else {
-						this.players.forEach(([pid, playerSocket]) => {
+						this.players.forEach(([pid, name, playerSocket]) => {
 							playerSocket.send(JSON.stringify({
 								type: 'Error',
 								message: `Tournament is inactive, stats will not be saved. Exiting...`,
@@ -107,7 +119,7 @@ export class Tournament {
 	handleVictory(finalWinnerId: string) {
 		this.isRunning = false;
 		console.custom('INFO', `Tournament: Tournament finished with winner ${finalWinnerId}`);
-		const winnerSocket = this.players.find(([id]) => id === finalWinnerId)?.[1];
+		const winnerSocket = this.players.find(([id]) => id === finalWinnerId)?.[2];
 
 		if (winnerSocket) {
 			winnerSocket.send(JSON.stringify({
@@ -125,9 +137,21 @@ export class Tournament {
 	}
 
 	async matchPlayers() {
-		while(this.isRunning && this.players.length > 1) {
-			const player1 = this.players.shift()!;
-			const player2 = this.players.shift()!;
+		let advancingPlayers: Array<[string, string, WebSocket]>;
+		if (this.round === 1) {
+			advancingPlayers = [...this.players];
+		} else {
+			const prevRound = this.round - 1;
+			const winnerIds = this.matchups
+				.filter(m => m.round === prevRound && m.winnerId)
+				.map(m => m.winnerId!);
+			advancingPlayers = winnerIds
+				.map(wid => this.players.find(([id]) => id === wid))
+				.filter(Boolean) as Array<[string, string, WebSocket]>;
+		}
+		while(this.isRunning && advancingPlayers.length > 1) {
+			const player1 = advancingPlayers.shift()!;
+			const player2 = advancingPlayers.shift()!;
 
 			const game = new Game(this.id);
 			this.activeGames++;
@@ -141,10 +165,11 @@ export class Tournament {
 		}
 	}
 
-	redirectToGameRoom(gameRoomId: string, player1: [string, WebSocket], player2: [string, WebSocket]) {
+	redirectToGameRoom(gameRoomId: string, player1: [string, string, WebSocket], player2: [string, string, WebSocket]) {
 		const message1 = JSON.stringify({
 			type: 'redirectingToGame',
 			gameRoomId: gameRoomId,
+			opponentName: player2[1],
 			opponentId: player2[0],
 			message: `Redirecting to game room: ${gameRoomId}`
 		});
@@ -152,12 +177,13 @@ export class Tournament {
 		const message2 = JSON.stringify({
 			type: 'redirectingToGame',
 			gameRoomId: gameRoomId,
+			opponentName: player1[1],
 			opponentId: player1[0],
 			message: `Redirecting to game room: ${gameRoomId}`
 		});
 
-		player1[1].send(message1);
-		player2[1].send(message2);
+		player1[2].send(message1);
+		player2[2].send(message2);
 	}
 
 	async detectWinners() {
@@ -176,6 +202,8 @@ export class Tournament {
 							console.custom('DEBUG', `Eliminated: ${player.id}, knownIds: ${Array.from(this.knownIds.entries())}`);
 						}
 					}
+					this.addMatchup(game);
+					this.sendMatchupData();
 					this.activeGames--;
 					this.games.delete(game.gameRoomId);
 					this.app.gameInstances.delete(game.gameRoomId);
@@ -184,8 +212,38 @@ export class Tournament {
 		}, 500);
 	}
 
+	addMatchup(game: Game) {
+		const player1 = game.players.get('player1')!;
+		const player2 = game.players.get('player2')!;
+		this.matchups.push({
+			gameId: game.gameRoomId,
+			round: this.round,
+			p1: { id: player1.id, name: player1.username, score: game.state.scores.player1 },
+			p2: { id: player2.id, name: player2.username, score: game.state.scores.player2 },
+			winnerId: game.winnerId
+		});
+	}
+
+	sendMatchupData() {
+		const matchupData = this.matchups.map(match => ({
+			gameId: match.gameId,
+			round: match.round,
+			p1: match.p1,
+			p2: match.p2,
+			winnerId: match.winnerId
+		}));
+		this.players.forEach(([id, name, socket]) => {
+			socket.send(JSON.stringify({
+				type: 'matchupData',
+				tournamentId: this.id,
+				matchups: matchupData
+			}));
+		});
+	}
+
 	async startTournament() {
 		this.isRunning = true;
+		this.round++;
 		await this.matchPlayers();
 		console.custom('DEBUG', `Tournament: Players matched, waiting for games to finish...`);
 		this.detectWinners();
