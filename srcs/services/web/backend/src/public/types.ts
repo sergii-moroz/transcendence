@@ -19,6 +19,7 @@ export interface WsMatchMakingMessage {
 	opponentId?: string;
 	opponentName?: string;
 	matchups?: Matchup[];
+	maxPlayers?: number;
 }
 
 export interface GameState {

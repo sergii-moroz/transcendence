@@ -225,18 +225,21 @@ export class Tournament {
 	}
 
 	sendMatchupData() {
-		const matchupData = this.matchups.map(match => ({
+		const matchupData = this.matchups.length > 0
+		? this.matchups.map(match => ({
 			gameId: match.gameId,
 			round: match.round,
 			p1: match.p1,
 			p2: match.p2,
 			winnerId: match.winnerId
-		}));
+		}))
+		: null;
 		this.players.forEach(([id, name, socket]) => {
 			socket.send(JSON.stringify({
 				type: 'matchupData',
 				tournamentId: this.id,
-				matchups: matchupData
+				matchups: matchupData ,
+				maxPlayers: this.maxPlayers,
 			}));
 		});
 	}
