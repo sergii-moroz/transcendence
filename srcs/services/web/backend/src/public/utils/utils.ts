@@ -1,3 +1,5 @@
+import { AbstractMesh, ImportMeshAsync, ISceneLoaderAsyncResult, Scene, Space, Vector3 } from "@babylonjs/core";
+
 export const formatString = (str: string, groupSize: number = 4, separator: string = "-"): string => {
 	if (str.length === 0) {
 		return "";
@@ -65,4 +67,31 @@ export const generateBackupCodesImage = (codes: string[]) => {
 		a.click();
 		URL.revokeObjectURL(url);
 	}, 'image/png');
+}
+
+export const clamp = (value: number, min: number, max: number) => {
+	return Math.min(Math.max(value, min), max)
+}
+
+export const loadRandomCharacter = async (scene: Scene): Promise<AbstractMesh> => {
+	// Generate random character suffix (a-r)
+	const randomChar = String.fromCharCode(97 + Math.floor(Math.random() * 18))
+	const modelPath = `../models/characters/character-${randomChar}.glb`
+
+	try {
+		const result: ISceneLoaderAsyncResult = await ImportMeshAsync(
+			modelPath, scene
+		)
+		const mesh = result.meshes[0]
+
+		mesh.position = Vector3.Zero()
+		mesh.scaling = new Vector3(20, 20, 20)
+
+		mesh.rotate(new Vector3(1, 0, 0), -Math.PI / 2, Space.WORLD);
+
+		return mesh
+	} catch (error) {
+		console.error("Failed to load character:", error)
+		throw error
+	}
 }

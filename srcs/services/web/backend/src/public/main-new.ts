@@ -31,6 +31,7 @@ import { UserGameHistory } from "./components/history/user-game-history.js";
 import { CollapsedView } from "./components/sidebar/sidebarCollapsed.js";
 import { FriendListView } from "./components/sidebar/sidebarFriendList.js";
 import { ChatView } from "./components/sidebar/sidebarChat.js";
+import { SinglePlayerRoom } from "./components/singleplayer.js";
 import { LeaderboardCard } from "./components/leaderboard/leaderboard-card.js";
 import { ButtonPasswordReset } from "./components/2fa/button-reset.js";
 import { PasswordResetForm } from "./components/settings/password-reset-form.js";
@@ -92,6 +93,7 @@ customElements.define('match-making', Matchmaking)
 
 // Game
 customElements.define('game-room', GameRoom)
+customElements.define('singleplayer-game', SinglePlayerRoom);
 customElements.define('loss-screen', LossScreen)
 customElements.define('victory-screen', VictoryScreen)
 

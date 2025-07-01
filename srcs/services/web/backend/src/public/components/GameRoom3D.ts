@@ -1,6 +1,28 @@
-import { Camera, Color3, Engine, HemisphericLight, Mesh, MeshBuilder, Scene, StandardMaterial, TrailMesh, UniversalCamera, Vector3 } from "@babylonjs/core"
+import {
+	AbstractMesh,
+	Camera,
+	Color3,
+	Engine,
+	HDRCubeTexture,
+	ImportMeshAsync,
+	ISceneLoaderAsyncResult,
+	Matrix,
+	MeshBuilder,
+	PBRMaterial,
+	Scene,
+	Space,
+	StandardMaterial,
+	Texture,
+	TrailMesh,
+	UniversalCamera,
+	Vector3,
+} from "@babylonjs/core"
+
 import { gameJson, GameState } from "../types.js"
 import { Router } from "../router-static.js"
+import { HitEffect } from "../utils/hit-effect.js"
+import { clamp, loadRandomCharacter } from "../utils/utils.js"
+import { ScoreBoard } from "../utils/score.js"
 
 export class Game3D extends HTMLElement {
 	private gameRoomId: string | null = null
@@ -9,19 +31,26 @@ export class Game3D extends HTMLElement {
 	private gameOver: boolean = false
 	private gameOverMessage: { message: string, winner: string } | null = null
 	private ballTrail: TrailMesh | null = null
+	private keysPressed: { [key: string]: boolean } = {};
 
 	// Babylon.js components
 	private canvas: HTMLCanvasElement | null = null
 	private engine: Engine | null = null
 	private scene: Scene | null = null
 	private resizeObserver: ResizeObserver | null = null
+	private cameras: Camera[] = []
 
 	// Game objects
-	private ball: Mesh | null = null
-	private paddle1: Mesh | null = null
-	private paddle2: Mesh | null = null
+	private ball: AbstractMesh | null = null
+	private character1: AbstractMesh | null = null
+	private character2: AbstractMesh | null = null
+	private paddle1: AbstractMesh | undefined = undefined
+	private paddle2: AbstractMesh | null = null
 	private fieldWidth = 250
 	private fieldHeight = 150
+
+	private hitEffect: HitEffect | null = null
+	private scoreBoard: ScoreBoard | null = null
 
 	constructor() {
 		super()
@@ -32,7 +61,8 @@ export class Game3D extends HTMLElement {
 		this.render()
 		this.handleSocket()
 		this.initializeScene()
-		document.addEventListener('keydown', this.handleUserInput)
+		document.addEventListener('keydown', this.handleKeyDown);
+		document.addEventListener('keyup', this.handleKeyUp);
 	}
 
 	disconnectedCallback() {
@@ -40,38 +70,15 @@ export class Game3D extends HTMLElement {
 		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
 			this.socket.close()
 		}
-		document.removeEventListener('keydown', this.handleUserInput)
+		document.removeEventListener('keydown', this.handleKeyDown);
+		document.removeEventListener('keyup', this.handleKeyUp);
 	}
 
 	private render() {
 		this.innerHTML = `
-		<div class="relative z-0">
-			<canvas class="w-full h-full block "></canvas>
-			<!-- HUD Overlay -->
-			<div class="absolute inset-0 pointer-events-none z-10">
-				<!-- Score Display -->
-				<div class="flex justify-between p-5 w-full">
-					<!-- Player 1 Score -->
-					<div class="bg-black bg-opacity-50 text-white px-5 py-3 rounded-md border-2 border-blue-400 min-w-[120px] text-center">
-						<div id="player1-score" class="text-4xl font-bold">0</div>
-						<div id="player1-name" class="text-base mt-1">Player 1</div>
-					</div>
-
-					<!-- Player 2 Score -->
-					<div class="bg-black bg-opacity-50 text-white px-5 py-3 rounded-md border-2 border-pink-500 min-w-[120px] text-center">
-						<div id="player2-score" class="text-4xl font-bold">0</div>
-						<div id="player2-name" class="text-base mt-1">Player 2</div>
-					</div>
-				</div>
-
-				<!-- Game Message Center -->
-				<div id="game-message" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2
-					bg-black bg-opacity-70 text-white px-10 py-5 rounded-xl text-center max-w-[80%] hidden">
-					<h2 class="text-2xl font-bold mb-2" id="message-text"></h2>
-					<h3 class="text-xl" id="winner-text"></h3>
-					<p class="mt-3">Redirecting in 3 seconds...</p>
-				</div>
-			</div></div>
+			<div class="relative z-0">
+				<canvas class="w-full h-full block "></canvas>
+			</div>
 		`
 	}
 
@@ -86,29 +93,58 @@ export class Game3D extends HTMLElement {
 		})
 		this.scene = new Scene(this.engine)
 
-		// Static camera setup - Orthographic projection
-		const camera = new UniversalCamera("camera", new Vector3(0, 0, -400), this.scene);
-		camera.mode = Camera.ORTHOGRAPHIC_CAMERA;
-		camera.orthoTop = this.fieldHeight;
-		camera.orthoBottom = -this.fieldHeight;
-		camera.orthoLeft = -this.fieldWidth;
-		camera.orthoRight = this.fieldWidth;
+		// Static camera setup
+		const alpha = 15
+		const camera = new UniversalCamera("camera-1", new Vector3(0, -400 * Math.sin(alpha * Math.PI / 180), -400 * Math.cos(alpha * Math.PI / 180)), this.scene);
+		camera.mode = Camera.PERSPECTIVE_CAMERA
 		camera.rotation = new Vector3(0, 0, 0); // Lock rotation
 		camera.lockedTarget = Vector3.Zero(); // Look at center
+		this.cameras.push(camera)
 
-		// Alternative: Perspective camera fixed angle
-		// const camera = new Camera("camera", new Vector3(0, 250, -500), this.scene);
-		// // camera.setTarget(Vector3.Zero());
-		// camera.fov = 0.5; // Narrow field of view
+		const camera2 = new UniversalCamera("camera-2", new Vector3(400, 0, -400), this.scene);
+		camera2.mode = Camera.PERSPECTIVE_CAMERA
+		camera2.rotation.z = Math.PI/2
+		camera2.rotation.y = -40 / 90 * Math.PI/2
+		this.cameras.push(camera2)
+
+		const camera3 = new UniversalCamera("camera-3", new Vector3(-400, 0, -400), this.scene);
+		camera3.mode = Camera.PERSPECTIVE_CAMERA
+		camera3.rotation.z = -Math.PI/2
+		camera3.rotation.y = 40 / 90 * Math.PI/2
+		this.cameras.push(camera3)
+
+		// this.scene.activeCamera = camera2
+
+		// const camera = new ArcRotateCamera(
+		// 	"camera",
+		// 	-Math.PI / 2,
+		// 	Math.PI / 2.5,
+		// 	400,
+		// 	Vector3.Zero(),
+		// 	this.scene
+		// );
+		// camera.attachControl(this.canvas, true);
 
 		// Lighting
-		new HemisphericLight('light1', new Vector3(0, 1, 0), this.scene)
-		new HemisphericLight('light2', new Vector3(0 -1, 0), this.scene)
+		const hdr = new HDRCubeTexture("../textures/citrus_orchard_road_puresky_1k.hdr", this.scene, 128, false, true, false, true);
+		const rotationMatrix = Matrix.RotationX(Math.PI / 2);
+		hdr.coordinatesMode = Texture.PROJECTION_MODE;
+		hdr.getReflectionTextureMatrix().multiplyToRef(rotationMatrix, hdr.getReflectionTextureMatrix());
+
+		this.scene.environmentTexture = hdr
+		// const skybox = this.scene.createDefaultSkybox(hdr, true, 1000, 0, true)
+		// if (!skybox) return
+		// skybox.rotation.x = -Math.PI / 2
+		// this.scene.environmentIntensity = 1.0;
 
 		// create game objects
 		this.createField()
-		this.createPaddles()
+		// this.createPaddles()
 		this.createBall()
+		this.hitEffect = new HitEffect(this.scene)
+		this.createCharacter()
+		this.scoreBoard = new ScoreBoard(this.scene)
+		this.scoreBoard.setPosition(0, 149.5, 0)
 
 		// Handle resize
 		this.resizeObserver = new ResizeObserver(() => {
@@ -120,10 +156,11 @@ export class Game3D extends HTMLElement {
 		this.engine.runRenderLoop(() => {
 			this.scene?.render()
 			this.updateGameObjects()
+			this.sendInput();
 		})
 	}
 
-	private createField() {
+	private async createField() {
 		if (!this.scene) return
 		// Create field boundaries
 		const linePoints = [
@@ -136,26 +173,18 @@ export class Game3D extends HTMLElement {
 		MeshBuilder.CreateLines("walls", { points: linePoints }, this.scene)
 
 		// Create floor
-		const ground = MeshBuilder.CreateGround("ground", {
-			width: this.fieldWidth * 2,
-			height: this.fieldHeight * 2
-		}, this.scene)
-		ground.position.z = 1
-		ground.rotate(new Vector3(1, 0, 0), -Math.PI/2)
-
-		const groundMat = new StandardMaterial("groundMat", this.scene)
-		groundMat.diffuseColor = new Color3(0.2, 0.2, 0.2)
-		ground.material = groundMat
+		const ground = await this.loadField(this.scene)
+		ground.position.z = 30
 	}
 
 	private createBall() {
 		if (!this.scene) return
 
 		this.ball = MeshBuilder.CreateSphere("ball", { diameter: 10 }, this.scene)
-		const ballMat = new StandardMaterial("ballMat", this.scene)
-		// ballMat.diffuseColor = new Color3(1, 1, 1)
-		ballMat.emissiveColor = new Color3(1, 1, 1)
-		ballMat.specularPower = 100
+		const ballMat = new PBRMaterial("ballMat", this.scene)
+		ballMat.albedoColor = new Color3(1, 1, 1)
+		ballMat.metallic = 0.0
+		ballMat.roughness = 0.5
 		this.ball.material = ballMat
 
 		// Create ball trail
@@ -166,60 +195,60 @@ export class Game3D extends HTMLElement {
 		this.ballTrail.material = trailMat
 	}
 
-	private createPaddles() {
+	private async createCharacter() {
 		if (!this.scene) return
 
-		// Player 1 paddle (blue)
-		this.paddle1 = MeshBuilder.CreateBox("paddle1", {
-			width: 10,
-			height: 60,
-			depth: 5
-		}, this.scene)
+		this.character1 = await loadRandomCharacter(this.scene)
+		this.character1.rotate(new Vector3(0, 0, 1), Math.PI / 2, Space.WORLD);
+		this.character1.position.x = -this.fieldWidth - 5
+		this.character1.position.z = 30
+
+		this.character2 = await loadRandomCharacter(this.scene)
+		this.character2.rotate(new Vector3(0, 0, 1), -Math.PI / 2, Space.WORLD);
+		this.character2.position.x = this.fieldWidth + 5
+		this.character2.position.z = 30
+
+		this.paddle1 = await this.loadPaddle(this.scene)
+		this.paddle2 = await this.loadPaddle(this.scene)
+		this.paddle1.scaling = new Vector3(20, 20, 20)
+		this.paddle2.scaling = new Vector3(20, 20, 20)
 		this.paddle1.position.x = -this.fieldWidth + 5
-
-		const paddle1Mat = new StandardMaterial("paddle1Mat", this.scene)
-		paddle1Mat.diffuseColor = new Color3(0, 0.5, 1)
-		this.paddle1.material = paddle1Mat
-
-		// Player 2 paddle (red)
-		this.paddle2 = MeshBuilder.CreateBox("paddle2", {
-			width: 10,
-			height: 60,
-			depth: 5
-		}, this.scene)
 		this.paddle2.position.x = this.fieldWidth - 5
-
-		const paddle2Mat = new StandardMaterial("paddle2Mat", this.scene)
-		paddle2Mat.diffuseColor = new Color3(1, 0, 0.5)
-		this.paddle2.material = paddle2Mat
 	}
 
 	private updateGameObjects() {
-		if (!this.latestState || !this.ball || !this.paddle1 || !this.paddle2) return
+		if (!this.latestState || !this.ball || !this.character1 || !this.character2) return
+		if (!this.paddle1 || !this.paddle2) return
 
 		// update ball position
 		this.ball.position.x = this.latestState.ball.x
 		this.ball.position.y = this.latestState.ball.y
 		this.ball.position.z = 0
 
-		// Update paddle1
-		this.paddle1.position.y = this.latestState.paddles.player1.y
-		this.paddle2.position.y = this.latestState.paddles.player2.y
+		// Update paddles
+		this.character1.position.y = this.latestState.paddles.player1.y
+		this.character2.position.y = this.latestState.paddles.player2.y
 
-		// Update scores
-		const player1Score = this.querySelector('#player1-score');
-		const player2Score = this.querySelector('#player2-score');
-		const player1Name = this.querySelector('#player1-name');
-		const player2Name = this.querySelector('#player2-name');
+		const deltaY1 = this.ball.position.y - this.character1.position.y
+		const clampedY1 = clamp(deltaY1, -25, 25)
+		this.paddle1.position.y = this.character1.position.y + clampedY1
+		this.paddle1.rotationQuaternion = null
+		this.paddle1.rotation.x = (clampedY1 / 25) * (Math.PI / 2) + Math.PI
 
-		if (player1Score && player2Score && player1Name && player2Name) {
-			player1Score.textContent = this.latestState.scores.player1.toString();
-			player2Score.textContent = this.latestState.scores.player2.toString();
-			player1Name.textContent = this.latestState.scores.user1;
-			player2Name.textContent = this.latestState.scores.user2;
+		const deltaY2 = this.ball.position.y - this.character2.position.y
+		const clampedY2 = clamp(deltaY2, -25, 25)
+		this.paddle2.position.y = this.character2.position.y + clampedY2
+		this.paddle2.rotationQuaternion = null
+		this.paddle2.rotation.x = (clampedY2 / 25) * (Math.PI / 2) + Math.PI
+
+		this.scoreBoard?.updateScore(this.latestState.scores.player1, this.latestState.scores.player2, this.latestState.scores.user1, this.latestState.scores.user2)
+
+		if (this.latestState.hit) {
+			this.hitEffect?.playHitEffect({
+				x: this.latestState.ball.x,
+				y: this.latestState.ball.y
+			})
 		}
-
-		// Handle gameover
 
 	}
 
@@ -250,16 +279,13 @@ export class Game3D extends HTMLElement {
 					message: data.message as string,
 					winner: data.winner as string
 				};
-				console.log('Game over:', data.message, data.winner, data.tournamentId);
-				setTimeout(() => {
-					// this.socket?.send(JSON.stringify({ type: 'exit' }));
-					if(data.tournamentId !== null) {
-						console.log("Redirecting to tournament:", data.tournamentId);
-						Router.navigateTo(`/tournament/${data.tournamentId}`);
-					} else {
-						Router.navigateTo('/victory-screen');
+				// console.log('Game over:', data.message, data.winner, data.tournamentId);
+				if (data.tournamentId !== null) {
+					console.log("Redirecting to tournament:", data.tournamentId);
+					Router.navigateTo(`/tournament/${data.tournamentId}`);
+				} else {
+					Router.navigateTo('/victory-screen');
 					}
-				}, 3000);
 			}
 
 			if (data.type === 'defeat') {
@@ -268,11 +294,8 @@ export class Game3D extends HTMLElement {
 					message: data.message as string,
 					winner: data.winner as string
 				};
-				console.log('Game over:', data.message, data.winner, data.tournamentId);
-				setTimeout(() => {
-					// this.socket?.send(JSON.stringify({ type: 'exit' }));
-					Router.navigateTo('/loss-screen');
-				}, 3000);
+				// console.log('Game over:', data.message, data.winner, data.tournamentId);
+				Router.navigateTo('/loss-screen');
 			}
 		};
 
@@ -288,27 +311,103 @@ export class Game3D extends HTMLElement {
 		};
 	}
 
-	handleUserInput = (e: KeyboardEvent) => {
-		if (this.gameOver) return;
-		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-			if (e.key === 'ArrowUp') {
-				e.preventDefault();
-				this.socket.send(JSON.stringify({ type: 'input', input: 'down' }));
+	handleKeyDown = (e: KeyboardEvent) => {
+		if (!this.scene || this.gameOver) return;
+		// if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+			e.preventDefault();
+			if (e.key === '1') {
+				this.scene.activeCamera = this.cameras[0]
+			} else if (e.key === '2') {
+				this.scene.activeCamera = this.cameras[1]
+			} else if (e.key === '3') {
+				this.scene.activeCamera = this.cameras[2]
+			} else {
+				this.keysPressed[e.key] = true;
 			}
-			if (e.key === 'ArrowDown') {
-				e.preventDefault();
-				this.socket.send(JSON.stringify({ type: 'input', input: 'up' }));
-			}
-		}
+		// }
 	};
+
+	handleKeyUp = (e: KeyboardEvent) => {
+		if (this.gameOver) return;
+		// if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+			e.preventDefault();
+			this.keysPressed[e.key] = false;
+		// }
+	};
+
+	sendInput = () => {
+		if (this.gameOver || !this.socket || !this.scene?.activeCamera) return
+
+		const activeCameraName = this.scene.activeCamera.name
+		switch (activeCameraName) {
+			case "camera-1":
+				if (this.keysPressed['ArrowUp']) {
+					this.socket.send(JSON.stringify({ type: 'input', input: 'down' }));
+				}
+				if (this.keysPressed['ArrowDown']) {
+					this.socket.send(JSON.stringify({ type: 'input', input: 'up' }));
+				}
+				break
+			case "camera-2":
+				if (this.keysPressed['ArrowRight']) {
+					this.socket.send(JSON.stringify({ type: 'input', input: 'down' }));
+				}
+				if (this.keysPressed['ArrowLeft']) {
+					this.socket.send(JSON.stringify({ type: 'input', input: 'up' }));
+				}
+				break
+			case "camera-3":
+				if (this.keysPressed['ArrowRight']) {
+					this.socket.send(JSON.stringify({ type: 'input', input: 'up' }));
+				}
+				if (this.keysPressed['ArrowLeft']) {
+					this.socket.send(JSON.stringify({ type: 'input', input: 'down' }));
+				}
+				break
+		}
+		// if (this.keysPressed['ArrowUp'] || this.keysPressed['ArrowRight']) {
+		// 	this.socket.send(JSON.stringify({ type: 'input', input: 'down' }));
+		// }
+		// if (this.keysPressed['ArrowDown'] || this.keysPressed['ArrowLeft']) {
+		// 	this.socket.send(JSON.stringify({ type: 'input', input: 'up' }));
+		// }
+	}
 
 	private cleanup() {
 		this.resizeObserver?.disconnect()
+
 		if (this.engine) {
 			this.engine.dispose()
 			this.engine = null
 		}
+
+		this.scene?.dispose()
 		this.scene = null
+
 		this.canvas = null
+	}
+
+	private async loadPaddle(scene: Scene):Promise<AbstractMesh> {
+		try {
+			const result: ISceneLoaderAsyncResult = await ImportMeshAsync(
+				"../models/paddle.glb", scene
+			)
+			const mesh = result.meshes[0]
+			return mesh
+		} catch (error) {
+			return MeshBuilder.CreateBox("paddle10", { width: 1, height: 10, depth: 10 }, this.scene )
+		}
+	}
+
+	private async loadField(scene: Scene):Promise<AbstractMesh> {
+		try {
+			const result: ISceneLoaderAsyncResult = await ImportMeshAsync(
+				"../models/field.glb", scene
+			)
+			const mesh = result.meshes[0]
+			return mesh
+		} catch (error) {
+			return MeshBuilder.CreateBox("paddle10", { width: 1, height: 10, depth: 10 }, this.scene )
+		}
 	}
 }

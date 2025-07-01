@@ -17,7 +17,7 @@ import { MessageToServer } from "../types/user.js";
 import { findUserIdByUsername } from "../services/userService.js";
 import { sendMessage } from "../services/utils.js";
 import { FriendInvalid } from "../errors/friends.error.js";
-import { Game } from "../services/game.js";
+import { Game } from "../services/aiGame.js";
 
 export const handleChatInit = async (
 	req:		FastifyRequest,

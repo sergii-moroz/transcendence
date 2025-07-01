@@ -1,5 +1,5 @@
 import { Router } from "../router-static.js"
-import {Engine, Scene, ArcRotateCamera, Vector3, ImportMeshAsync, HemisphericLight, Color4, AbstractMesh} from "@babylonjs/core"
+import {Engine, Scene, ArcRotateCamera, Vector3, ImportMeshAsync, HemisphericLight, Color4, AbstractMesh, HDRCubeTexture} from "@babylonjs/core"
 import "@babylonjs/loaders/glTF";
 
 export class LossScreen extends HTMLElement {
@@ -33,6 +33,9 @@ export class LossScreen extends HTMLElement {
 		this.scene = new Scene(this.engine);
 		this.scene.clearColor = new Color4(0, 0, 0, 0);
 
+		const hdr = new HDRCubeTexture("../textures/rostock_laage_airport_1k.hdr", this.scene, 128, false, true, false, true);
+		this.scene.environmentTexture = hdr
+
 		const camera = new ArcRotateCamera(
 			"camera",
 			Math.PI / 2,
@@ -43,8 +46,6 @@ export class LossScreen extends HTMLElement {
 		);
 		camera.attachControl(this.canvas, true);
 		camera.inputs.removeByType("ArcRotateCameraMouseWheelInput");
-
-		new HemisphericLight("light", new Vector3(0, 1, 0), this.scene);
 
 		try {
 			const result = await ImportMeshAsync("../models/aluminum_mug.glb", this.scene);
