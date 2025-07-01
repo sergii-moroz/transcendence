@@ -75,7 +75,12 @@ project/
 └── .env
 ```
 
+Prometheus
+curl -s http://localhost:9090/-/healthy
 
+metrics
+curl -s http://localhost:9090/metrics
+curl -s "http://localhost:9090/api/v1/query?query=up"
 
 # log Grafana
 docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml logs -f grafana
@@ -83,7 +88,9 @@ docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml lo
 # log logstash
 docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml logs -f logstash
 
-
+#stress test
+docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml exec stress \
+stress --cpu 4 --timeout 60
 #  health 
 docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml exec grafana \
   curl -s localhost:3000/api/health
