@@ -1,3 +1,5 @@
+import { Matchup, PlayerInfo } from './types/tournament.js';
+
 export interface User {
 	username: string;
 	bio: string;
@@ -15,6 +17,8 @@ export interface WsMatchMakingMessage {
 	gameRoomId?: string;
 	tournamentId?: string;
 	opponentId?: string;
+	opponentName?: string;
+	matchups?: Matchup[];
 }
 
 export interface GameState {
