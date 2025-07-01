@@ -75,11 +75,20 @@ project/
 └── .env
 ```
 
+## 🛠️ Monitoring and Observability
 Prometheus
-curl -s http://localhost:9090/-/healthy
 
-metrics
-curl -s http://localhost:9090/metrics
+http://localhost:9090
+	up
+	node_memory_MemAvailable_bytes
+
+	 http://localhost:9090 → Status → Targets
+	
+
+
+curl -s http://localhost:9090/-/healthy
+curl -s http://localhost:9090/metrics | head -n 20
+      http_requests_total
 curl -s "http://localhost:9090/api/v1/query?query=up"
 
 # log Grafana
@@ -89,8 +98,10 @@ docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml lo
 docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml logs -f logstash
 
 #stress test
-docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml exec stress \
+docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml up -d loadgen
 stress --cpu 4 --timeout 60
+
+
 #  health 
 docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml exec grafana \
   curl -s localhost:3000/api/health
