@@ -9,6 +9,7 @@ export class GameRoom extends HTMLElement {
 	latestState: GameState | null = null;
 	gameOver: boolean = false;
 	gameOverMessage: {message: string, winner: string} | null = null;
+	keysPressed: { [key: string]: boolean } = {};
 
 	constructor() {
 		super();
@@ -21,7 +22,8 @@ export class GameRoom extends HTMLElement {
 		this.canvas = document.getElementById("game") as HTMLCanvasElement;
 		this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
 		this.handleCanvasScaling();
-		document.addEventListener('keydown', this.handleUserInput);
+		document.addEventListener('keydown', this.handleKeyDown);
+		document.addEventListener('keyup', this.handleKeyUp);
 		window.addEventListener('resize', this.handleCanvasScaling);
 		this.renderLoop();
 	}
@@ -31,7 +33,8 @@ export class GameRoom extends HTMLElement {
 			this.socket.close();
 			console.log('Disconnecting from socket, page unload...');
 		}
-		document.removeEventListener('keydown', this.handleUserInput);
+		document.removeEventListener('keydown', this.handleKeyDown);
+		document.removeEventListener('keyup', this.handleKeyUp);
 		window.removeEventListener('resize', this.handleCanvasScaling);
 	}
 
@@ -109,21 +112,34 @@ export class GameRoom extends HTMLElement {
 		};
 	}
 
-	 handleUserInput = (e: KeyboardEvent) => {
-		if (this.gameOver) {
-			return; // Ignore input if the game is over
-		}
-		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-			if (e.key === 'ArrowUp') {
-				e.preventDefault();
-				this.socket.send(JSON.stringify({ type: 'input', input: 'up' }));
-			}
-			if (e.key === 'ArrowDown') {
-				e.preventDefault();
-				this.socket.send(JSON.stringify({ type: 'input', input: 'down' }));
-			}
+	handleKeyDown = (e: KeyboardEvent) => {
+		if (this.gameOver) return;
+		if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+			e.preventDefault();
+			this.keysPressed[e.key] = true;
 		}
 	};
+
+	handleKeyUp = (e: KeyboardEvent) => {
+		if (this.gameOver) return;
+		if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+			e.preventDefault();
+			this.keysPressed[e.key] = false;
+		}
+	};
+
+	sendInput = () => {
+		if (this.gameOver || !this.socket || this.socket.readyState !== WebSocket.OPEN) {
+			return;
+		}
+
+		if (this.keysPressed['ArrowUp']) {
+			this.socket.send(JSON.stringify({ type: 'input', input: 'up' }));
+		}
+		if (this.keysPressed['ArrowDown']) {
+			this.socket.send(JSON.stringify({ type: 'input', input: 'down' }));
+		}
+	}
 
 	renderLoop = () => {
 		if (this.latestState && !this.gameOver) {
@@ -131,6 +147,7 @@ export class GameRoom extends HTMLElement {
 		} else if (this.gameOver) {
 			this.drawGameOver(this.gameOverMessage!.message, this.gameOverMessage!.winner);
 		}
+		this.sendInput();
 		requestAnimationFrame(this.renderLoop);
 	}
 

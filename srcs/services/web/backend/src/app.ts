@@ -13,7 +13,7 @@ import { matchmakingSock } from "./routes/v1/matchmaking.js";
 import { tournamentListSock } from "./routes/v1/tournamentList.js";
 import { tournamentRoomSock } from "./routes/v1/tournamentRoom.js";
 import { initializeDB } from "./db/init.js";
-import { Game } from "./services/game.js";
+import { Game } from "./services/aiGame.js";
 import { Tournament } from "./services/tournament.js";
 import { twoFARoutes } from "./routes/v1/2fa.routes.js";
 import { normalizeError } from "./errors/error.js";
@@ -21,6 +21,8 @@ import { friends } from "./routes/v1/friends.js";
 import { chat } from "./routes/v1/chat.js";
 import { statsRoutes } from "./routes/v1/stats.routes.js";
 import { historyRoutes } from "./routes/v1/game-history.route.js";
+import { singlePlayerRoutes } from "./routes/v1/singleplayer.route.js";
+
 import { profile } from "./routes/v1/profile.js";
 import fastifyMultipart from "@fastify/multipart";
 import { verifyAccessToken } from "./services/tokenService.js";
@@ -100,6 +102,7 @@ export const build = async (opts: FastifyServerOptions) => {
 	app.register(twoFARoutes, {prefix: 'api/2fa'});
 	app.register(statsRoutes, {prefix: 'api/stats'});
 	app.register(historyRoutes, {prefix: 'api/history'});
+	app.register(singlePlayerRoutes, {prefix: 'api/singleplayer'});
 
 	// GLOBAL ERROR HANDLING
 	app.setErrorHandler( async (error, request, reply) => {

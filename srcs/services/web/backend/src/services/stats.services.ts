@@ -1,5 +1,6 @@
 import { db } from "../db/connections.js"
 import { UserNotFoundError } from "../errors/2fa.errors.js"
+import { GAME_MODES } from "../public/types/game-history.types.js"
 
 import {
 	GameMode,
@@ -50,4 +51,52 @@ export const getTopPlayers = async (key: GameMode, limit: number = 3): Promise<P
 			}
 		)
 	})
+}
+
+export const updatePlayerStats = async ( winnerId: string, loserId: string, key: GAME_MODES): Promise<void> => {
+	const modeColumnMap: Record<GAME_MODES, string> = {
+		1: 's', 2: 'm', 3: 't'
+	}
+	const prefix = modeColumnMap[key]
+	const winsCol = `${prefix}_wins`
+	const lossesCol = `${prefix}_losses`
+
+	return new Promise((resolve, reject) => {
+		// Execute both updates as a transaction
+		db.serialize(() => {
+			db.run("BEGIN TRANSACTION");
+
+			// Update winner's wins
+			db.run(
+				`UPDATE user_stats SET ${winsCol} = ${winsCol} + 1 WHERE user_id = ?`,
+				[winnerId],
+				(err) => {
+					if (err) {
+						db.run("ROLLBACK");
+						return reject(err);
+					}
+				}
+			);
+
+			// Update loser's losses
+			db.run(
+				`UPDATE user_stats SET ${lossesCol} = ${lossesCol} + 1 WHERE user_id = ?`,
+				[loserId],
+				(err) => {
+					if (err) {
+						db.run("ROLLBACK");
+						return reject(err);
+					}
+				}
+			);
+
+			db.run("COMMIT", (err) => {
+				if (err) {
+					db.run("ROLLBACK");
+					return reject(err);
+				}
+				resolve();
+			});
+		});
+	});
 }

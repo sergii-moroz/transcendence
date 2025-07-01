@@ -13,9 +13,8 @@ export const tournamentRoomSock = async (app: FastifyInstance) => {
 		const userName = req.user.username;
 		const { tournamentId } = req.params as { tournamentId: string };
 		const tournament = app.tournaments.get(tournamentId) as Tournament;
-
 		// console.custom("WARN", `name: ${userName}, id: ${tournamentId}`);
-
+    
 		if (!tournament) {
 			console.custom("WARN", 'User: ' + userName + ' tried to connect to a non-existing tournament: ' + tournamentId);
 			socket.send(JSON.stringify({
@@ -25,21 +24,22 @@ export const tournamentRoomSock = async (app: FastifyInstance) => {
 			socket.close();
 			return;
 		}
-
+		
 		socket.on('message', (messageBuffer: Event) => {
 			const message = JSON.parse(messageBuffer.toString());
-
+			
 			if(message.type === 'joinRoom') {
 				if (tournament.deleteTimeout) {
 					clearTimeout(tournament.deleteTimeout);
 					tournament.deleteTimeout = null;
 				}
 				console.custom('INFO', `User: ${req.user.username} connected to tournament: ${tournamentId}`);
-				tournament.addPlayer(socket, userId);
+				tournament.addPlayer(socket, userId, userName);
 				socket.send(JSON.stringify({
 					type: 'joinedRoom',
 					message: `You have joined tournament room`
 				}));
+				tournament.sendMatchupData();
 				console.custom('INFO', 'Users in tournament room:', tournament.players.map(player => player[0]));
 			}
 		});

@@ -179,6 +179,11 @@ export class API {
 		return response
 	}
 
+	static async getRoomId() {
+		const response = await this.get(`/api/singleplayer/room-id`)
+		return response
+	}
+
 	// ==========================================
 	// PRIVATE: HELPERS
 	// ==========================================
