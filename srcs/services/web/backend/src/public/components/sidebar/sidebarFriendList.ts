@@ -18,14 +18,14 @@ export class FriendListView extends HTMLElement {
 		this.render();
 	}
 
-	async connectedCallback() {		
+	async connectedCallback() {
 		// socialSocketManager.setMessageCallback((data: Message) => {return});
 		this.el_close = this.querySelector('#close-btn');
 		this.el_backdrop = this.querySelector('#backdrop');
 		this.el_refresh = this.querySelector('#refresh-friends-btn');
 		this.el_addFriend = this.querySelector('#addFriendBTN');
 		this.el_addFriendInput = this.querySelector('#addFriendInput') as HTMLInputElement;
-	
+
 		this.el_close?.addEventListener('click', this.switchToCollapseSidebar);
 		window.addEventListener('keydown', this.switchToCollapseSidebar);
 		this.el_backdrop?.addEventListener('click', this.switchToCollapseSidebar);
@@ -36,10 +36,10 @@ export class FriendListView extends HTMLElement {
 
 		await this.loadFriendList();
 	}
-	
+
 	disconnectedCallback() {
 		// socialSocketManager.removeMessageCallback();
-		
+
 		this.el_close?.removeEventListener('click', this.switchToCollapseSidebar);
 		this.el_backdrop?.removeEventListener('click', this.switchToCollapseSidebar);
 		this.el_refresh?.removeEventListener('click', this.loadFriendList);
@@ -97,7 +97,7 @@ export class FriendListView extends HTMLElement {
 				requestElement.innerHTML = `
 					<div class="flex items-center justify-between">
 						<div id="friendRequestProfile" class="flex items-center gap-2 cursor-pointer">
-							<img 
+							<img
 								src="${request.picture}"
 								class="w-10 h-10 rounded-full object-cover"
 							>
@@ -136,7 +136,7 @@ export class FriendListView extends HTMLElement {
 			requestElement.dataset.friendName = friend.name;
 			requestElement.innerHTML = `
 				<div class="relative mr-3">
-					<img 
+					<img
 						src=${friend.picture}
 						class="w-10 h-10 rounded-full"
 					>
@@ -165,7 +165,7 @@ export class FriendListView extends HTMLElement {
 			requestElement.dataset.friendName = friend.name;
 			requestElement.innerHTML = `
 				<div class="relative mr-3">
-					<img 
+					<img
 						src=${friend.picture}
 						class="w-10 h-10 rounded-full"
 					>
@@ -188,7 +188,7 @@ export class FriendListView extends HTMLElement {
 		if (acceptFriend) this.acceptFriend(acceptFriend);
 
 		const rejectFriend = target.closest('#rejectFriendReq') as HTMLElement | null;
-		if (rejectFriend) this.acceptFriend(rejectFriend);
+		if (rejectFriend) this.rejectFriend(rejectFriend);
 	}
 
 	switchToChatSidebar = (friend: HTMLElement) => {

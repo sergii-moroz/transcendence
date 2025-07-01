@@ -7,7 +7,6 @@ import path from "path";
 import fs from 'fs';
 
 import { authRoutes } from "./routes/v1/auth.js";
-import { routes } from "./routes/v1/routes.js";
 import { gameRoomSock } from "./routes/v1/gameRoom.js";
 import { matchmakingSock } from "./routes/v1/matchmaking.js";
 import { tournamentListSock } from "./routes/v1/tournamentList.js";
@@ -90,7 +89,6 @@ export const build = async (opts: FastifyServerOptions) => {
 		prefix: '/'
 	})
 
-	app.register(routes);
 	app.register(friends, {prefix: "api"});
 	app.register(profile, {prefix: "api"});
 	app.register(chat);
