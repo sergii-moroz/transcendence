@@ -37,7 +37,7 @@ const compHTML = `
 
 		<!-- CARD: FOOTER -->
 		<div class="flex items-center justify-between">
-			<a href="/settings" data-link class="tw-btn-outline w-24">Cancel</a>
+			<a href="/profile" data-link class="tw-btn-outline w-24">Cancel</a>
 			<!-- a href="/settings/2fa/verify" data-link class="tw-btn w-24">Next</a -->
 			<button id="btn-next" class="tw-btn w-24 tw-btn-disabled">Next</button>
 		</div>

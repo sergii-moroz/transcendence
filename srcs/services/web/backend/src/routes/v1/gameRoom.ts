@@ -4,15 +4,19 @@ import {
 	FastifyRequest
 } from "fastify"
 import { GameRoomRequest } from "../../types/game.js";
+import { authenticate } from "../../services/authService.js";
 
 
 export const gameRoomSock = async (app: FastifyInstance) => {
 
 	const disconnectTimeouts = new Map<string, NodeJS.Timeout>();
 
-	app.get('/game/:gameRoomId', { websocket: true }, (socket, req: GameRoomRequest) => {
+	app.get('/game/:gameRoomId', { websocket: true, preHandler: [authenticate]}, (socket, req: FastifyRequest) => {
 		console.custom("INFO", `New WebSocket connection from ${req.user.id}`);
-		const gameRoomId = req.params.gameRoomId;
+		const { gameRoomId } = req.params as { gameRoomId: string };
+
+		// console.custom("warn", `gameroom: ${gameRoomId}`)
+
 		const game = app.gameInstances.get(gameRoomId);
 		const userId = req.user.id.toString();
 		const userName = req.user.username;

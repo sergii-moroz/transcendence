@@ -17,7 +17,7 @@
 		this.winrates.singleplayer = this.getIntAttribute('singleplayer', 0);
 		this.winrates.multiplayer = this.getIntAttribute('multiplayer', 0);
 		this.winrates.tournament = this.getIntAttribute('tournament', 0);
-		console.log(this.winrates)
+		// console.log(this.winrates)
 		this.renderChart()
 	}
 

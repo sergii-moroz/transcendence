@@ -48,7 +48,7 @@ export const handleFriendAdding = async (
 	reply:	FastifyReply
 ) => {
 	try {
-		const friendName = (req.body as { name: string }).name;
+		const friendName = (req.body as { name: string }).name.toLowerCase();
 		await addFriend(friendName, req.user.id);
 		reply.status(200).send({ success: true });
 	} catch (error) {

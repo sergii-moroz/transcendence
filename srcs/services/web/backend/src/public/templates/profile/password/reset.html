@@ -1,46 +1,14 @@
-<header
-	class="bg-white border border-transparent shadow
-		dark:bg-gray-800 dark:border-b-gray-700"
->
-	<div
-		class="flex items-center justify-between py-4 px-8 md:px-11 max-w-7xl mx-auto"
-	>
-		<a href="/settings" data-link class="cursor-pointer hover:underline hover:decoration-2 hover:decoration-primary hover:underline-offset-4" >
-			<div class="flex gap-2 items-center hover:[&_div]:bg-primary/20 hover:[&_div]:text-primary dark:hover:[&_div]:bg-gray-200 pointer-events-none" data-item-icon>
-				<div class="size-8 flex items-center shadow dark:border dark:border-gray-700 justify-center rounded-full"><icon-chevron-left></icon-chevron-left></div>
-				Back
-			</div>
-		</a>
+<simple-header title="Password Reset" backTo="profile"></simple-header>
 
-		<div
-			class="flex items-center font-bold text-gray-900
-			dark:text-white
-			sm:max-w-sm sm:text-lg
-			md:max-w-md md:text-xl"
-		>
-			<span class="text-2xl mr-2 hidden sm:block sm:text-3xl md:text-4xl">🔒</span>
-			<div>
-				<div>Reset</div>
-				<div>Password</div>
-			</div>
+<div class="flex flex-col items-center justify-center px-6 py-8 mx-auto lg:py-0">
+	<div class="tw-card w-full sm:max-w-sm md:mt-0 md:max-w-md xl:p-0">
+		<div class="p-6 space-y-4 md:space-y-6 sm:p-8">
+			<h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
+					Reset password
+			</h1>
+
+			<password-reset-form></password-reset-form>
+
 		</div>
 	</div>
-</header>
-
-
-<section>
-
-	<div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-
-			<div class="tw-card w-full sm:max-w-sm md:mt-0 md:max-w-md xl:p-0">
-				<div class="p-6 space-y-4 md:space-y-6 sm:p-8">
-					<h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-							Reset password
-					</h1>
-
-					<password-reset-form></password-reset-form>
-
-				</div>
-			</div>
-		</div>
-</section>
+</div>

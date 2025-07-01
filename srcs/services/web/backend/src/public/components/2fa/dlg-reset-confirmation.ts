@@ -31,7 +31,7 @@ export class DlgResetConfirmation extends HTMLElement {
 
 				<!-- CARD: FOOTER -->
 				<div class="flex items-center justify-end">
-					<a href="/home" data-link class="tw-btn w-24">Done</a>
+					<a href="/profile" data-link class="tw-btn w-24">Done</a>
 				</div>
 			</div>
 		`
