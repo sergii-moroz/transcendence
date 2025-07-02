@@ -179,6 +179,11 @@ export class API {
 		return response
 	}
 
+	static async getRoomId() {
+		const response = await this.get(`/api/singleplayer/room-id`)
+		return response
+	}
+
 	// ==========================================
 	// PRIVATE: HELPERS
 	// ==========================================
@@ -386,7 +391,7 @@ export class API {
 
 	static async updateFunFact(input: string) {
 		try {
-			const res = await this.post('/api/updateFunFact', {input});
+			const res = await this.post('/api/updateFunFact', {input}, { includeCSRF: true });
 			return res.json();
 		} catch (error) {
 			console.error("update FunFact API call failed:", error);
@@ -406,7 +411,7 @@ export class API {
 
 	static async denyGameInvite(name: string) {
 		try {
-			const res = await this.post('/api/denyGameInvite', {name});
+			const res = await this.post('/api/denyGameInvite', {name}, { includeCSRF: true });
 			return res.json();
 
 		} catch (error) {
@@ -416,7 +421,7 @@ export class API {
 
 	static async acceptGameInvite(name: string) {
 		try {
-			const res = await this.post('/api/acceptGameInvite', {name});
+			const res = await this.post('/api/acceptGameInvite', {name}, { includeCSRF: true });
 			return res.json();
 
 		} catch (error) {
@@ -426,7 +431,7 @@ export class API {
 
 	static async createGameInvite(name: string) {
 		try {
-			const res = await this.post('/api/createGameInvite', {name});
+			const res = await this.post('/api/createGameInvite', {name}, { includeCSRF: true });
 			return res.json();
 
 		} catch (error) {

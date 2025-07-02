@@ -1,3 +1,5 @@
+import { Matchup, PlayerInfo } from './types/tournament.js';
+
 export interface User {
 	username: string;
 	bio: string;
@@ -14,6 +16,10 @@ export interface WsMatchMakingMessage {
 	message?: string;
 	gameRoomId?: string;
 	tournamentId?: string;
+	opponentId?: string;
+	opponentName?: string;
+	matchups?: Matchup[];
+	maxPlayers?: number;
 }
 
 export interface GameState {
@@ -27,8 +33,9 @@ export interface GameState {
 		player2: number;
 		user1: string;
 		user2: string;
-	};
-};
+	},
+	hit: boolean
+}
 
 export interface gameJson {
 	type: string;

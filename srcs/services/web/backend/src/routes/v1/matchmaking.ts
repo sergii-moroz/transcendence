@@ -2,12 +2,15 @@ import {
 	FastifyInstance,
 } from "fastify"
 
-import { Game } from "../../services/game.js";
+// import { Game } from "../../services/game.js";
+import { authenticate } from "../../services/authService.js";
+import { GAME_MODES } from "../../public/types/game-history.types.js";
+import { Game } from "../../services/aiGame.js";
 
 export const matchmakingSock = async (app: FastifyInstance) => {
 	let matchmakingConns = new Array<[string, WebSocket]>();
 
-	app.get('/matchmaking', {websocket: true }, async (socket, req) => {
+	app.get('/matchmaking', {websocket: true, preHandler: [authenticate]}, async (socket, req) => {
 		let userId: string = req.user.id.toString();
 
 		connectUser(userId, socket);
@@ -38,7 +41,7 @@ export const matchmakingSock = async (app: FastifyInstance) => {
 	}
 
 	function matchPlayers(app: FastifyInstance, matchmakingConns: Array<[string, WebSocket]>) {
-		const game = new Game();
+		const game = new Game(null, GAME_MODES.Multiplayer);
 		app.gameInstances.set(game.gameRoomId, game);
 		redirectToGameRoom(game.gameRoomId, matchmakingConns);
 		console.custom('INFO', 'Game started:', game.gameRoomId);

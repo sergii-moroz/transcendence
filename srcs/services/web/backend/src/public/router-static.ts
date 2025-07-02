@@ -6,7 +6,7 @@ export class Router {
 	private static currentRoute: tRoute | null = null;
 	static initSocket: boolean = false;
 	static username: string | null = null;
-	private static publicRoutes: string[] = ['/', '/register', '/login'] //add 2fa routes
+	private static publicRoutes: string[] = ['/', '/register', '/login', '/login/2fa/verify'] //add 2fa routes
 
 	static async init() {
 		window.addEventListener("popstate", () => this.handleRouteChange());
@@ -14,7 +14,8 @@ export class Router {
 			const target = (e.target as HTMLElement).closest("[data-link]") as HTMLAnchorElement | null;
 			if (target) {
 				e.preventDefault()
-				const href = target.getAttribute('href');
+				let href = target.getAttribute('href');
+				if (href === '/profile') href += `/${this.username}`;
 				if (href)
 					this.navigateTo(href);
 				return ;

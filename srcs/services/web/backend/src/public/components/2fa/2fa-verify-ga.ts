@@ -44,7 +44,7 @@ const innerHTML = `
 
 			<!-- CARD: FOOTER -->
 			<div class="flex items-center justify-between">
-				<a href="/settings" data-link class="tw-btn-outline w-24">Cancel</a>
+				<a href="/profile" data-link class="tw-btn-outline w-24">Cancel</a>
 				<button type="submit" class="tw-btn-disabled w-24" disabled>Next</button>
 			</div>
 		</div>
