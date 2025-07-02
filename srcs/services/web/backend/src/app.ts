@@ -1,6 +1,7 @@
 import fastify, { FastifyReply, FastifyRequest, FastifyServerOptions } from "fastify"
 import fastifyStatic from "@fastify/static";
 import fastifyCookie from "@fastify/cookie";
+import fastifyMetrics from "fastify-metrics";         
 import fastifyWebsocket, { WebSocket } from '@fastify/websocket';
 import { fileURLToPath } from "url";
 import path from "path";

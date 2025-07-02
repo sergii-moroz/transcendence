@@ -1,6 +1,6 @@
 COMPOSE_FILE = ./srcs/docker-compose.yml
 
-MON_COMPOSE = ./srcs/services/observability/docker-compose.monitoring.yml
+#MON_COMPOSE = ./srcs/services/observability/docker-compose.monitoring.yml
 
 .PHONY: all up down clean fclean re
 
@@ -8,10 +8,10 @@ all: up
 
 up:
 	@docker compose -f $(COMPOSE_FILE) up --build -d
-	@docker compose -f $(MON_COMPOSE) up -d
+#	@docker compose -f $(MON_COMPOSE) up -d
 
 down:
-	@docker compose -f $(MON_COMPOSE) down
+#	@docker compose -f $(MON_COMPOSE) down
 	@docker compose -f $(COMPOSE_FILE) down
 
 
@@ -23,7 +23,7 @@ down:
 
 restart:
 	@docker compose -f $(COMPOSE_FILE) restart
-	@docker compose -f $(MON_COMPOSE) restart
+#	@docker compose -f $(MON_COMPOSE) restart
 
 
 clean: down
