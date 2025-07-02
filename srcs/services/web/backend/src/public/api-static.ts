@@ -439,7 +439,9 @@ export class API {
 		}
 	}
 
-
-
+	static async ping() {
+		const response = await this.get(`/api/ping`)
+		return response
+	}
 
 }
