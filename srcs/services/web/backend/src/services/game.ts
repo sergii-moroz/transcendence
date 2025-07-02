@@ -1,9 +1,11 @@
 import crypto from 'crypto'
 import { db } from '../db/connections.js'
 import { GAME_MODES } from '../public/types/game-history.types.js';
+import { aiOpponent, resetAIState } from './aiOpponent.js';
+import { updatePlayerStats } from './stats.services.js';
 
 export class Game {
-	players: Map< string, {socket: WebSocket, id: string, username: string} >;
+	players: Map< string, {socket: WebSocket | null, id: string, username: string} >;
 	state: {
 		ball: { x: number; y: number; dx: number, dy: number},
 		paddles: {
@@ -19,13 +21,14 @@ export class Game {
 	winnerId: string | null;
 	tournamentId: string | null;
 	private game_mode: GAME_MODES = GAME_MODES.Multiplayer
+	private gameStartTime: number = 0
 
-	constructor(tournamentId: string | null = null) {
+	constructor(tournamentId: string | null = null, game_mode: GAME_MODES = GAME_MODES.Multiplayer) {
 		this.tournamentId = tournamentId;
 		this.players = new Map();
 		this.standardBallSpeed = 4;
 		this.state = {
-			ball: { x: 0, y: 0, dx: 4, dy: 4 },
+			ball: { x: 0, y: 0, dx: this.standardBallSpeed, dy: this.standardBallSpeed },
 			paddles: {
 				player1: { y: 0 },
 				player2: { y: 0 }
@@ -36,7 +39,10 @@ export class Game {
 		this.winnerId = null;
 		this.gameRoomId = crypto.randomBytes(16).toString('hex');
 		this.gameRunning = false;
-		this.game_mode = this.tournamentId ? GAME_MODES.Tournament : GAME_MODES.Multiplayer
+		this.game_mode = game_mode;
+		if (this.game_mode === GAME_MODES.Singleplayer) {
+			resetAIState();
+		}
 	}
 
 	addPlayer(socket: WebSocket, id: string, username: string) {
@@ -53,6 +59,11 @@ export class Game {
 			this.players.set('player1', {socket, id, username});
 			this.state.scores.user1 = this.players.get('player1')!.username;
 			console.custom('INFO', `${this.gameRoomId}: Player 1 joined`);
+			if (this.game_mode === GAME_MODES.Singleplayer) {
+				this.players.set('player2', {socket: null, id: '1', username: 'AI'});
+				console.custom('INFO', `${this.gameRoomId}: AI opponent joined`);
+				this.startLoop();
+			}
 		}
 		else if (this.players.size === 1) {
 			this.players.set('player2', {socket, id, username});
@@ -79,7 +90,7 @@ export class Game {
 				user.socket.close();
 				loser = user;
 			} else {
-				user.socket.send(JSON.stringify({
+				user.socket?.send(JSON.stringify({
 					type: 'victory',
 					message: `${user.username} wins!`,
 					winner: role,
@@ -88,15 +99,16 @@ export class Game {
 				winner = user;
 			}
 		}
-		if(winner && loser)
+		if(winner && loser) {
 			this.updateDatabase(winner, loser);
+		}
 	}
 
 	removeAllPlayers() {
 		// console.custom("WARN", "aaa");
 		for (const [role, user] of this.players.entries()) {
-			user.socket.send(JSON.stringify({
-				type: 'victory',
+			user.socket?.send(JSON.stringify({
+				type: 'Error',
 				message: `game was closed`
 			}));
 			this.players.delete(role);
@@ -105,14 +117,21 @@ export class Game {
 
 	startLoop() {
 		this.gameRunning = true;
+		this.gameStartTime = Date.now()
+		let frameCounter: number = 0;
 		const FIELD_X = 250, FIELD_Y = 150;
 		const PADDLE_X1 = -FIELD_X + 10, PADDLE_X2 = FIELD_X - 10;
 		const PADDLE_HEIGHT = 30;
 		setInterval(() => {
+			frameCounter++;
 			if(!this.gameRunning) return;
 			this.state.hit = false
 			this.state.ball.x += this.state.ball.dx;
 			this.state.ball.y += this.state.ball.dy;
+
+			if (this.game_mode === GAME_MODES.Singleplayer) {
+				aiOpponent(this.state.paddles.player2, frameCounter, this.state.ball);
+			}
 
 			// Ball collision with paddles (simplified)
 			if (
@@ -156,7 +175,7 @@ export class Game {
 			}
 
 			this.players.forEach(player => {
-				player.socket.send(JSON.stringify({
+				player.socket?.send(JSON.stringify({
 					type: 'gameState',
 					state: this.state
 				}));
@@ -179,7 +198,7 @@ export class Game {
 
 			// Send gameOver message
 			if (winner) {
-				winner.socket.send(JSON.stringify({
+				winner.socket?.send(JSON.stringify({
 					type: 'victory',
 					message: `${winnerRole === 'player1'
 						? this.players.get('player1')!.username
@@ -189,7 +208,7 @@ export class Game {
 				}));
 			}
 			if (loser) {
-				loser.socket.send(JSON.stringify({
+				loser.socket?.send(JSON.stringify({
 					type: 'defeat',
 					message: `${winnerRole === 'player1'
 						? this.players.get('player1')!.username
@@ -211,14 +230,15 @@ export class Game {
 		}
 	}
 
-	updateDatabase(winner: {socket: WebSocket, id: string, username: string}, loser: {socket: WebSocket, id: string, username: string}) {
+	private async updateDatabase(winner: {socket: WebSocket | null, id: string, username: string}, loser: {socket: WebSocket | null, id: string, username: string}) {
 		if(!this.tournamentId) {
-			db.run(
-				`UPDATE user_stats SET m_wins = m_wins + 1 WHERE user_id = ?`, [winner.id]
-			);
-			db.run(
-				`UPDATE user_stats SET m_losses = m_losses + 1 WHERE user_id = ?`, [loser.id]
-			);
+			// db.run(
+			// 	`UPDATE user_stats SET m_wins = m_wins + 1 WHERE user_id = ?`, [winner.id]
+			// );
+			// db.run(
+			// 	`UPDATE user_stats SET m_losses = m_losses + 1 WHERE user_id = ?`, [loser.id]
+			// );
+			await updatePlayerStats(winner.id, loser.id, this.game_mode)
 			const gameResults = {
 				gameId: this.gameRoomId,
 				gameModeId: this.game_mode,
@@ -226,7 +246,7 @@ export class Game {
 				player2Id: parseInt(this.players.get('player2')!.id),
 				score1: this.state.scores.player1,
 				score2: this.state.scores.player2,
-				duration: 42,
+				duration: Math.floor((Date.now() - this.gameStartTime) / 1000),
 				techWin: false
 			}
 			saveGameResults(gameResults)
