@@ -23,6 +23,7 @@ import { Router } from "../router-static.js"
 import { HitEffect } from "../utils/hit-effect.js"
 import { clamp, loadRandomCharacter } from "../utils/utils.js"
 import { ScoreBoard } from "../utils/score.js"
+import { API } from "../api-static.js"
 
 export class Game3D extends HTMLElement {
 	private gameRoomId: string | null = null
@@ -252,7 +253,8 @@ export class Game3D extends HTMLElement {
 
 	}
 
-	handleSocket = () => {
+	handleSocket = async () => {
+		await API.ping()
 		this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/game/${this.gameRoomId}`);
 
 		this.socket.onopen = () => {
@@ -268,8 +270,7 @@ export class Game3D extends HTMLElement {
 
 			if (data.type === 'Error') {
 				this.socket?.send(JSON.stringify({ type: 'exit' }));
-				alert(data.message);
-				console.error('WebSocket error:', data.message);
+				console.error('Game3D: WebSocket error:', data.message);
 				Router.navigateTo('/home');
 			}
 
@@ -305,8 +306,7 @@ export class Game3D extends HTMLElement {
 
 		this.socket.onerror = (err: Event) => {
 			this.socket?.send(JSON.stringify({ type: 'exit' }));
-			alert(`WebSocket error: ${err}`);
-			console.error('WebSocket error:', err);
+			console.error('Game3D: WebSocket error:', err);
 			Router.navigateTo('/home');
 		};
 	}

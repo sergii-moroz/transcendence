@@ -1,6 +1,7 @@
 import { join } from "path";
 import { Router } from "../router-static.js"
 import { tournamentListJson } from "../types.js";
+import { API } from "../api-static.js";
 
 
 
@@ -40,7 +41,8 @@ export class TournamentList extends HTMLElement {
 		`;
 	}
 
-	handleSocket = () => {
+	handleSocket = async () => {
+		await API.ping()
 		this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/tournament-list`);
 
 		this.socket.onopen = () => {
@@ -69,7 +71,7 @@ export class TournamentList extends HTMLElement {
 			console.log(`Creating tournament with ${size} players...`);
 			this.querySelector('#create-tournament-popup')?.remove();
 		}
-		
+
 		const joinBtn = target.closest('button[data-tournament-id]');
 		if (joinBtn) {
 			const tournamentId = joinBtn.getAttribute('data-tournament-id');
@@ -105,8 +107,7 @@ export class TournamentList extends HTMLElement {
 	}
 
 	handleError = (event: Event) => {
-		alert(`WebSocket error: ${event}`);
-		console.error('WebSocket error:', event);
+		console.error('TournamentList: WebSocket error:', event);
 	}
 
 	showCreateTournamentPopup = () => {

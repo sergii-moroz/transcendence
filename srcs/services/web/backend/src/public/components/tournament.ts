@@ -1,3 +1,4 @@
+import { API } from "../api-static.js";
 import { Router } from "../router-static.js";
 import { WsMatchMakingMessage } from "../types.js";
 import { Matchup } from "../types/tournament.js";
@@ -40,7 +41,8 @@ export class Tournament extends HTMLElement {
 		`;
 	}
 
-	handleSocket = () => {
+	handleSocket = async () => {
+		await API.ping()
 		this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/tournament/${this.tournamentId}`);
 
 		this.socket.onopen = this.handleOpen;
@@ -88,8 +90,7 @@ export class Tournament extends HTMLElement {
 		}
 
 		if (data.type === 'Error') {
-			console.error(`Error: ${data.message}`);
-			alert(`Error: ${data.message}`);
+			console.error(`Tournament: Error: ${data.message}`);
 			if(this.socket && this.socket.readyState === WebSocket.OPEN) {
 				this.socket.close();
 			}
@@ -105,8 +106,7 @@ export class Tournament extends HTMLElement {
 	}
 
 	handleError = (event: Event) => {
-		alert(`WebSocket error: ${event}`);
-		console.error('WebSocket error:', event);
+		console.error('Tournament: WebSocket error:', event);
 		this.handleClose();
 	}
 

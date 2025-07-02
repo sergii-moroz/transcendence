@@ -265,7 +265,7 @@ export class Game {
 				player = role;
 			}
 		}
-		const STEP = 20;
+		const STEP = 3;
 		const MIN_Y = -150 + 30, MAX_Y = 150 - 30;
 		if (player == "player1") {
 			if (input === 'up' && this.state.paddles.player1.y > MIN_Y) {
