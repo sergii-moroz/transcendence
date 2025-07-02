@@ -21,7 +21,7 @@ export class Game {
 	winnerId: string | null;
 	tournamentId: string | null;
 	private game_mode: GAME_MODES = GAME_MODES.Multiplayer
-	private gameStartTime: number = 0
+	gameStartTime: number = 0
 
 	constructor(tournamentId: string | null = null, game_mode: GAME_MODES = GAME_MODES.Multiplayer) {
 		this.tournamentId = tournamentId;
