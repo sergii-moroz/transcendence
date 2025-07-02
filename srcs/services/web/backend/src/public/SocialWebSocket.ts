@@ -34,7 +34,7 @@ class SocialSocketHandler {
 			this.socket = null;
 			if (event.code === 1000) {
 				await Router.logout();
-				alert('User is already signed in!');
+				console.log('Social Socket: User is already signed in!');
 			}
 		}
 
@@ -97,11 +97,11 @@ class SocialSocketHandler {
 				</div>
 			</div>
 		`
-	
+
 		const autoDismiss = setTimeout(() => {
 			dismissPopup();
 		}, 5000);
-	
+
 		const closeBtn = root.querySelector('.close-btn');
 		if (closeBtn) {
 			closeBtn.addEventListener('click', () => {
@@ -109,7 +109,7 @@ class SocialSocketHandler {
 				dismissPopup();
 			});
 		}
-	
+
 		function dismissPopup() {
 			const popup = root.querySelector('#popupDiv');
 			if (popup) {
@@ -120,8 +120,8 @@ class SocialSocketHandler {
 				}, { once: true });
 			}
 		}
-	
-	
+
+
 		// console.log(`new message from ${message.owner}: ${message.text}, popup`);
 	}
 }
