@@ -1,0 +1,115 @@
+#version: "3.9"
+
+services:
+  # ---------- ELK ----------
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks: [transnet]
+    ports: [ "9200:9200" ]
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.13.4
+    volumes:
+      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+    networks: [transnet]
+    ports: [ "5044:5044" ]
+    depends_on: [elasticsearch]
+
+  
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    networks: [transnet]
+    ports: ["5601:5601"]
+    volumes:
+      - ./kibana/ft_saved.ndjson:/tmp/ft_saved.ndjson:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
+      interval: 30s
+      retries: 20
+    command:
+      - bash
+      - -c
+      - |
+        /usr/local/bin/kibana-docker &
+        sleep 30
+        curl -s -X POST -H 'kbn-xsrf: true' \
+          http://localhost:5601/api/saved_objects/_import?overwrite=true \
+          --form file=@/tmp/ft_saved.ndjson
+        wait
+    depends_on: [elasticsearch]
+  
+
+
+  # ---------- Prometheus ----------
+  prometheus:
+    image: prom/prometheus:v2.52.0 
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+    networks: [transnet]
+    ports: ["9090:9090"]
+
+
+
+  # ---------- Grafana ----------
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks: [transnet]
+    ports: [ "3000:3000" ]
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+
+  # ---------- Node Exporter ----------
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter
+    networks: [transnet]
+    ports:
+      - "9100:9100"
+    pid: host                  
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/host/root:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/host/root'
+
+# ----------- Stress-ng Load Generator ----------
+  loadgen:
+    image: alpine:3.20          # крошечный и актуальный
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        apk add --no-cache stress-ng \
+        && stress-ng --cpu 4 --timeout 60s
+    networks: [transnet]
+
+
+
+
+volumes:
+  esdata:
+  grafana_data:
+
+networks:
+  transnet:
+    external: true
