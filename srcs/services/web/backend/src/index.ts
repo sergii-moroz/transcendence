@@ -1,6 +1,8 @@
 import { FastifyServerOptions } from "fastify";
 import "./services/utils.js";
 import { build } from "./app.js";
+import metricsPlugin from './plugins/metrics.js';
+
 
 const opts: FastifyServerOptions = { logger: true }
 
@@ -13,6 +15,7 @@ if (process.stdout.isTTY) {
 }
 
 const app = await build(opts)
+await app.register(metricsPlugin)
 const port: number = Number(process.env.PORT) || 4242
 const host: string = process.env.HOST || '127.0.0.1'
 
