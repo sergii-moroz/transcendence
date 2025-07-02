@@ -1,0 +1,62 @@
+{
+  "uid": "app-errors",
+  "title": "Application Errors",
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "tags": ["ft", "app"],
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "HTTP 5xx Error Rate",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m]))",
+          "legendFormat": "5xx errors"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "req/s"
+        }
+      },
+      "gridPos": {"x": 0, "y": 0, "w": 24, "h": 8}
+    },
+    {
+      "type": "stat",
+      "title": "Current 5xx Error %",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100",
+          "legendFormat": "error %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent"
+        }
+      },
+      "gridPos": {"x": 0, "y": 8, "w": 6, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "Current 4xx Error %",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{status=~\"4..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100",
+          "legendFormat": "4xx %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent"
+        }
+      },
+      "gridPos": {"x": 6, "y": 8, "w": 6, "h": 4}
+    }
+  ]
+}
