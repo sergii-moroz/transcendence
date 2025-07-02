@@ -226,7 +226,10 @@ export class ChatView extends HTMLElement {
 
 	acceptGameInvite = async () => {
 		const res = await API.acceptGameInvite(this.name);
-		if (!res.success) return showErrorState(this.querySelector('#sidebar-chat'));
+		if (!res.success) {
+			this.el_gameInvitationSection!.innerHTML = '';
+			return alert(`game: ${res.gameID} isnt availiable anymore`);
+		}
 		Router.navigateTo(`/game/${res.gameID}`);
 	}
 
