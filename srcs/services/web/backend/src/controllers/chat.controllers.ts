@@ -114,7 +114,11 @@ export const handleAcceptGameInvite = async (
 		const friendName = (req.body as { name: string }).name;
 		const gameID = await getGameInviteID(friendName, req.user.id);
 		await deleteGameInvite(friendName, req.user.id);
-		reply.status(200).send( { success: true, gameID});
+		if (req.server.gameInstances.has(gameID))
+			reply.status(200).send( { success: true, gameID});
+		else
+			reply.status(200).send( { success: false, gameID});
+		
 	} catch (error) {
 		throw error;
 	}
@@ -129,7 +133,7 @@ export const handleDenyGameInvite = async (
 
 		const gameID = await getGameInviteID(friendName, req.user.id);
 		await deleteGameInvite(friendName, req.user.id);
-		req.server.gameInstances.get(gameID).close('Friend declined Game Invite');
+		req.server.gameInstances.get(gameID)?.close('Friend declined Game Invite');
 		reply.status(200).send( { success: true });
 	} catch (error) {
 		throw error;
