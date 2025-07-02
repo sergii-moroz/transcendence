@@ -17,7 +17,7 @@ import { MessageToServer } from "../types/user.js";
 import { findUserIdByUsername } from "../services/userService.js";
 import { sendMessage } from "../services/utils.js";
 import { FriendInvalid } from "../errors/friends.error.js";
-import { Game } from "../services/aiGame.js";
+import { Game } from "../services/game.js";
 
 export const handleChatInit = async (
 	req:		FastifyRequest,
@@ -129,8 +129,7 @@ export const handleDenyGameInvite = async (
 
 		const gameID = await getGameInviteID(friendName, req.user.id);
 		await deleteGameInvite(friendName, req.user.id);
-		req.server.gameInstances.get(gameID).removeAllPlayers();
-		req.server.gameInstances.delete(gameID);
+		req.server.gameInstances.get(gameID).close('Friend declined Game Invite');
 		reply.status(200).send( { success: true });
 	} catch (error) {
 		throw error;

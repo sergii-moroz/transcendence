@@ -273,6 +273,12 @@ export class Game3D extends HTMLElement {
 				Router.navigateTo('/home');
 			}
 
+			if (data.type === 'closed') {
+				this.socket?.send(JSON.stringify({ type: 'exit' }));
+				alert(data.message);
+				Router.navigateTo('/home');
+			}
+
 			if (data.type === 'victory') {
 				this.gameOver = true;
 				this.gameOverMessage = {
