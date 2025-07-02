@@ -33,7 +33,7 @@ export class Game {
 				player1: { y: 0 },
 				player2: { y: 0 }
 			},
-			scores: { player1: 0, player2: 0, user1: 'bing', user2: 'bong' },
+			scores: { player1: 0, player2: 0, user1: 'bing', user2: 'ai' },
 			hit: false
 		};
 		this.winnerId = null;
