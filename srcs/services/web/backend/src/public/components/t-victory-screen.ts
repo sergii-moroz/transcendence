@@ -1,5 +1,5 @@
 import { Router } from "../router-static.js"
-import {Engine, Scene, ArcRotateCamera, Vector3, ImportMeshAsync, HemisphericLight, Color4, AbstractMesh} from "@babylonjs/core"
+import {Engine, Scene, ArcRotateCamera, Vector3, ImportMeshAsync, HemisphericLight, Color4, AbstractMesh, HDRCubeTexture} from "@babylonjs/core"
 import "@babylonjs/loaders/glTF";
 
 export class TournamentVictoryScreen extends HTMLElement {
@@ -33,6 +33,9 @@ export class TournamentVictoryScreen extends HTMLElement {
 		this.scene = new Scene(this.engine);
 		this.scene.clearColor = new Color4(0, 0, 0, 0);
 
+		const hdr = new HDRCubeTexture("../textures/rostock_laage_airport_1k.hdr", this.scene, 128, false, true, false, true);
+		this.scene.environmentTexture = hdr
+
 		const camera = new ArcRotateCamera(
 			"camera",
 			Math.PI / 2,
@@ -43,8 +46,6 @@ export class TournamentVictoryScreen extends HTMLElement {
 		);
 		camera.attachControl(this.canvas, true);
 		camera.inputs.removeByType("ArcRotateCameraMouseWheelInput");
-
-		new HemisphericLight("light", new Vector3(0, 1, 0), this.scene);
 
 		try {
 			const result = await ImportMeshAsync("../models/gold_trophy.glb", this.scene);
@@ -71,15 +72,39 @@ export class TournamentVictoryScreen extends HTMLElement {
 			const center = min.add(sizeVec.scale(0.5));
 			const maxDimension = Math.max(sizeVec.x, sizeVec.y, sizeVec.z);
 
-			const desiredSize = 1.5;
+			const desiredSize = 1.1;
 			const scaleFactor = desiredSize / maxDimension;
 
 			// Scale and reposition model
 			for (const mesh of meshes) {
-				mesh.scaling.set(scaleFactor, scaleFactor, scaleFactor);
+				mesh.scaling.set(0.1 * scaleFactor, 0.1 * scaleFactor, 0.1 * scaleFactor);
+				mesh.rotation.z = -Math.PI / 2; // -90 degrees
+
+				// Animation parameters
+				const duration = 40; // frames (about 0.7s at 60fps)
+				let frame = 0;
+
+				this.scene.onBeforeRenderObservable.add(() => {
+					if (frame <= duration) {
+						// Progress from 0 to 1
+						const t = frame / duration;
+
+						// Ease out (cubic)
+						const ease = 1 - Math.pow(1 - t, 3);
+
+						// Animate scaling
+						const scale = 0.1 + (1 - 0.1) * ease;
+						mesh.scaling.set(scale * scaleFactor, scale * scaleFactor, scale * scaleFactor);
+
+						// Animate rotation
+						mesh.rotation.z = -Math.PI / 2 * (1 - ease);
+
+						frame++;
+					}
+				});
 				mesh.position.subtractInPlace(center);
-				mesh.position.z -= 1;
-				mesh.position.y += 1;
+				mesh.position.z -= 1.30;
+				mesh.position.y += 1.45;
 			}
 
 			// Adjust camera distance based on bounding sphere
