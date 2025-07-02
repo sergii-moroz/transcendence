@@ -1,5 +1,6 @@
 import {
 	FastifyInstance,
+	FastifyRequest,
 } from "fastify"
 
 // import { Game } from "../../services/game.js";
@@ -12,6 +13,17 @@ export const matchmakingSock = async (app: FastifyInstance) => {
 
 	app.get('/matchmaking', {websocket: true, preHandler: [authenticate]}, async (socket, req) => {
 		let userId: string = req.user.id.toString();
+
+		const alreadyInGame_gameID = findGameByPlayerId(userId, req);
+		if (alreadyInGame_gameID) {
+			console.custom('INFO', `Users is already in a game. Redirecting to game room: ${alreadyInGame_gameID}`);
+			const message = JSON.stringify({
+				type: 'redirectingToGame',
+				gameRoomId: alreadyInGame_gameID,
+				message: `Redirecting to game room: ${alreadyInGame_gameID}`
+			});
+			return socket.send(message);
+		}
 
 		connectUser(userId, socket);
 		console.custom('INFO', 'Users in matchmaking queue:', matchmakingConns.map(([id]) => id));
@@ -77,4 +89,15 @@ export function redirectToGameRoom(gameRoomId: string, matchmakingConns: Array<[
 	})
 
 	console.custom('INFO', `Redirecting ${users[0][0]} and ${users[1][0]} to game room: ${gameRoomId}`);
+}
+
+function findGameByPlayerId(targetId: string, req: FastifyRequest): string | null {
+	for (const [gameID, game] of req.server.gameInstances.entries()) {
+		for (const player of game.players.values()) {
+			if (player.id === targetId) {
+				return gameID ;
+			}
+		}
+	}
+	return null;
 }
