@@ -1,3 +1,4 @@
+import { API } from "../api-static.js";
 import { Router } from "../router-static.js";
 import { gameJson, GameState } from "../types.js";
 
@@ -47,7 +48,8 @@ export class GameRoom extends HTMLElement {
 		`;
 	}
 
-	handleSocket = () => {
+	handleSocket = async () => {
+		await API.ping()
 		this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/game/${this.gameRoomId}`);
 
 		this.socket.onopen = () => {
@@ -63,7 +65,7 @@ export class GameRoom extends HTMLElement {
 
 			if (data.type === 'Error') {
 				this.socket?.send(JSON.stringify({ type: 'exit' }));
-				alert(data.message);
+				console.log("Game Room", data.message);
 				console.error('WebSocket error:', data.message);
 				Router.navigateTo('/home');
 			}
@@ -106,8 +108,7 @@ export class GameRoom extends HTMLElement {
 
 		this.socket.onerror = (err: Event) => {
 			this.socket?.send(JSON.stringify({ type: 'exit' }));
-			alert(`WebSocket error: ${err}`);
-			console.error('WebSocket error:', err);
+			console.error('GameRoom: WebSocket error:', err);
 			Router.navigateTo('/home');
 		};
 	}
