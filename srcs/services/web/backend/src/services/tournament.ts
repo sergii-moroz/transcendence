@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { redirectToGameRoom } from '../routes/v1/matchmaking.js';
 import { db } from '../db/connections.js';
 import { GAME_MODES } from '../public/types/game-history.types.js';
-import { Game } from './aiGame.js';
+import { Game } from './game.js';
 
 export class Tournament {
 	games: Map<string, Game>;

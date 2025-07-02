@@ -5,7 +5,7 @@ import {
 // import { Game } from "../../services/game.js";
 import { authenticate } from "../../services/authService.js";
 import { GAME_MODES } from "../../public/types/game-history.types.js";
-import { Game } from "../../services/aiGame.js";
+import { Game } from "../../services/game.js";
 
 export const matchmakingSock = async (app: FastifyInstance) => {
 	let matchmakingConns = new Array<[string, WebSocket]>();

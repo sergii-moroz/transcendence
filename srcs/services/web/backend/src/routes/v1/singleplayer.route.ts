@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import { authenticate } from "../../services/authService.js";
-import { Game } from "../../services/aiGame.js";
+import { Game } from "../../services/game.js";
 import { GAME_MODES } from "../../public/types/game-history.types.js";
 
 export const singlePlayerRoutes = async (
