@@ -30,12 +30,18 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 	});
 
 	app.post('/refresh', {
-		handler:		handleRefresh
+		handler:	handleRefresh
 	})
 
 	app.post('/password/reset', {
 		preHandler: [authenticate, checkCsrf],
 		handler: handlePasswordReset
+	})
+
+	app.get('/ping', {
+		preHandler: [authenticate]
+	}, (req, reply) => {
+		reply.send({ success: true })
 	})
 
 }
