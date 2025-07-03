@@ -9,13 +9,9 @@ import { authenticate } from "../../services/authService.js";
 
 export const gameRoomSock = async (app: FastifyInstance) => {
 
-	// const disconnectTimeouts = new Map<string, NodeJS.Timeout>();
-
 	app.get('/game/:gameRoomId', { websocket: true, preHandler: [authenticate]}, (socket, req: FastifyRequest) => {
 		console.custom("INFO", `New WebSocket connection from ${req.user.id}`);
 		const { gameRoomId } = req.params as { gameRoomId: string };
-
-		// console.custom("warn", `gameroom: ${gameRoomId}`)
 
 		const game = app.gameInstances.get(gameRoomId);
 		const userId = req.user.id.toString();
@@ -27,10 +23,6 @@ export const gameRoomSock = async (app: FastifyInstance) => {
 			return;
 		}
 
-		// if (disconnectTimeouts.has(userId)) {
-		// 	clearTimeout(disconnectTimeouts.get(userId)!);
-		// 	disconnectTimeouts.delete(userId);
-		// }
 		game.addPlayer(socket, userId, userName);
 		console.custom('INFO', `User: ${req.user.username} connected to game room: ${gameRoomId}`);
 
@@ -39,17 +31,6 @@ export const gameRoomSock = async (app: FastifyInstance) => {
 				if(message.type === 'input') {
 					game.registerPlayerInput(message.input, socket);
 				}
-				// if(message.type === 'exit') {
-				// 	if(disconnectTimeouts.has(userId)) {
-				// 		clearTimeout(disconnectTimeouts.get(userId)!);
-				// 		disconnectTimeouts.delete(userId);
-				// 	}
-				// 	game.removePlayer(socket);
-				// 	if (app.gameInstances.has(gameRoomId)) {
-				// 		app.gameInstances.delete(gameRoomId);
-				// 		console.custom('INFO', `Game room ${gameRoomId} closed.`);
-				// 	}
-				// }
 				if(message.type === 'deleteGameBeforeStart') {
 					if (app.gameInstances.get(gameRoomId)?.gameStartTime === 0) { //game hasnt started
 						app.gameInstances.delete(gameRoomId);
@@ -68,19 +49,6 @@ export const gameRoomSock = async (app: FastifyInstance) => {
 				app.gameInstances.delete(gameRoomId);
 				console.custom('INFO', `Game room ${gameRoomId} closed gracefully`);
 			}
-
-			// const timeout = setTimeout(() => {
-			// 	if (app.gameInstances.has(gameRoomId) && app.gameInstances.get(gameRoomId).isRunning) { // Player disconnected before the game ended
-			// 		game.removePlayer(socket);
-			// 		console.custom('INFO', `Game room ${gameRoomId} closed due to inactivity`);
-			// 	} else if (app.gameInstances.has(gameRoomId) && !app.gameInstances.get(gameRoomId).isRunning) { // Player disconnected after the game ended, graceful delete
-			// 		app.gameInstances.delete(gameRoomId);
-			// 		console.custom('INFO', `Game room ${gameRoomId} closed gracefully`);
-			// 	}
-			// 	disconnectTimeouts.delete(userId);
-			// }, 10000);
-
-			// disconnectTimeouts.set(userId, timeout);
 		})
 
 		socket.on('error', (err: Event) => {

@@ -65,6 +65,7 @@ export class Game3D extends HTMLElement {
 		this.initializeScene()
 		this.homeBtn = this.querySelector("#home-btn");
 		this.homeBtn?.addEventListener('click', this.handleBackHome);
+		window.addEventListener("popstate", this.handleBackHome);
 		document.addEventListener('keydown', this.handleKeyDown);
 		document.addEventListener('keyup', this.handleKeyUp);
 	}
@@ -75,6 +76,7 @@ export class Game3D extends HTMLElement {
 			this.socket.close()
 		}
 		this.homeBtn?.removeEventListener('click', this.handleBackHome);
+		window.removeEventListener("popstate", this.handleBackHome);
 		document.removeEventListener('keydown', this.handleKeyDown);
 		document.removeEventListener('keyup', this.handleKeyUp);
 	}
