@@ -82,9 +82,9 @@ export const getTopPlayers = async (key: GameMode, limit: number = 3): Promise<P
 			JOIN users ON user_stats.user_id = users.id
 			WHERE user_stats.${winsCol} + user_stats.${lossesCol} > 0
 			ORDER BY wilson_score DESC
-			LIMIT ${limit}
+			LIMIT ?
 		`
-		db.all<PlayerStats>(sql, [], (err, rows) => {
+		db.all<PlayerStats>(sql, [limit], (err, rows) => {
 				if (err) return reject (err)
 				// if (!rows || rows.length === 0) return reject(new UserNotFoundError())
 				resolve(rows)
