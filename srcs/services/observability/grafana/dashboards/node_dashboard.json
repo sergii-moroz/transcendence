@@ -1,0 +1,45 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "type": "dashboard",
+        "name": "Annotations & Alerts",
+        "enabled": true
+      }
+    ]
+  },
+  "title": "Node Exporter Minimal",
+  "uid": "node-min",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "CPU Usage",
+      "targets": [
+        {
+          "expr": "100 - (avg by (instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[1m])) * 100)",
+          "legendFormat": "{{instance}}",
+          "refId": "A"
+        }
+      ],
+      "datasource": "Prometheus",
+      "id": 1
+    },
+    {
+      "type": "graph",
+      "title": "Memory Usage",
+      "targets": [
+        {
+          "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+          "legendFormat": "Used Memory (%)",
+          "refId": "A"
+        }
+      ],
+      "datasource": "Prometheus",
+      "id": 2
+    }
+  ],
+  "schemaVersion": 30,
+  "version": 1,
+  "refresh": "10s"
+}
