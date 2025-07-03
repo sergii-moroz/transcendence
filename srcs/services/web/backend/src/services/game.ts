@@ -20,7 +20,7 @@ export class Game {
 	gameRunning: boolean;
 	winnerId: string | null;
 	tournamentId: string | null;
-	private game_mode: GAME_MODES = GAME_MODES.Multiplayer
+	game_mode: GAME_MODES = GAME_MODES.Multiplayer
 	gameStartTime: number = 0
 
 	constructor(tournamentId: string | null = null, game_mode: GAME_MODES = GAME_MODES.Multiplayer) {
