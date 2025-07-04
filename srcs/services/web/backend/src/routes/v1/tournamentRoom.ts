@@ -35,11 +35,6 @@ export const tournamentRoomSock = async (app: FastifyInstance) => {
 				}
 				console.custom('INFO', `User: ${req.user.username} connected to tournament: ${tournamentId}`);
 				tournament.addPlayer(socket, userId, userName);
-				socket.send(JSON.stringify({
-					type: 'joinedRoom',
-					message: `You have joined tournament room`
-				}));
-				tournament.sendMatchupData();
 				console.custom('INFO', 'Users in tournament room:', tournament.players.map(player => player[0]));
 			}
 		});
