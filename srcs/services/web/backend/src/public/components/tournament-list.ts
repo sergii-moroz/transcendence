@@ -171,7 +171,7 @@ export class TournamentList extends HTMLElement {
 									(tournament.playerCount / tournament.maxPlayers) * 100 }%">
 								</div>
 							</div>
-							<p class="text-sm font-medium text-gray-700 dark:text-gray-200">${tournament.playerCount} / ${tournament.maxPlayers} players</p>
+							<p class="text-sm font-medium text-gray-700 dark:text-gray-200">${tournament.isRunning ? tournament.maxPlayers : tournament.playerCount} / ${tournament.maxPlayers} players</p>
 						</div>
 					</div>
 					<button
