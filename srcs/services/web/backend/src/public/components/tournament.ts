@@ -37,6 +37,10 @@ export class Tournament extends HTMLElement {
 				<div class="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-black-400 dark:border-white-400"></div>
 				<p id="waiting-message" class="text-sm text-gray-400 text-center m-0">Waiting for other players...</p>
 			</div>
+			<div class="flex flex-row items-center justify-center gap-3">
+				<a href="" id="play-button" class="tw-btn-disabled w-20 mt-6" data-link> Play </button>
+				<a href="/home" class="tw-btn w-20 mt-6" data-link> Home </a>
+			</div>
 		`;
 	}
 
@@ -57,17 +61,17 @@ export class Tournament extends HTMLElement {
 	handleMessage = (event: MessageEvent) => {
 		const data = JSON.parse(event.data) as WsMatchMakingMessage;
 
-		if (data.type === 'joinedRoom') {
-			console.log(data.message);
-		}
-
-		if (data.type === 'redirectingToGame') {
+		if (data.type === 'redirectToGame') {
 			console.log(`Redirecting to game room: ${data.gameRoomId}`);
-			document.getElementById('waiting-message')!.textContent = `Matching up against ${data.opponentName}...`;
-
-			setTimeout(() => {
-				Router.navigateTo('/game/' + data.gameRoomId);
-			}, 10000);
+			if(data.opponentName) {
+				document.getElementById('waiting-message')!.textContent = `Matching up against ${data.opponentName}...`;
+			} else {
+				document.getElementById('waiting-message')!.textContent = data.message || 'Game room is ready';
+			}
+			this.enablePlayButton(data);
+			// setTimeout(() => {
+			// 	Router.navigateTo('/game/' + data.gameRoomId);
+			// }, 10000);
 		}
 
 		if (data.type === 'victory') {
@@ -95,6 +99,19 @@ export class Tournament extends HTMLElement {
 			}
 			Router.navigateTo('/home');
 		}
+	}
+
+	enablePlayButton = (data: WsMatchMakingMessage) => {
+		const playButton = this.querySelector('#play-button') as HTMLAnchorElement;
+		if (!playButton) return;
+
+		playButton.classList.remove('tw-btn-disabled');
+		playButton.classList.add('tw-btn');
+		playButton.classList.add('bg-green-500');
+		playButton.classList.add('hover:border-green-500');
+		playButton.classList.add('hover:text-green-500');
+		playButton.classList.add('hover:bg-transparent');
+		playButton.href = `/game/${data.gameRoomId}`;
 	}
 
 	handleClose = () => {
