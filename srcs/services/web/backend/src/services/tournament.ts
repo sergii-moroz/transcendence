@@ -8,7 +8,7 @@ import { Game } from './game.js';
 export class Tournament {
 	games: Map<string, Game>;
 	players: Array<[id: string, name: string, socket: WebSocket]>;
-	knownIds: Map<string, boolean>; // true = eliminated, false = not eliminated
+	knownIds: Map<string, {eliminated: boolean, redirectToGameId: string | null}>;
 	allConnected: boolean;
 	activeGames: number;
 	isRunning: boolean;
@@ -48,7 +48,7 @@ export class Tournament {
 		} else if(this.players.length !== this.maxPlayers) { // Add player
 			this.players = this.players.filter(([pid]) => pid !== id);
 			this.players.push([id, name, socket]);
-			this.knownIds.set(id, false);
+			this.knownIds.set(id, {eliminated: false, redirectToGameId: null});
 			console.custom('INFO', `Tournament: Player ${id} joined (${this.players.length}/4)`);
 		} else if (this.players.length === this.maxPlayers) { // Forbid joining if full
 			socket.send(JSON.stringify({
@@ -65,22 +65,37 @@ export class Tournament {
 	}
 
 	handleReconnect(socket: WebSocket, id: string, name: string) {
-		if (this.knownIds.has(id) && this.knownIds.get(id) === false) {
+		if (this.knownIds.has(id) && this.knownIds.get(id)?.eliminated === false) {
 			if(this.deleteTimeout) {
 				clearTimeout(this.deleteTimeout);
 			}
+
 			this.players = this.players.filter(([pid]) => pid !== id);
 			this.players.push([id, name, socket]);
+
+			this.sendMatchupData();
 			console.custom('DEBUG', `Tournament: Player ${id} reconnected`);
 
-			const remaining = Array.from(this.knownIds.entries()).filter(([_, eliminated]) => !eliminated);
+			const redirectToGameId = this.knownIds.get(id)?.redirectToGameId;
+			if (redirectToGameId) {
+				socket.send(JSON.stringify({
+					type: 'redirectToGame',
+					gameRoomId: redirectToGameId,
+					message: `Matched with opponent, proceed to game room...`
+				}));
+				console.custom('DEBUG', `Tournament: Player ${id} redirected to game room ${redirectToGameId}`);
+			}
+
+			const remaining = Array.from(this.knownIds.entries()).filter(
+				([_, info]) => !info.eliminated
+			);
 			console.custom('DEBUG', `Tournament: Remaining players after rejoin: ${remaining.map(([id]) => id).join(', ')}`);
 
 			if (remaining.length === 1) {
 				this.handleVictory(remaining[0][0]);
 				return;
 			}
-			if(this.players.length === remaining.length && this.isRunning) {
+			if(this.players.length === remaining.length && this.activeGames == 0 && this.isRunning) {
 				console.custom('INFO', `Tournament: Starting next round...`);
 				this.startTournament();
 			} else if (this.isRunning) {
@@ -102,7 +117,7 @@ export class Tournament {
 					}
 				}, 90000); // 90 seconds of inactivity before deletion
 			}
-		} else if (this.knownIds.has(id) && this.knownIds.get(id) === true) {
+		} else if (this.knownIds.has(id) && this.knownIds.get(id)?.eliminated === true) {
 			socket.send(JSON.stringify({
 				type: 'Error',
 				message: 'You have been eliminated.'
@@ -160,15 +175,17 @@ export class Tournament {
 			this.app.gameInstances.set(game.gameRoomId, game);
 
 			await new Promise(resolve => setTimeout(resolve, 50));
-
+			
 			this.redirectToGameRoom(game.gameRoomId, player1, player2);
+			this.knownIds.set(player1[0], {eliminated: false, redirectToGameId: game.gameRoomId});
+			this.knownIds.set(player2[0], {eliminated: false, redirectToGameId: game.gameRoomId});
 			console.custom('DEBUG', `Tournament: Game room ${game.gameRoomId} created with players ${player1[0]} and ${player2[0]}`);
 		}
 	}
 
 	redirectToGameRoom(gameRoomId: string, player1: [string, string, WebSocket], player2: [string, string, WebSocket]) {
 		const message1 = JSON.stringify({
-			type: 'redirectingToGame',
+			type: 'redirectToGame',
 			gameRoomId: gameRoomId,
 			opponentName: player2[1],
 			opponentId: player2[0],
@@ -176,7 +193,7 @@ export class Tournament {
 		});
 
 		const message2 = JSON.stringify({
-			type: 'redirectingToGame',
+			type: 'redirectToGame',
 			gameRoomId: gameRoomId,
 			opponentName: player1[1],
 			opponentId: player1[0],
@@ -199,8 +216,10 @@ export class Tournament {
 					// Mark all players in this game as eliminated except the winner
 					for (const player of game.players.values()) {
 						if (player.id !== winnerId) {
-							this.knownIds.set(String(player.id), true); // eliminated
+							this.knownIds.set(String(player.id), {eliminated: true, redirectToGameId: null}); // eliminated
 							console.custom('DEBUG', `Eliminated: ${player.id}, knownIds: ${Array.from(this.knownIds.entries())}`);
+						} else {
+							this.knownIds.set(String(player.id), {eliminated: false, redirectToGameId: null}); // not eliminated
 						}
 					}
 					this.addMatchup(game);
@@ -223,6 +242,7 @@ export class Tournament {
 			p2: { id: player2.id, name: player2.username, score: game.state.scores.player2 },
 			winnerId: game.winnerId
 		});
+		console.custom('DEBUG', `Tournament: Matchup added for game ${game.gameRoomId} in round ${this.round}`);
 	}
 
 	sendMatchupData() {
@@ -243,12 +263,13 @@ export class Tournament {
 				maxPlayers: this.maxPlayers,
 			}));
 		});
+		console.custom('DEBUG', `Tournament: Matchup data sent to players, total matchups: ${this.matchups.length}`);
 	}
 
 	async startTournament() {
 		this.isRunning = true;
 		this.round++;
-		await this.matchPlayers();
+		this.matchPlayers();
 		console.custom('DEBUG', `Tournament: Players matched, waiting for games to finish...`);
 		this.detectWinners();
 	}
