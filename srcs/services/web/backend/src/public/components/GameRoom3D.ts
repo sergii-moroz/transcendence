@@ -64,6 +64,8 @@ export class Game3D extends HTMLElement {
 		this.initializeScene()
 		document.addEventListener('keydown', this.handleKeyDown);
 		document.addEventListener('keyup', this.handleKeyUp);
+		document.addEventListener('pointerdown', this.handlePointerDown)
+		document.addEventListener('pointerup', this.handlePointerUp)
 	}
 
 	disconnectedCallback() {
@@ -73,11 +75,13 @@ export class Game3D extends HTMLElement {
 		}
 		document.removeEventListener('keydown', this.handleKeyDown);
 		document.removeEventListener('keyup', this.handleKeyUp);
+		document.removeEventListener('pointerdown', this.handlePointerDown)
+		document.removeEventListener('pointerup', this.handlePointerUp)
 	}
 
 	private render() {
 		this.innerHTML = `
-			<div class="relative z-0">
+			<div class="relative z-0 w-full">
 				<canvas class="w-full h-full block "></canvas>
 			</div>
 		`
@@ -93,6 +97,7 @@ export class Game3D extends HTMLElement {
 			stencil: true
 		})
 		this.scene = new Scene(this.engine)
+		// console.log(this.engine.hostInformation.isMobile)
 
 		// Static camera setup
 		const alpha = 15
@@ -365,12 +370,6 @@ export class Game3D extends HTMLElement {
 				}
 				break
 		}
-		// if (this.keysPressed['ArrowUp'] || this.keysPressed['ArrowRight']) {
-		// 	this.socket.send(JSON.stringify({ type: 'input', input: 'down' }));
-		// }
-		// if (this.keysPressed['ArrowDown'] || this.keysPressed['ArrowLeft']) {
-		// 	this.socket.send(JSON.stringify({ type: 'input', input: 'up' }));
-		// }
 	}
 
 	private cleanup() {
@@ -409,5 +408,23 @@ export class Game3D extends HTMLElement {
 		} catch (error) {
 			return MeshBuilder.CreateBox("paddle10", { width: 1, height: 10, depth: 10 }, this.scene )
 		}
+	}
+
+	// Handle Mobile Inputs
+	private handlePointerDown = (e: PointerEvent) => {
+		const x = e.clientX
+		const screenWidth = window.innerWidth
+
+		if (x < screenWidth / 2) {
+			this.keysPressed['ArrowDown'] = true
+		} else {
+			this.keysPressed['ArrowUp'] = true
+		}
+	}
+
+	private handlePointerUp = (e: PointerEvent) => {
+		if (this.gameOver) return
+		this.keysPressed['ArrowUp'] = false
+		this.keysPressed['ArrowDown'] = false
 	}
 }
