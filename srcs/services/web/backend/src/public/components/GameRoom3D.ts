@@ -24,6 +24,7 @@ import { HitEffect } from "../utils/hit-effect.js"
 import { clamp, loadRandomCharacter } from "../utils/utils.js"
 import { ScoreBoard } from "../utils/score.js"
 import { API } from "../api-static.js"
+import { InfoBoard } from "../utils/info-board.js"
 
 export class Game3D extends HTMLElement {
 	private gameRoomId: string | null = null
@@ -52,6 +53,7 @@ export class Game3D extends HTMLElement {
 
 	private hitEffect: HitEffect | null = null
 	private scoreBoard: ScoreBoard | null = null
+	private infoBoard: InfoBoard | null = null
 
 	constructor() {
 		super()
@@ -151,11 +153,21 @@ export class Game3D extends HTMLElement {
 		this.createCharacter()
 		this.scoreBoard = new ScoreBoard(this.scene)
 		this.scoreBoard.setPosition(0, 149.5, 0)
+		this.infoBoard = new InfoBoard(this.scene)
+		this.infoBoard.setPosition(0, -100, 28)
+		this.infoBoard.updateInfo("▼ down", "up ▲")
+		this.infoBoard.setVisibility(0)
 
 		// Handle resize
 		this.resizeObserver = new ResizeObserver(() => {
 			this.engine?.resize()
+			if (this.engine?.hostInformation.isMobile) {
+				this.infoBoard?.setVisibility(1)
+			} else {
+				this.infoBoard?.setVisibility(0)
+			}
 		})
+
 		this.resizeObserver.observe(this.canvas)
 
 		// Run render loop
