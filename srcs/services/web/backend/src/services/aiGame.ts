@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import { db } from '../db/connections.js'
 import { GAME_MODES } from '../public/types/game-history.types.js';
-import { aiOpponent, resetAIState } from './aiOpponent.js';
+import { aiOpponent, createAIState } from './aiOpponent.js';
 import { updatePlayerStats } from './stats.services.js';
 
 export class Game {
@@ -22,6 +22,7 @@ export class Game {
 	tournamentId: string | null;
 	private game_mode: GAME_MODES = GAME_MODES.Multiplayer
 	private gameStartTime: number = 0
+	private aiState: any = null; // Store AI state per game instance
 
 	constructor(tournamentId: string | null = null, game_mode: GAME_MODES = GAME_MODES.Multiplayer) {
 		this.tournamentId = tournamentId;
@@ -41,7 +42,7 @@ export class Game {
 		this.gameRunning = false;
 		this.game_mode = game_mode;
 		if (this.game_mode === GAME_MODES.Singleplayer) {
-			resetAIState();
+			this.aiState = createAIState();
 		}
 	}
 
@@ -115,7 +116,7 @@ export class Game {
 			this.state.ball.y += this.state.ball.dy;
 
 			if (this.game_mode === GAME_MODES.Singleplayer) {
-				aiOpponent(this.state.paddles.player2, frameCounter, this.state.ball);
+				aiOpponent(this.state.paddles.player2, frameCounter, this.state.ball, this.aiState);
 			}
 
 			// Ball collision with paddles (simplified)
