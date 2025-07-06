@@ -22,7 +22,7 @@ export class Game {
 	tournamentId: string | null;
 	private game_mode: GAME_MODES = GAME_MODES.Multiplayer
 	private gameStartTime: number = 0
-	private aiState: any = null; // Store AI state per game instance
+	private aiState: any = null;
 
 	constructor(tournamentId: string | null = null, game_mode: GAME_MODES = GAME_MODES.Multiplayer) {
 		this.tournamentId = tournamentId;
@@ -100,7 +100,6 @@ export class Game {
 	}
 
 	removeAllPlayers() {
-		// console.custom("WARN", "aaa");
 		for (const [role, user] of this.players.entries()) {
 			user.socket?.send(JSON.stringify({
 				type: 'Error',
@@ -117,9 +116,12 @@ export class Game {
 		const FIELD_X = 250, FIELD_Y = 150;
 		const PADDLE_X1 = -FIELD_X + 10, PADDLE_X2 = FIELD_X - 10;
 		const PADDLE_HEIGHT = 30;
-		setInterval(() => {
+		const gameInterval = setInterval(() => {
 			frameCounter++;
-			if(!this.gameRunning) return;
+			if(!this.gameRunning) {
+				clearInterval(gameInterval);
+				return;
+			}
 			this.state.hit = false
 			// Update ball position
 			this.state.ball.x += this.state.ball.dx;
@@ -177,7 +179,7 @@ export class Game {
 			});
 
 			this.checkScores();
-		}, 16);
+		}, 16); // ~60 FPS for smoother gameplay
 	}
 
 	checkScores() {
