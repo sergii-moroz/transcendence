@@ -17,6 +17,13 @@ export const routes: tRoutes = {
 		title: `404 | ${APP_TITLE}`,
 		description: "Page not found"
 	},
+
+	"unauthorized": {
+		template: "/templates/unauthorized.html",
+		title: `unauthorized | ${APP_TITLE}`,
+		description: "Unauthorized"
+	},
+
 	"error": {
 		template: 'error',
 		title: `error | ${APP_TITLE}`,

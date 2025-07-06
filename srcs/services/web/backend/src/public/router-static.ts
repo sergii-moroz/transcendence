@@ -43,6 +43,8 @@ export class Router {
 			if (this.username) {
 				socialSocketManager.init();
 				this.initSocket = true;
+			} else {
+				route = routes["unauthorized"]
 			}
 		}
 
