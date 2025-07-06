@@ -48,7 +48,6 @@ export class Tournament {
 		} else if(this.players.length !== this.maxPlayers) { // Add player
 			this.players = this.players.filter(([pid]) => pid !== id);
 			this.players.push([id, name, socket]);
-			this.knownIds.set(id, {eliminated: false, redirectToGameId: null});
 			console.custom('INFO', `Tournament: Player ${id} joined (${this.players.length}/4)`);
 		} else if (this.players.length === this.maxPlayers) { // Forbid joining if full
 			socket.send(JSON.stringify({
@@ -58,6 +57,10 @@ export class Tournament {
 			console.custom('ERROR', `Tournament: User ${id} tried to join a full tournament`);
 		}
 		if(this.players.length === this.maxPlayers && !this.isRunning) { // Start tournament if max players reached
+			this.players.forEach(([pid, name, playerSocket]) => {
+				this.knownIds.set(pid, {eliminated: false, redirectToGameId: null});
+			});
+			this.sendMatchupData();
 			this.allConnected = true;
 			console.custom('INFO', `Tournament: Starting tournament...`);
 			this.startTournament();
@@ -77,7 +80,7 @@ export class Tournament {
 			console.custom('DEBUG', `Tournament: Player ${id} reconnected`);
 
 			const redirectToGameId = this.knownIds.get(id)?.redirectToGameId;
-			if (redirectToGameId) {
+			if (redirectToGameId && this.games.has(redirectToGameId) && this.games.get(redirectToGameId)?.winnerId === null) {
 				socket.send(JSON.stringify({
 					type: 'redirectToGame',
 					gameRoomId: redirectToGameId,
