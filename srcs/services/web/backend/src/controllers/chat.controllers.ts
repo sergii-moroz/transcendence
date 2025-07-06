@@ -17,7 +17,8 @@ import { MessageToServer } from "../types/user.js";
 import { findUserIdByUsername } from "../services/userService.js";
 import { sendMessage } from "../services/utils.js";
 import { FriendInvalid } from "../errors/friends.error.js";
-import { Game } from "../services/aiGame.js";
+import { Game } from "../services/game.js";
+import { GAME_MODES } from "../public/types/game-history.types.js";
 
 export const handleChatInit = async (
 	req:		FastifyRequest,
@@ -97,7 +98,7 @@ export const handleGameInviteCreation = async (
 ) => {
 	try {
 		const friendName = (req.body as { name: string }).name;
-		const game = new Game();
+		const game = new Game(null, GAME_MODES.Multiplayer);
 		req.server.gameInstances.set(game.gameRoomId, game);
 		await addGameInvite(friendName, req.user.id, game.gameRoomId);
 		reply.status(200).send( { success: true, gameID: game.gameRoomId });
