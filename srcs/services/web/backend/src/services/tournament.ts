@@ -48,6 +48,7 @@ export class Tournament {
 		} else if(this.players.length !== this.maxPlayers) { // Add player
 			this.players = this.players.filter(([pid]) => pid !== id);
 			this.players.push([id, name, socket]);
+			this.sendMatchupData();
 			console.custom('INFO', `Tournament: Player ${id} joined (${this.players.length}/4)`);
 		} else if (this.players.length === this.maxPlayers) { // Forbid joining if full
 			socket.send(JSON.stringify({
