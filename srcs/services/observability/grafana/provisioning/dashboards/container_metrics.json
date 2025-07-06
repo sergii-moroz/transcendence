@@ -1,0 +1,66 @@
+{
+  "uid": "containers",
+  "title": "Docker Container Metrics (cAdvisor)",
+  "schemaVersion": 30,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Container CPU Usage (%)",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(container_cpu_usage_seconds_total{name!=\"\", image!=\"\", container!=\"POD\"}[1m]) * 100",
+          "legendFormat": "{{container}}",
+          "refId": "A"
+        }
+      ],
+      "id": 1
+    },
+    {
+      "type": "graph",
+      "title": "Container Memory Usage (MB)",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "container_memory_usage_bytes{name!=\"\", image!=\"\"} / 1024 / 1024",
+          "legendFormat": "{{container}}",
+          "refId": "A"
+        }
+      ],
+      "id": 2
+    },
+    {
+      "type": "graph",
+      "title": "Container Network Traffic (bytes/sec)",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(container_network_receive_bytes_total{name!=\"\", image!=\"\"}[1m])",
+          "legendFormat": "{{container}} RX",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(container_network_transmit_bytes_total{name!=\"\", image!=\"\"}[1m])",
+          "legendFormat": "{{container}} TX",
+          "refId": "B"
+        }
+      ],
+      "id": 3
+    },
+    {
+      "type": "graph",
+      "title": "Container Disk IO Time (seconds/sec)",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "rate(container_blkio_io_service_time_recursive_seconds_total[1m])",
+          "legendFormat": "{{container}} IO",
+          "refId": "A"
+        }
+      ],
+      "id": 4
+    }
+  ]
+}

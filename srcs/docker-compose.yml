@@ -24,6 +24,19 @@ services:
     depends_on:
       - elasticsearch
 
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - transnet
+
   kibana:
     image: docker.elastic.co/kibana/kibana:8.13.4
     environment:
@@ -74,6 +87,8 @@ services:
       - "3000:3000"
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./services/observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./services/observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
 
   node-exporter:
     image: prom/node-exporter:latest
