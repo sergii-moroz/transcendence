@@ -95,6 +95,7 @@ export const build = async (opts: FastifyServerOptions) => {
 	})
 
 	//await app.register(metricsPlugin);   
+	//app.register(import('./metrics'))
 	app.register(friends, {prefix: "api"});
 	app.register(profile, {prefix: "api"});
 	app.register(chat);
