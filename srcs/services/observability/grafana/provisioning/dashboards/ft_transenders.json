@@ -153,28 +153,69 @@
       }
     },
     {
-      "id": 6,
-      "type": "stat",
-      "title": "Concurrent Virtual Users (k6_vus)",
-      "datasource": "Prometheus",
-      "targets": [
-        {
-          "expr": "max(k6_vus)",
-          "refId": "A"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "none",
-          "decimals": 0
-        }
-      },
-      "gridPos": {
-        "x": 12,
-        "y": 14,
-        "w": 12,
-        "h": 4
-      }
-    }
+
+		"id": 6,
+		"type": "stat",
+		"title": "Active Players",
+		"datasource": "Prometheus",
+		"targets": [
+			{
+			"expr": "active_players_total",
+			"refId": "A"
+			}
+		],
+		"fieldConfig": {
+			"defaults": {
+			"unit": "none",
+			"decimals": 0
+			}
+		},
+		"gridPos": {
+			"x": 0,
+			"y": 18,
+			"w": 6,
+			"h": 4
+		}
+		},
+	{
+	"id": 9,
+	"type": "timeseries",
+	"title": "Match Duration P95 (s)",
+	"datasource": "Prometheus",
+	"targets": [
+		{
+		"expr": "histogram_quantile(0.95, rate(match_duration_seconds_bucket[1m]))",
+		"refId": "A"
+		}
+	],
+	"fieldConfig": {
+		"defaults": {
+		"unit": "s",
+		"decimals": 0
+		}
+	},
+	"gridPos": { "x": 0, "y": 26, "w": 24, "h": 6 }
+	},
+	{
+	"id": 10,
+	"type": "stat",
+	"title": "Avg Match Duration (s)",
+	"datasource": "Prometheus",
+	"targets": [
+		{
+		"expr": "rate(match_duration_seconds_sum[1m]) / rate(match_duration_seconds_count[1m])",
+		"refId": "A"
+		}
+	],
+	"fieldConfig": {
+		"defaults": {
+		"unit": "s",
+		"decimals": 0
+		}
+	},
+	"gridPos": { "x": 0, "y": 32, "w": 6, "h": 4 }
+	}
+
+
   ]
 }
