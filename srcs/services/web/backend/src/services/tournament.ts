@@ -179,39 +179,42 @@ export class Tournament {
 			this.knownPlayers.set(player1[0], {eliminated: false, name: player1[1], redirectToGameId: game.gameRoomId});
 			this.knownPlayers.set(player2[0], {eliminated: false, name: player2[1], redirectToGameId: game.gameRoomId});
 			
-			this.redirectToGameRoom(player1[0], player2[0]);
+			this.informPlayersAboutNewGame(player1, player2, game.gameRoomId);
 			console.custom('DEBUG', `Tournament: Game room ${game.gameRoomId} created with players ${player1[0]} and ${player2[0]}`);
 		}
 	}
 
-	redirectToGameRoom(player1Id: string, player2Id: string) {
-		const player1 = this.knownPlayers.get(player1Id);
-		const player2 = this.knownPlayers.get(player2Id);
-		const gameRoomId = player1?.redirectToGameId || player2?.redirectToGameId;
+	informPlayersAboutNewGame(player1: [string, string], player2: [string, string], gameRoomId: string) {
+		try {
+			const players = [
+				{id: player1[0], name: player1[1], gameSocket: this.playerSockets.get(player1[0])?.socket, socialSocket: this.app.onlineUsers.get(player1[1])},
+				{id: player2[0], name: player1[1], gameSocket: this.playerSockets.get(player2[0])?.socket, socialSocket: this.app.onlineUsers.get(player2[1])}
+			]
 
+			for (let i = 0; i < players.length; i++) {
+				const player = players[i];
+				const opponent = players[1 - i];
 
-		const message1 = JSON.stringify({
-			type: 'redirectToGame',
-			gameRoomId: gameRoomId,
-			opponentName: player2?.name,
-			message: `Redirecting to game room: ${gameRoomId}`
-		});
-
-		const message2 = JSON.stringify({
-			type: 'redirectToGame',
-			gameRoomId: gameRoomId,
-			opponentName: player1?.name,
-			message: `Redirecting to game room: ${gameRoomId}`
-		});
-
-		const player1Socket = this.playerSockets.get(player1Id)?.socket;
-		const player2Socket = this.playerSockets.get(player2Id)?.socket;
-
-		if (player1Socket) player1Socket.send(message1);
-		if (player2Socket) player2Socket.send(message2);
-
-		if (!player1Socket || !player2Socket) {
-			console.custom('WARN', `Tournament: Failed to send redirectToGame to ${!player1Socket ? player1Id : ''} ${!player2Socket ? player2Id : ''}`);
+				if (player.socialSocket) {
+					const message = {
+						type: 'tournamentNextGame',
+						opponentName: opponent.name,
+						gameRoomId
+					};
+					player.socialSocket?.send(JSON.stringify(message));
+				}
+				
+				const message = {
+					type: 'redirectToGame',
+					gameRoomId,
+					opponentName: opponent.name,
+					opponentId: opponent.id,
+					message: `Redirecting to game room: ${gameRoomId}`
+				};
+				player.gameSocket?.send(JSON.stringify(message));
+			}
+		} catch (error) {
+			console.custom('WARN', `Tournament: ${this.id}: Failed to send redirectToGame to game: ${gameRoomId}`);
 		}
 	}
 
