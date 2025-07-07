@@ -1,5 +1,6 @@
 import { ChatInitResponse, Message } from "../../../types/user.js";
 import { API } from "../../api-static.js";
+import { PopupData, popupManager } from "../../popupManager.js";
 import { Router } from "../../router-static.js";
 import { socialSocketManager } from "../../SocialWebSocket.js";
 import { iconSidebarCheck, iconX } from "../icons/icons.js";
@@ -30,12 +31,17 @@ export class ChatView extends HTMLElement {
 
 	async connectedCallback() {
 		this.name = this.getAttribute('friend') || '';
-		socialSocketManager.setMessageCallback((data: Message) => {
+		socialSocketManager.setMessageCallback((data: PopupData) => {
 			if (data.owner != this.name) {
-				socialSocketManager.addPopup(data);
+				popupManager.addPopup(data);
 				return;
 			}
-			this.addMessages(data);
+			if (data.type === 'chatMessage') {
+				this.addMessages({text: data.message!, owner: data.owner});
+			}
+			else if (data.type === 'chatGameInvite') {
+				this.addGameInvitation();
+			}
 		});
 
 		this.el_back = this.querySelector('#back-to-friends-btn');
