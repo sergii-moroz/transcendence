@@ -65,7 +65,7 @@ export class Tournament extends HTMLElement {
 			if(data.opponentName) {
 				document.getElementById('waiting-message')!.textContent = `Matching up against ${data.opponentName}...`;
 			} else {
-				document.getElementById('waiting-message')!.textContent = data.message || 'Game room is ready';
+				document.getElementById('waiting-message')!.textContent = data.message || 'Matchup found, redirecting to game room...';
 			}
 			this.enablePlayButton(data);
 			// setTimeout(() => {
