@@ -145,7 +145,7 @@ export class TournamentList extends HTMLElement {
 		this.appendChild(popup);
 	}
 
-	updateTournamentList(tournaments: Array<{ id: string, playerCount: number, maxPlayers: number, isRunning: boolean }> | undefined) {
+	updateTournamentList(tournaments: Array<{ id: string, playerCount: number, maxPlayers: number, isRunning: boolean, isUserInTournament: boolean }> | undefined) {
 		const listElement = document.getElementById('tournament-list')!;
 		if (!listElement) {
 			console.error('Tournament list element not found.');
@@ -168,7 +168,7 @@ export class TournamentList extends HTMLElement {
 						<div class='flex items-center gap-3 w-full'>
 							<div class="flex-1 h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
 								<div class="h-full bg-indigo-500" style="width: ${
-									(tournament.playerCount / tournament.maxPlayers) * 100 }%">
+									((tournament.isRunning ? tournament.maxPlayers : tournament.playerCount) / tournament.maxPlayers) * 100 }%">
 								</div>
 							</div>
 							<p class="text-sm font-medium text-gray-700 dark:text-gray-200">${tournament.isRunning ? tournament.maxPlayers : tournament.playerCount} / ${tournament.maxPlayers} players</p>
@@ -176,11 +176,13 @@ export class TournamentList extends HTMLElement {
 					</div>
 					<button
 						id="join-tournament-${tournament.id}"
-						class="${tournament.isRunning ? 'tw-btn-disabled' : 'tw-btn'} ml-4"
+						class="${tournament.isRunning && !tournament.isUserInTournament ? 'tw-btn-disabled' : 'tw-btn'} ml-4"
 						data-tournament-id="${tournament.id}"
-						${tournament.isRunning ? 'disabled' : ''}
+						${tournament.isRunning && !tournament.isUserInTournament ? 'disabled' : ''}
 					>
-						${tournament.isRunning ? 'Full' : 'Join'}
+						${tournament.isRunning
+							? (tournament.isUserInTournament ? 'Rejoin' : 'Full')
+							: 'Join'}
 					</button>
 				`;
 
