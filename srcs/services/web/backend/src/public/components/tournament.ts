@@ -62,7 +62,6 @@ export class Tournament extends HTMLElement {
 		const data = JSON.parse(event.data) as WsMatchMakingMessage;
 
 		if (data.type === 'redirectToGame') {
-			console.log(`Redirecting to game room: ${data.gameRoomId}`);
 			if(data.opponentName) {
 				document.getElementById('waiting-message')!.textContent = `Matching up against ${data.opponentName}...`;
 			} else {
@@ -102,6 +101,7 @@ export class Tournament extends HTMLElement {
 	}
 
 	enablePlayButton = (data: WsMatchMakingMessage) => {
+		console.log(`enabling play button that redirecting to game room: ${data.gameRoomId}`);
 		const playButton = this.querySelector('#play-button') as HTMLAnchorElement;
 		if (!playButton) return;
 

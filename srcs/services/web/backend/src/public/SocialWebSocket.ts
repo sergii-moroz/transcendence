@@ -22,7 +22,9 @@ class SocialSocketHandler {
 					callback(data)
 				}
 				else if (data.type == 'tournamentNextGame' || data.type == 'tournamentInfo') {
-					popupManager.addPopup(data);
+					if (!window.location.pathname.includes('/tournament/'))
+						popupManager.addPopup(data);
+					console.log('tournament message received');
 				}
 				else if (data.type == 'error') {
 					console.error(data.text);

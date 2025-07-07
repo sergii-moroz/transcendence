@@ -1,6 +1,5 @@
 import { FastifyInstance } from 'fastify';
 import crypto from 'crypto';
-import { redirectToGameRoom } from '../routes/v1/matchmaking.js';
 import { db } from '../db/connections.js';
 import { GAME_MODES } from '../public/types/game-history.types.js';
 import { Game } from './game.js';
@@ -180,32 +179,38 @@ export class Tournament {
 
 			await new Promise(resolve => setTimeout(resolve, 50));
 			
-			this.redirectToGameRoom(game.gameRoomId, player1, player2);
+			this.informPlayersAboutNewGame(game.gameRoomId, [player1, player2]);
 			this.knownIds.set(player1[0], {eliminated: false, redirectToGameId: game.gameRoomId});
 			this.knownIds.set(player2[0], {eliminated: false, redirectToGameId: game.gameRoomId});
 			console.custom('DEBUG', `Tournament: Game room ${game.gameRoomId} created with players ${player1[0]} and ${player2[0]}`);
 		}
 	}
 
-	redirectToGameRoom(gameRoomId: string, player1: [string, string, WebSocket], player2: [string, string, WebSocket]) {
-		const message1 = JSON.stringify({
-			type: 'redirectToGame',
-			gameRoomId: gameRoomId,
-			opponentName: player2[1],
-			opponentId: player2[0],
-			message: `Redirecting to game room: ${gameRoomId}`
-		});
-
-		const message2 = JSON.stringify({
-			type: 'redirectToGame',
-			gameRoomId: gameRoomId,
-			opponentName: player1[1],
-			opponentId: player1[0],
-			message: `Redirecting to game room: ${gameRoomId}`
-		});
-
-		player1[2].send(message1);
-		player2[2].send(message2);
+	informPlayersAboutNewGame(gameRoomId: string, players: Array<[string, string, WebSocket]>) {
+		
+		for (let i = 0; i < players.length; i++) {
+			const [id, username, socket] = players[i];
+			const opponent = i === 0 ? players[1] : players[0];
+			
+			const socialSocket = this.app.onlineUsers.get(username);
+			if (socialSocket) {
+				const message = {
+					type: 'tournamentNextGame',
+					opponentName: opponent[1],
+					gameRoomId
+				};
+				socialSocket.send(JSON.stringify(message));
+			}
+			
+			const message = {
+				type: 'redirectToGame',
+				gameRoomId,
+				opponentName: opponent[1],
+				opponentId: opponent[0],
+				message: `Redirecting to game room: ${gameRoomId}`
+			};
+			socket.send(JSON.stringify(message));
+		}
 	}
 
 	async detectWinners() {
