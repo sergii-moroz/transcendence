@@ -138,7 +138,7 @@ class popupHandler {
 							`,
 					title: 'Game Invite',
 					message: `${data.owner} invited you to play a 1v1`,
-					button: `<button id='acceptGameInviteInPopup' class="action-btn px-3 py-1 bg-purple-500 hover:bg-purple-600 text-white text-sm rounded-lg transition-colors" gameRoomId=${data.gameRoomId}>
+					button: `<button id='acceptGameInviteInPopup' class="action-btn px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-sm rounded-lg transition-colors" gameRoomId=${data.gameRoomId}>
 								Accept
 							</button>`,
 					defaultDismissTime: 5000
@@ -153,7 +153,7 @@ class popupHandler {
 							`,
 					title: 'Next Matchup',
 					message: `Your next tournament game against ${data.opponentName} is ready`,
-					button: `<button id="acceptJoiningNextTournamentGame" class="action-btn px-3 py-1 bg-indigo-500 hover:bg-indigo-600 text-white text-sm rounded-lg transition-colors" gameRoomId=${data.gameRoomId}>
+					button: `<button id="acceptJoiningNextTournamentGame" class="action-btn px-3 py-1.5 bg-indigo-500 hover:bg-indigo-600 text-white text-sm rounded-lg transition-colors" gameRoomId=${data.gameRoomId}>
 								Play
 							 </button>`,
 					defaultDismissTime: 5000
