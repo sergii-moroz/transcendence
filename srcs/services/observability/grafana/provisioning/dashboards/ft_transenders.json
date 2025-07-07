@@ -59,11 +59,11 @@
     {
       "id": 2,
       "type": "stat",
-      "title": "Error Rate (5xx, %)",
+      "title": "Error Rate (4xx+5xx, %)",
       "datasource": "Prometheus",
       "targets": [
         {
-          "expr": "(sum(rate(http_requests_total{code=~\"5..\"}[1m])) / sum(rate(http_requests_total[1m]))) * 100",
+          "expr": "(sum(rate(http_requests_total{code=~\"4..|5..\"}[1m])) / sum(rate(http_requests_total[1m]))) * 100",
           "refId": "A"
         }
       ],
@@ -125,6 +125,54 @@
         "x": 0,
         "y": 10,
         "w": 6,
+        "h": 4
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Error Requests per Second by Code",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum by (code)(rate(http_requests_total{code!~\"2..|3..\"}[1m]))",
+          "legendFormat": "{{code}}",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        }
+      },
+      "gridPos": {
+        "x": 6,
+        "y": 10,
+        "w": 18,
+        "h": 4
+      }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Concurrent Virtual Users (k6_vus)",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "max(k6_vus)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0
+        }
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 14,
+        "w": 12,
         "h": 4
       }
     }

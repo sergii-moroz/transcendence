@@ -134,6 +134,25 @@ services:
       options:
         gelf-address: "udp://127.0.0.1:5044"  # send logs to Logstash GELF input
 
+
+  k6:
+    image: grafana/k6:latest
+    profiles: ["manual"]
+    volumes:
+      - ./services/observability/grafana/test_script.js:/test_script.js:ro
+    command:
+      - run
+      - --out
+      - experimental-prometheus-rw=http://prometheus:9090/api/v1/write
+      - /test_script.js
+    networks: [transnet]
+
+
+
+
+
+
+
 # ----------------------- Volumes & networks -----------------------
 volumes:
   esdata:

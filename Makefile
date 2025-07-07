@@ -16,8 +16,9 @@ down:
 
 
 # monitoring:
-	
-	
+loadtest:
+	@docker compose -f $(COMPOSE_FILE) run --rm k6
+
 # mon-down:
 	
 
