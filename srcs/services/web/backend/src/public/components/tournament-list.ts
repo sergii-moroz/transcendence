@@ -75,7 +75,7 @@ export class TournamentList extends HTMLElement {
 			const tournamentId = joinBtn.getAttribute('data-tournament-id');
 			this.socket?.send(JSON.stringify({
 				type: 'joinTournament',
-				tournamentId
+				tournamentId: tournamentId
 			}));
 			console.log(`Joining tournament: ${tournamentId}`);
 		}
