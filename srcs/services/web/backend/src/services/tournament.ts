@@ -4,6 +4,7 @@ import { redirectToGameRoom } from '../routes/v1/matchmaking.js';
 import { db } from '../db/connections.js';
 import { GAME_MODES } from '../public/types/game-history.types.js';
 import { Game } from './game.js';
+import { clear } from 'console';
 
 export class Tournament {
 	games: Map<string, Game>;
@@ -88,7 +89,7 @@ export class Tournament {
 					message: `Matched with opponent, proceed to game room...`
 				}));
 				console.custom('DEBUG', `Tournament: Player ${id} redirected to game room ${redirectToGameId}`);
-			}
+			} 
 
 			const remaining = Array.from(this.knownIds.entries()).filter(
 				([_, info]) => !info.eliminated
@@ -107,6 +108,7 @@ export class Tournament {
 					if (this.players.length == 1){
 						this.players.forEach(([pid, playerSocket]) => {
 							this.handleVictory(pid);
+							console.custom('INFO', `Tournament: tournament timeout, player ${pid} is the winner`);
 						});
 					} else {
 						this.players.forEach(([pid, name, playerSocket]) => {
@@ -119,7 +121,7 @@ export class Tournament {
 						this.app.tournaments.delete(this.id);
 						console.custom('INFO', `Tournament: Inactive tournament ${this.id} deleted`);
 					}
-				}, 90000); // 90 seconds of inactivity before deletion
+				}, 120000); // 120 seconds of inactivity before deletion
 			}
 		} else if (this.knownIds.has(id) && this.knownIds.get(id)?.eliminated === true) {
 			socket.send(JSON.stringify({
@@ -136,7 +138,7 @@ export class Tournament {
 		}
 	}
 
-	handleVictory(finalWinnerId: string) {
+	async handleVictory(finalWinnerId: string) {
 		this.isRunning = false;
 		console.custom('INFO', `Tournament: Tournament finished with winner ${finalWinnerId}`);
 		const winnerSocket = this.players.find(([id]) => id === finalWinnerId)?.[2];
@@ -152,11 +154,12 @@ export class Tournament {
 		db.run(
 				`UPDATE user_stats SET t_wins = t_wins + 1 WHERE user_id = ?`, [finalWinnerId]
 		);
+		await new Promise(resolve => setTimeout(resolve, 200));
 		this.app.tournaments.delete(this.id);
 		return;
 	}
 
-	async matchPlayers() {
+	matchPlayers() {
 		let advancingPlayers: Array<[string, string, WebSocket]>;
 		if (this.round === 1) {
 			advancingPlayers = [...this.players];
@@ -178,11 +181,10 @@ export class Tournament {
 			this.games.set(game.gameRoomId, game);
 			this.app.gameInstances.set(game.gameRoomId, game);
 
-			await new Promise(resolve => setTimeout(resolve, 50));
-			
-			this.redirectToGameRoom(game.gameRoomId, player1, player2);
 			this.knownIds.set(player1[0], {eliminated: false, redirectToGameId: game.gameRoomId});
 			this.knownIds.set(player2[0], {eliminated: false, redirectToGameId: game.gameRoomId});
+			
+			this.redirectToGameRoom(game.gameRoomId, player1, player2);
 			console.custom('DEBUG', `Tournament: Game room ${game.gameRoomId} created with players ${player1[0]} and ${player2[0]}`);
 		}
 	}
@@ -210,13 +212,15 @@ export class Tournament {
 
 	async detectWinners() {
 		const interval = setInterval(() => {
-			if (!this.isRunning) {
+			if (!this.isRunning || this.activeGames === 0) {
 				clearInterval(interval);
 				return;
 			}
 			for (const game of this.games.values()) {
 				if (game.winnerId) {
 					const winnerId = game.winnerId;
+					let winnerSocket;
+					let winnerName;
 					// Mark all players in this game as eliminated except the winner
 					for (const player of game.players.values()) {
 						if (player.id !== winnerId) {
@@ -224,6 +228,8 @@ export class Tournament {
 							console.custom('DEBUG', `Eliminated: ${player.id}, knownIds: ${Array.from(this.knownIds.entries())}`);
 						} else {
 							this.knownIds.set(String(player.id), {eliminated: false, redirectToGameId: null}); // not eliminated
+							winnerSocket = player.socket;
+							winnerName = player.username;
 						}
 					}
 					this.addMatchup(game);
@@ -231,6 +237,10 @@ export class Tournament {
 					this.activeGames--;
 					this.games.delete(game.gameRoomId);
 					this.app.gameInstances.delete(game.gameRoomId);
+					if(this.activeGames === 0) {
+						clearInterval(interval);
+					}
+					this.addPlayer(winnerSocket!, winnerId, winnerName!);
 				}
 			}
 		}, 500);
