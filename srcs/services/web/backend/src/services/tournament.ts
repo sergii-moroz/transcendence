@@ -180,7 +180,7 @@ export class Tournament {
 			this.knownPlayers.set(player2[0], {eliminated: false, name: player2[1], redirectToGameId: game.gameRoomId});
 			
 			this.informPlayersAboutNewGame(player1, player2, game.gameRoomId);
-			console.custom('DEBUG', `Tournament: Game room ${game.gameRoomId} created with players ${player1[0]} and ${player2[0]}`);
+			console.custom('DEBUG', `Tournament: Game room ${game.gameRoomId} created with players ${player1[0]}:(${player1[1]}) and ${player2[0]}:(${player2[1]})`);
 		}
 	}
 
@@ -188,12 +188,13 @@ export class Tournament {
 		try {
 			const players = [
 				{id: player1[0], name: player1[1], gameSocket: this.playerSockets.get(player1[0])?.socket, socialSocket: this.app.onlineUsers.get(player1[1])},
-				{id: player2[0], name: player1[1], gameSocket: this.playerSockets.get(player2[0])?.socket, socialSocket: this.app.onlineUsers.get(player2[1])}
+				{id: player2[0], name: player2[1], gameSocket: this.playerSockets.get(player2[0])?.socket, socialSocket: this.app.onlineUsers.get(player2[1])}
 			]
 
 			for (let i = 0; i < players.length; i++) {
 				const player = players[i];
 				const opponent = players[1 - i];
+				// console.custom('warn', `${player.name}'s opponent is ${opponent.name}`);
 
 				if (player.socialSocket) {
 					const message = {
