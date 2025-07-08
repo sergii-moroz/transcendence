@@ -20,8 +20,8 @@ export class Game {
 	gameRunning: boolean;
 	winnerId: string | null;
 	tournamentId: string | null;
-	private game_mode: GAME_MODES = GAME_MODES.Multiplayer
-	private gameStartTime: number = 0
+	game_mode: GAME_MODES = GAME_MODES.Multiplayer
+	gameStartTime: number = 0
 
 	constructor(tournamentId: string | null = null, game_mode: GAME_MODES = GAME_MODES.Multiplayer) {
 		this.tournamentId = tournamentId;
@@ -104,14 +104,12 @@ export class Game {
 		}
 	}
 
-	removeAllPlayers() {
-		// console.custom("WARN", "aaa");
+	close(message?: string) {
 		for (const [role, user] of this.players.entries()) {
 			user.socket?.send(JSON.stringify({
-				type: 'Error',
-				message: `game was closed`
+				type: 'closed',
+				message: `${message ? message : "game was closed"}`
 			}));
-			this.players.delete(role);
 		}
 	}
 
