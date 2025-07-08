@@ -1,6 +1,7 @@
 import { Router } from "./router-static.js";
 import { MessageToServer } from "../types/user.js";
 import { popupManager } from "./popupManager.js";
+import { API } from "./api-static.js";
 
 class SocialSocketHandler {
 	private socket: WebSocket | null = null;
@@ -41,6 +42,11 @@ class SocialSocketHandler {
 			if (event.code === 1000) {
 				await Router.logout();
 				console.log('Social Socket: User is already signed in!');
+			}
+			if (API.refreshTimeout) {
+				console.log('delete token refresh Timeout');
+				clearTimeout(API.refreshTimeout);
+				API.refreshTimeout = null;
 			}
 		}
 

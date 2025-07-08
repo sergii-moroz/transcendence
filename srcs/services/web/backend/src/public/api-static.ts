@@ -1,10 +1,9 @@
 import { JwtUserPayload } from "../types/user.js"
+import { Router } from "./router-static.js"
 import { GAME_MODES } from "./types/game-history.types.js"
 
 export class API {
-	static baseUrl: string
-	static refreshInterval: number
-	static refreshIntervalId: ReturnType<typeof setInterval> | null
+	static refreshTimeout: NodeJS.Timeout | null = null;
 
 	// ==========================================
 	// GET REQUEST
@@ -61,13 +60,10 @@ export class API {
 	 */
 	static async login(username: string, password: string) {
 		const response = await this.post('/api/login', { username, password })
-
-		// if (response.ok && response.status === 202) return response.json()
-
-		// if (response.ok) {
-		// 	this.startAutoRefresh()
-		// }
-		return response.json()
+		// const json = await response.json();
+		// if (json.success)
+		// 	this.scheduleTokenRefresh();
+		return response.json();
 	}
 
 	/**
@@ -96,6 +92,11 @@ export class API {
 	 * @returns A Promise resolving to the parsed JSON response from the server.
 	 */
 	static async logout() {
+		if (this.refreshTimeout) {
+			console.log('delete token refresh Timeout');
+			clearTimeout(this.refreshTimeout);
+			this.refreshTimeout = null;
+		}
 		const response = await this.post('/api/logout', {}, { includeCSRF: true })
 		return response.json()
 	}
@@ -252,6 +253,34 @@ export class API {
 		}
 	}
 
+	static async scheduleTokenRefresh() {
+		if (this.refreshTimeout)
+			clearTimeout(this.refreshTimeout);
+		const postRequestInit = this.postRequestInit({}, {includeCSRF: true})
+
+		try {
+			const res = await fetch('/api/tokenInfo', postRequestInit)
+			if (!res.ok) {
+				if (res.status === 401) {
+					Router.navigateTo('/login');
+					return;
+				}
+				throw new Error('getting token info failed');
+			}
+
+			const {expireTime} = await res.json();
+			const delay = expireTime * 1000 - Date.now() - 20000; //refresh 20s before it would expire
+			if (delay > 0) { //if token hasnt expired
+				console.log(`Schedued token refresh in ${Math.floor(delay / 1000)}s`)
+				this.refreshTimeout = setTimeout(() => this.refreshToken(), delay)
+			}
+
+		} catch (err) {
+			console.error(`error setting token refresh timeout: `, err);
+			Router.navigateTo('/login');
+		}
+	}
+
 	/**
 	 * Attempts to refresh the access token by making a POST request to the refresh endpoint.
 	 *
@@ -266,9 +295,13 @@ export class API {
 
 		try {
 			const res = await fetch('/api/refresh', postRequestInit)
-			return res.ok
+			console.log('access token got refreshed');
+			this.scheduleTokenRefresh();
+			return res.ok;
 		} catch (err) {
-			return false
+			console.error(`error refreshing token: `, err);
+			Router.navigateTo('/login');
+			return false;
 		}
 	}
 
