@@ -40,7 +40,7 @@ class SocialSocketHandler {
 			this.socket = null;
 			if (event.code === 1000) {
 				await Router.logout();
-				alert('User is already signed in!');
+				console.log('Social Socket: User is already signed in!');
 			}
 		}
 
@@ -73,7 +73,6 @@ class SocialSocketHandler {
 			console.error('sending message over social socket failed: ', error);
 		}
 	}
-
 }
 
 export const socialSocketManager = new SocialSocketHandler();

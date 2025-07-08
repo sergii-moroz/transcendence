@@ -1,8 +1,10 @@
 import { WsMatchMakingMessage } from "../types.js";
 import { Router } from "../router-static.js"
+import { API } from "../api-static.js";
 
 export class Matchmaking extends HTMLElement {
 	socket: WebSocket | null = null;
+	// reconnectAttemped = false
 
 	constructor() {
 		super();
@@ -20,7 +22,8 @@ export class Matchmaking extends HTMLElement {
 		}
 	}
 
-	handleSocket = () => {
+	handleSocket = async () => {
+		await API.ping()
 		this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/matchmaking`);
 
 		this.socket.onopen = this.handleOpen;
@@ -50,9 +53,21 @@ export class Matchmaking extends HTMLElement {
 		}
 	}
 
-	handleError = (err: Event) => {
-		alert(`WebSocket error: ${err}`);
-		console.error('WebSocket error:', err);
+	handleError = async (err: Event) => {
+		console.error('Matchmaking: WebSocket error:', err);
+		// if (!this.reconnectAttemped) {
+		// 	this.reconnectAttemped = true
+
+		// 	try {
+		// 		console.log("Attempting to refresh token...")
+		// 		await API.refreshToken()
+		// 		this.handleSocket()
+		// 	} catch (error) {
+		// 		console.error("Token refresh failed:", error)
+		// 	}
+		// } else {
+		// 	console.error("WebSocket failed even after token refresh")
+		// }
 	}
 
 	// <h2 class="text-xl font-semibold mb-4 text-gray-800 dark:text-white">

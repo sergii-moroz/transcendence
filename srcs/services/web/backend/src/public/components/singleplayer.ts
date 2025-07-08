@@ -10,8 +10,7 @@ export class SinglePlayerRoom extends HTMLElement {
 	async connectedCallback() {
 		const res = await API.getRoomId();
 		if (!res.roomId) {
-			console.error('Error connecting to matchmaking service:', res);
-			alert('Error connecting to matchmaking service. Please try again later.');
+			console.error('SinglePlayerRoom: Error connecting to matchmaking service:', res);
 			return;
 		}
 		console.log('Connected to matchmaking service.');

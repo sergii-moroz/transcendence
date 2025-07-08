@@ -1,5 +1,3 @@
-import { Router } from "../../router-static.js";
-
 export class HomeContent extends HTMLElement {
 
 	constructor() {
@@ -14,26 +12,6 @@ export class HomeContent extends HTMLElement {
 	disconnectedCallback() {
 		// this.removeEventListener('click', this.handleClick);
 	}
-
-	// async handleClick(event: Event) {
-	// 	const target = event.target as HTMLElement;
-
-	// 	if (target.closest('#singleplayer-btn')) {
-	// 		alert('not available');
-	// 	}
-	// 	else if (target.closest('#multiplayer-btn')) {
-	// 		Router.navigateTo('/matchmaking');
-	// 	}
-	// 	else if (target.closest('#tournament-btn')) {
-	// 		Router.navigateTo('/tournament-list');
-	// 	}
-	// 	else if (target.closest('#viewProfile-btn')) {
-	// 		Router.navigateTo('/settings');
-	// 	}
-	// 	else if (target.closest('#viewLeaderboard-btn')) {
-	// 		Router.navigateTo('/about');
-	// 	}
-	// }
 
 	render() {
 		this.innerHTML = `

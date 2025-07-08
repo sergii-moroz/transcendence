@@ -23,6 +23,8 @@ import { Router } from "../router-static.js"
 import { HitEffect } from "../utils/hit-effect.js"
 import { clamp, loadRandomCharacter } from "../utils/utils.js"
 import { ScoreBoard } from "../utils/score.js"
+import { API } from "../api-static.js"
+import { InfoBoard } from "../utils/info-board.js"
 
 export class Game3D extends HTMLElement {
 	private gameRoomId: string | null = null
@@ -51,6 +53,7 @@ export class Game3D extends HTMLElement {
 
 	private hitEffect: HitEffect | null = null
 	private scoreBoard: ScoreBoard | null = null
+	private infoBoard: InfoBoard | null = null
 
 	private homeBtn: HTMLElement | null = null
 
@@ -68,6 +71,8 @@ export class Game3D extends HTMLElement {
 		window.addEventListener("popstate", this.handleBackHome);
 		document.addEventListener('keydown', this.handleKeyDown);
 		document.addEventListener('keyup', this.handleKeyUp);
+		document.addEventListener('pointerdown', this.handlePointerDown)
+		document.addEventListener('pointerup', this.handlePointerUp)
 	}
 
 	disconnectedCallback() {
@@ -79,11 +84,13 @@ export class Game3D extends HTMLElement {
 		window.removeEventListener("popstate", this.handleBackHome);
 		document.removeEventListener('keydown', this.handleKeyDown);
 		document.removeEventListener('keyup', this.handleKeyUp);
+		document.removeEventListener('pointerdown', this.handlePointerDown)
+		document.removeEventListener('pointerup', this.handlePointerUp)
 	}
 
 	private render() {
 		this.innerHTML = `
-			<div class="relative z-0">
+			<div class="relative z-0 w-full">
            		<canvas class="w-full h-full block"></canvas>
 			</div>
 			<div class="flex justify-center mt-2">
@@ -104,6 +111,7 @@ export class Game3D extends HTMLElement {
 			stencil: true
 		})
 		this.scene = new Scene(this.engine)
+		// console.log(this.engine.hostInformation.isMobile)
 
 		// Static camera setup
 		const alpha = 15
@@ -157,11 +165,21 @@ export class Game3D extends HTMLElement {
 		this.createCharacter()
 		this.scoreBoard = new ScoreBoard(this.scene)
 		this.scoreBoard.setPosition(0, 149.5, 0)
+		this.infoBoard = new InfoBoard(this.scene)
+		this.infoBoard.setPosition(0, -100, 28)
+		this.infoBoard.updateInfo("▼ down", "up ▲")
+		this.infoBoard.setVisibility(0)
 
 		// Handle resize
 		this.resizeObserver = new ResizeObserver(() => {
 			this.engine?.resize()
+			if (this.engine?.hostInformation.isMobile) {
+				this.infoBoard?.setVisibility(1)
+			} else {
+				this.infoBoard?.setVisibility(0)
+			}
 		})
+
 		this.resizeObserver.observe(this.canvas)
 
 		// Run render loop
@@ -264,7 +282,8 @@ export class Game3D extends HTMLElement {
 
 	}
 
-	handleSocket = () => {
+	handleSocket = async () => {
+		await API.ping()
 		this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/game/${this.gameRoomId}`);
 
 		this.socket.onopen = () => {
@@ -279,9 +298,7 @@ export class Game3D extends HTMLElement {
 			}
 
 			if (data.type === 'Error') {
-				// this.socket?.send(JSON.stringify({ type: 'exit' }));
-				alert(data.message);
-				console.error('WebSocket error:', data.message);
+				console.error('Game3D: WebSocket error:', data.message);
 				Router.navigateTo('/home');
 			}
 
@@ -322,9 +339,7 @@ export class Game3D extends HTMLElement {
 		};
 
 		this.socket.onerror = (err: Event) => {
-			// this.socket?.send(JSON.stringify({ type: 'exit' }));
-			alert(`WebSocket error: ${err}`);
-			console.error('WebSocket error:', err);
+			console.error('Game3D: WebSocket error:', err);
 			Router.navigateTo('/home');
 		};
 	}
@@ -389,12 +404,6 @@ export class Game3D extends HTMLElement {
 				}
 				break
 		}
-		// if (this.keysPressed['ArrowUp'] || this.keysPressed['ArrowRight']) {
-		// 	this.socket.send(JSON.stringify({ type: 'input', input: 'down' }));
-		// }
-		// if (this.keysPressed['ArrowDown'] || this.keysPressed['ArrowLeft']) {
-		// 	this.socket.send(JSON.stringify({ type: 'input', input: 'up' }));
-		// }
 	}
 
 	private cleanup() {
@@ -433,5 +442,23 @@ export class Game3D extends HTMLElement {
 		} catch (error) {
 			return MeshBuilder.CreateBox("paddle10", { width: 1, height: 10, depth: 10 }, this.scene )
 		}
+	}
+
+	// Handle Mobile Inputs
+	private handlePointerDown = (e: PointerEvent) => {
+		const x = e.clientX
+		const screenWidth = window.innerWidth
+
+		if (x < screenWidth / 2) {
+			this.keysPressed['ArrowDown'] = true
+		} else {
+			this.keysPressed['ArrowUp'] = true
+		}
+	}
+
+	private handlePointerUp = (e: PointerEvent) => {
+		if (this.gameOver) return
+		this.keysPressed['ArrowUp'] = false
+		this.keysPressed['ArrowDown'] = false
 	}
 }
