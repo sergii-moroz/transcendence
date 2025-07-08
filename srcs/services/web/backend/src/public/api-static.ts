@@ -269,12 +269,11 @@ export class API {
 			}
 
 			const {expireTime} = await res.json();
-			const delay = expireTime * 1000 - Date.now() - 20000; //refresh 20s before it would expire
-			if (delay > 0) { //if token hasnt expired
-				console.log(`Schedued token refresh in ${Math.floor(delay / 1000)}s`)
-				this.refreshTimeout = setTimeout(() => this.refreshToken(), delay)
-			}
+			const expiresIn = expireTime * 1000 - Date.now(); 
+			const refreshIn = Math.max(0, expiresIn - 20000); //refresh 20s before it would expire
 
+			console.log(`Schedued token refresh in ${Math.floor(refreshIn / 1000)}s`)
+			this.refreshTimeout = setTimeout(() => this.refreshToken(), refreshIn);
 		} catch (err) {
 			console.error(`error setting token refresh timeout: `, err);
 			Router.navigateTo('/login');
