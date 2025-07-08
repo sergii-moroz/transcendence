@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "fastify-metrics": "^12.1.0",
+    "fastify-plugin": "^5.0.1",
+    "prom-client": "^15.1.3"
+  }
+}

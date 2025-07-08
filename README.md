@@ -97,6 +97,13 @@ docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml lo
 # log logstash
 docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml logs -f logstash
 
+
+stress make loadtest
+loadtest:
+	@docker compose -f $(COMPOSE_FILE) run --rm k6
+
+
+
 #stress test
 docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml up -d loadgen
 stress --cpu 4 --timeout 60

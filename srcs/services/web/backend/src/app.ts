@@ -1,10 +1,13 @@
 import fastify, { FastifyReply, FastifyRequest, FastifyServerOptions } from "fastify"
 import fastifyStatic from "@fastify/static";
 import fastifyCookie from "@fastify/cookie";
+import fastifyMetrics from "fastify-metrics";         
 import fastifyWebsocket, { WebSocket } from '@fastify/websocket';
 import { fileURLToPath } from "url";
 import path from "path";
 import fs from 'fs';
+import metricsPlugin from './plugins/metrics.js';  
+
 
 import { authRoutes } from "./routes/v1/auth.js";
 import { gameRoomSock } from "./routes/v1/gameRoom.js";
@@ -29,12 +32,14 @@ import { verifyAccessToken } from "./services/tokenService.js";
 export const build = async (opts: FastifyServerOptions) => {
 	const app = fastify(opts)
 
+	
 	const gameInstances = new Map<string, Game>(); //gameID, Game Instance
 	const tournaments = new Map<string, Tournament>(); //tournamentID, Tournament Instance
-
+	
 	app.decorate("gameInstances", gameInstances);
 	app.decorate("tournaments", tournaments);
 	app.decorate("onlineUsers", new Map<string, WebSocket>());
+    
 
 	app.register(fastifyCookie, {
 		secret: 'cookiesecret-key-cookiesecret-key',
@@ -89,6 +94,8 @@ export const build = async (opts: FastifyServerOptions) => {
 		prefix: '/'
 	})
 
+	//await app.register(metricsPlugin);   
+	//app.register(import('./metrics'))
 	app.register(friends, {prefix: "api"});
 	app.register(profile, {prefix: "api"});
 	app.register(chat);

@@ -6,6 +6,8 @@ import { validateRegisterInput } from "../services/authService.js";
 import { RegisterInputProps } from "../types/registration.js";
 import bcrypt from 'bcrypt';
 import { NoRefreshTokenError } from "../errors/middleware.errors.js";
+import { playerConnected,  playerDisconnected} from '../plugins/metrics.js';
+
 
 export const handleLogout = async (
 	req:		FastifyRequest,
@@ -38,7 +40,7 @@ export const handleLogin = async (
 			const tempToken = generate2FAAccessToken(user);
 			return reply.code(202).send({ requires2FA: true, token: tempToken });
 		}
-
+		+  playerConnected();
 		// Normal login (no 2FA)
 		const accessToken = generateAccessToken(user);
 		const refreshToken = generateRefreshToken(user);
@@ -64,7 +66,8 @@ export const handleLogin = async (
 				path: '/',
 				maxAge: 60 * 15
 			})
-			.send({ success: true });
+			 .send({ success: true });
+	  	playerDisconnected(); 
 	} catch (error) {
 		throw error;
 	}
@@ -86,6 +89,7 @@ export const handleRegister = async (
 		const refreshToken = generateRefreshToken(user);
 		const csrfToken = createCsrfToken();
 
+		playerConnected();
 		return reply
 			.setCookie('token', accessToken, {
 				httpOnly: true,

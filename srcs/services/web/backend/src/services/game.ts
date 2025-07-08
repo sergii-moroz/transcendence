@@ -3,6 +3,7 @@ import { db } from '../db/connections.js'
 import { GAME_MODES } from '../public/types/game-history.types.js';
 import { aiOpponent, createAIState } from './aiOpponent.js';
 import { updatePlayerStats } from './stats.services.js';
+import { matchDuration } from '../plugins/metrics.js';  
 
 export class Game {
 	players: Map< string, {socket: WebSocket | null, id: string, username: string} >;
@@ -243,6 +244,7 @@ export class Game {
 				duration: Math.floor((Date.now() - this.gameStartTime) / 1000),
 				techWin: false
 			}
+			matchDuration.observe(gameResults.duration);
 			saveGameResults(gameResults)
 		} else {
 			db.run(

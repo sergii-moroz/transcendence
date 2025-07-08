@@ -12,6 +12,12 @@ scrape_configs:
     static_configs:
       - targets: ['node-exporter:9100']
 
+  # cadvisor
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+
   # ─ ft_transcendence backend
   - job_name: 'app'
     metrics_path: /metrics          
