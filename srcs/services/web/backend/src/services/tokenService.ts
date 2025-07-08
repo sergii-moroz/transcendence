@@ -8,13 +8,14 @@ import {
 import crypto from 'crypto'
 import { JwtUserPayload } from '../types/user.js';
 import jwt from 'jsonwebtoken'
+import { TOKEN_EXPIRATION_TIME } from '../controllers/auth.controllers.js';
 
-const ACCESS_TOKEN_SECRET = process.env.JWT_ACCESS_SECRET || 'supersecret-key-supersecret-key!' as string;
+export const ACCESS_TOKEN_SECRET = process.env.JWT_ACCESS_SECRET || 'supersecret-key-supersecret-key!' as string;
 const REFRESH_TOKEN_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh-secret' as string;
 const TWO_FA_ACCESS_TOKEN_SECRET = process.env.JWT_2FA_ACCESS_SECRET || crypto.randomBytes(32).toString('hex') as string
 
 export function generateAccessToken(user: JwtUserPayload): string {
-	return jwt.sign({ id: user.id, username: user.username }, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+	return jwt.sign({ id: user.id, username: user.username }, ACCESS_TOKEN_SECRET, { expiresIn: `${TOKEN_EXPIRATION_TIME}s` });
 	// return jwt.sign(user, ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
 }
 

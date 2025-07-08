@@ -1,12 +1,15 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { createUser, findUserByUsername, verifyPassword } from "../services/userService.js";
 import { InvalidCredentialsError, UserNotFoundError } from "../errors/login.errors.js";
-import { createCsrfToken, generate2FAAccessToken, generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../services/tokenService.js";
+import { ACCESS_TOKEN_SECRET, createCsrfToken, generate2FAAccessToken, generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../services/tokenService.js";
 import { validateRegisterInput } from "../services/authService.js";
 import { RegisterInputProps } from "../types/registration.js";
 import bcrypt from 'bcrypt';
-import { NoRefreshTokenError } from "../errors/middleware.errors.js";
+import { AccessTokenInvalidError, NoAccessTokenError, NoRefreshTokenError } from "../errors/middleware.errors.js";
 import { playerConnected,  playerDisconnected} from '../plugins/metrics.js';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+
+export const TOKEN_EXPIRATION_TIME = 40 as number; //in sec
 
 
 export const handleLogout = async (
@@ -52,7 +55,7 @@ export const handleLogin = async (
 				secure: false, // set to true in production with HTTPS // process.env.NODE_ENV === 'production'
 				sameSite: 'strict',
 				path: '/',
-				maxAge: 60 * 15 // 15 min
+				maxAge: TOKEN_EXPIRATION_TIME
 			})
 			.setCookie('refreshToken', refreshToken, {
 				httpOnly: true,
@@ -64,7 +67,7 @@ export const handleLogin = async (
 				httpOnly: false,
 				sameSite: 'strict',
 				path: '/',
-				maxAge: 60 * 15
+				maxAge: TOKEN_EXPIRATION_TIME
 			})
 			 .send({ success: true });
 	  	playerDisconnected(); 
@@ -96,7 +99,7 @@ export const handleRegister = async (
 				secure: false, // set to true in production with HTTPS
 				sameSite: 'strict',
 				path: '/',
-				maxAge: 60 * 15 // 15 min
+				maxAge: TOKEN_EXPIRATION_TIME
 			})
 			.setCookie('refreshToken', refreshToken, {
 				httpOnly: true,
@@ -108,7 +111,7 @@ export const handleRegister = async (
 				httpOnly: false,
 				sameSite: 'strict',
 				path: '/',
-				maxAge: 60 * 15
+				maxAge: TOKEN_EXPIRATION_TIME
 			})
 			.send({ success: true });
 	} catch (error) {
@@ -134,16 +137,34 @@ export const handleRefresh = async (
 				httpOnly: true,
 				sameSite: 'strict',
 				path: '/',
-				maxAge: 60 * 15
+				maxAge: TOKEN_EXPIRATION_TIME
 			})
 			.setCookie('csrf_token', csrfToken, {
 				httpOnly: false,
 				sameSite: 'strict',
 				path: '/',
-				maxAge: 60 * 15
+				maxAge: TOKEN_EXPIRATION_TIME
 			})
 			.send({ success: true });
 	} catch (error) {
 		throw error;
+	}
+}
+
+export const handleTokenInfo = async (
+	req:		FastifyRequest,
+	reply:	FastifyReply
+) => {
+	
+	try {
+		const accessToken = req.cookies.token;
+		if (!accessToken) throw new AccessTokenInvalidError;
+		const decoded = jwt.verify(accessToken, ACCESS_TOKEN_SECRET) as JwtPayload
+		if (!decoded.exp)
+			throw new AccessTokenInvalidError
+		console.custom('warn', `${req.user.username}'s accessToken expires in ${(decoded.exp * 1000 - Date.now()) / 1000}s`);
+		reply.send({ expireTime: decoded.exp })
+	} catch (err) {
+		throw err;
 	}
 }
