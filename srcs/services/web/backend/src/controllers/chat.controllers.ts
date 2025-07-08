@@ -9,15 +9,15 @@ import {
 	getFriendChat,
 	getGameInviteID,
 	getOldMessages,
-	isBlocked
+	isBlocked,
+	sendMessage
 } from "../services/chat.services.js";
 
 import { WebSocket } from "@fastify/websocket";
 import { MessageToServer } from "../types/user.js";
 import { findUserIdByUsername } from "../services/userService.js";
-import { sendMessage } from "../services/utils.js";
 import { FriendInvalid } from "../errors/friends.error.js";
-import { Game } from "../services/aiGame.js";
+import { Game } from "../services/game.js";
 
 export const handleChatInit = async (
 	req:		FastifyRequest,
@@ -72,7 +72,7 @@ export const handleSocialSocket = async (
 				let errorMSG = 'Server failed on responding to message';
 				if (error instanceof Error && 'statusCode' in error) errorMSG = 'server cant process message because: ' + error.message;
 				req.server.log.error(errorMSG);
-				socket.send(JSON.stringify({ type: 'error', text: errorMSG }));
+				socket.send(JSON.stringify({ type: 'error', message: errorMSG }));
 			}
 		})
 
@@ -100,6 +100,15 @@ export const handleGameInviteCreation = async (
 		const game = new Game();
 		req.server.gameInstances.set(game.gameRoomId, game);
 		await addGameInvite(friendName, req.user.id, game.gameRoomId);
+
+		const friendSocket = req.server.onlineUsers.get(friendName);
+		if (friendSocket) {
+			friendSocket.send(JSON.stringify({
+				type: 'chatGameInvite',
+				owner: req.user.username,
+				gameRoomId: game.gameRoomId
+			}))
+		}
 		reply.status(200).send( { success: true, gameID: game.gameRoomId });
 	} catch (error) {
 		throw error;
@@ -114,7 +123,11 @@ export const handleAcceptGameInvite = async (
 		const friendName = (req.body as { name: string }).name;
 		const gameID = await getGameInviteID(friendName, req.user.id);
 		await deleteGameInvite(friendName, req.user.id);
-		reply.status(200).send( { success: true, gameID});
+		if (req.server.gameInstances.has(gameID))
+			reply.status(200).send( { success: true, gameID});
+		else
+			reply.status(200).send( { success: false, gameID});
+		
 	} catch (error) {
 		throw error;
 	}
@@ -129,8 +142,7 @@ export const handleDenyGameInvite = async (
 
 		const gameID = await getGameInviteID(friendName, req.user.id);
 		await deleteGameInvite(friendName, req.user.id);
-		req.server.gameInstances.get(gameID).removeAllPlayers();
-		req.server.gameInstances.delete(gameID);
+		req.server.gameInstances.get(gameID)?.close('Friend declined Game Invite');
 		reply.status(200).send( { success: true });
 	} catch (error) {
 		throw error;

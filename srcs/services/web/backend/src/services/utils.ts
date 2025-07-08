@@ -19,17 +19,3 @@ console.custom = function (prefix: string, ...args: any[]) {
 
 	console.log(`[${formattedTime}] ${color}${prefix}${reset}:`, ...args);
 };
-
-export const sendMessage = (text: string, owner: string, socket: WebSocket) => {
-	try {
-		const message: Message & { type: string} = {
-			type: 'message',
-			owner,
-			text
-		}
-		socket.send(JSON.stringify(message));
-	} catch (error) {
-		console.custom("ERROR", error);
-		socket.send({type: "error", text: "Message processing on the server failed"});
-	}
-}

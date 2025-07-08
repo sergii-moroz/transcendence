@@ -97,13 +97,14 @@ function redirectToTournament(tournamentId: string, app: FastifyInstance,
 }
 
 function sendTournamentList(connections: Array<[string, WebSocket]>, app: FastifyInstance) {
-	let tournamentList = Array.from(app.tournaments.values()).map(tournament => ({
-		id: tournament.id,
-		maxPlayers: tournament.maxPlayers,
-		playerCount: Array.from(tournament.knownIds.values()).filter(eliminated => !eliminated).length,
-		isRunning: tournament.isRunning
-	}));
 	connections.forEach(([userId, socket]) => {
+		let tournamentList = Array.from(app.tournaments.values()).map(tournament => ({
+			id: tournament.id,
+			maxPlayers: tournament.maxPlayers,
+			playerCount: tournament.playerSockets.size,
+			isRunning: tournament.isRunning,
+			isUserInTournament: tournament.knownPlayers.has(userId) && !tournament.knownPlayers.get(userId)?.eliminated
+		}));
 		socket.send(JSON.stringify({
 			type: 'tournamentList',
 			tournaments: tournamentList,

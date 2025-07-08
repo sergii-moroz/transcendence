@@ -1,8 +1,8 @@
 import {
 	FastifyInstance,
+	FastifyRequest,
 } from "fastify"
 
-// import { Game } from "../../services/game.js";
 import { authenticate } from "../../services/authService.js";
 import { GAME_MODES } from "../../public/types/game-history.types.js";
 import { Game } from "../../services/game.js";
@@ -12,6 +12,17 @@ export const matchmakingSock = async (app: FastifyInstance) => {
 
 	app.get('/matchmaking', {websocket: true, preHandler: [authenticate]}, async (socket, req) => {
 		let userId: string = req.user.id.toString();
+
+		const alreadyInGame_gameID = findMultiplayerGameByPlayerId(userId, req);
+		if (alreadyInGame_gameID) {
+			console.custom('INFO', `Users is already in a Multipalyer game. Redirecting to game room: ${alreadyInGame_gameID}`);
+			const message = JSON.stringify({
+				type: 'redirectingToGame',
+				gameRoomId: alreadyInGame_gameID,
+				message: `Redirecting to game room: ${alreadyInGame_gameID}`
+			});
+			return socket.send(message);
+		}
 
 		connectUser(userId, socket);
 		console.custom('INFO', 'Users in matchmaking queue:', matchmakingConns.map(([id]) => id));
@@ -77,4 +88,15 @@ export function redirectToGameRoom(gameRoomId: string, matchmakingConns: Array<[
 	})
 
 	console.custom('INFO', `Redirecting ${users[0][0]} and ${users[1][0]} to game room: ${gameRoomId}`);
+}
+
+function findMultiplayerGameByPlayerId(targetId: string, req: FastifyRequest): string | null {
+	for (const [gameID, game] of req.server.gameInstances.entries()) {
+		for (const player of game.players.values()) {
+			if (game.game_mode === GAME_MODES.Multiplayer && player.id === targetId) {
+				return gameID ;
+			}
+		}
+	}
+	return null;
 }

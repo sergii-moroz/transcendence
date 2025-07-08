@@ -108,8 +108,11 @@ export class ProfileData extends HTMLElement {
 
 			const data = await API.uploadNewAvatar(file);
 			if (!data.success) throw Error(`upload failed: ${data.message}`);
-			if (this.avatar)
-				this.avatar.src = data.url;
+			if (this.avatar) {
+				const imgUrl = new URL(data.url, window.location.origin);
+				imgUrl.searchParams.set('t', Date.now().toString());
+				this.avatar.src = imgUrl.toString();
+			}
 		} catch (err) {
 			console.error("changing avatar failed: ", err);
 			// this.querySelector('#parentContainer')!.innerHTML = '<h2 class="text-red-500 justify-center">Error</h2>';
