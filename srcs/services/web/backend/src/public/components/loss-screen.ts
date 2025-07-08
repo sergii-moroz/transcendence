@@ -69,7 +69,6 @@ export class LossScreen extends HTMLElement {
 
 			// Now we have the combined bounding box
 			const sizeVec = max.subtract(min);
-			const center = min.add(sizeVec.scale(0.5));
 			const maxDimension = Math.max(sizeVec.x, sizeVec.y, sizeVec.z);
 
 			const desiredSize = 60;
