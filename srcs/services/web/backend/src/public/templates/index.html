@@ -34,18 +34,386 @@
 
 </header>
 
-<div >
-	<main class="h-64 bg-primary/20 flex flex-col items-center justify-center">
-
-		<div class="mb-4 dark:text-gray-50">
-			<h1 class="text-3xl font-bold mb-4">CTA Hero<h1>
-			<span >Bla-bla-pong!<span>
-		</div>
-
-		<div class="flex gap-4">
-			<a href="/login" data-link class="tw-btn w-30">
-				Try it
-			</a>
-
-	</main>
+<!-- Hero Section -->
 <div>
+	<main class="bg-gradient-to-br from-primary/20 via-accent/10 to-primary/30 py-16 sm:py-24">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+			<div class="mb-8 dark:text-gray-50">
+				<h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+					ft_transcendence
+				</h1>
+				<p class="text-lg sm:text-xl lg:text-2xl mb-8 text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+					Experience the ultimate ping-pong showdown with cutting-edge 3D graphics, AI opponents, and real-time multiplayer action.
+				</p>
+			</div>
+
+			<div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+				<a href="/login" data-link class="tw-btn text-lg px-8 py-3 w-full sm:w-auto">
+					🚀 Start Playing
+				</a>
+				<a href="/register" data-link class="tw-btn-outline text-lg px-8 py-3 w-full sm:w-auto">
+					📝 Join Now
+				</a>
+			</div>
+		</div>
+	</main>
+
+	<!-- Features Overview -->
+	<section class="py-16 bg-white dark:bg-gray-900">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="grid md:grid-cols-3 gap-8">
+				<div class="tw-card p-6 text-center">
+					<div class="text-4xl mb-4">🎮</div>
+					<h3 class="text-xl font-bold mb-2 dark:text-white">Multiple Game Modes</h3>
+					<p class="text-gray-600 dark:text-gray-300">Singleplayer vs AI, multiplayer matches, and tournament competitions</p>
+				</div>
+				<div class="tw-card p-6 text-center">
+					<div class="text-4xl mb-4">🌐</div>
+					<h3 class="text-xl font-bold mb-2 dark:text-white">Cross-Platform</h3>
+					<p class="text-gray-600 dark:text-gray-300">Optimized for both desktop and mobile devices with adaptive controls</p>
+				</div>
+				<div class="tw-card p-6 text-center">
+					<div class="text-4xl mb-4">⚡</div>
+					<h3 class="text-xl font-bold mb-2 dark:text-white">Real-time Action</h3>
+					<p class="text-gray-600 dark:text-gray-300">WebSocket-powered real-time gameplay with 60 FPS performance</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Team Section -->
+	<section class="py-16 bg-gray-50 dark:bg-gray-800">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="text-center mb-12">
+				<h2 class="text-3xl sm:text-4xl font-bold mb-4 dark:text-white">Meet Our Team</h2>
+				<p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+					The talented developers behind ft_transcendence
+				</p>
+			</div>
+
+			<div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+				<!-- Team Member: Sergii -->
+				<div class="tw-card p-6 text-center">
+					<div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+						☕
+					</div>
+					<h3 class="text-lg font-bold mb-2 dark:text-white">smoroz</h3>
+					<p class="text-gray-600 dark:text-gray-300 text-sm">Sergii likes coffee.</p>
+				</div>
+
+				<!-- Team Member: Alex -->
+				<div class="tw-card p-6 text-center">
+					<div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+						🍫
+					</div>
+					<h3 class="text-lg font-bold mb-2 dark:text-white">olanokhi</h3>
+					<p class="text-gray-600 dark:text-gray-300 text-sm">Alex likes chocolate.</p>
+				</div>
+
+				<!-- Team Member: Tecker -->
+				<div class="tw-card p-6 text-center">
+					<div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+						🐘
+					</div>
+					<h3 class="text-lg font-bold mb-2 dark:text-white">tecker</h3>
+					<p class="text-gray-600 dark:text-gray-300 text-sm">elephant</p>
+				</div>
+
+				<!-- Team Member: Serhio -->
+				<div class="tw-card p-6 text-center">
+					<div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+						👁️
+					</div>
+					<h3 class="text-lg font-bold mb-2 dark:text-white">smoreron</h3>
+					<p class="text-gray-600 dark:text-gray-300 text-sm">Serhio observes the service.</p>
+				</div>
+
+				<!-- Team Member: Dima -->
+				<div class="tw-card p-6 text-center">
+					<div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+						🎮
+					</div>
+					<h3 class="text-lg font-bold mb-2 dark:text-white">dolifero</h3>
+					<p class="text-gray-600 dark:text-gray-300 text-sm">Dima is developing a game.</p>
+				</div>
+				<!-- Team Member: AI -->
+				<div class="tw-card p-6 text-center">
+					<div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+						🤖
+					</div>
+					<h3 class="text-lg font-bold mb-2 dark:text-white">ai</h3>
+					<p class="text-gray-600 dark:text-gray-300 text-sm">AI profile that you can&apos;t defeat.</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Gameplay Section -->
+	<section class="py-16 bg-white dark:bg-gray-900">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="text-center mb-12">
+				<h2 class="text-3xl sm:text-4xl font-bold mb-4 dark:text-white">🏓 Gameplay Experience</h2>
+				<p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+					Classic ping-pong reimagined with modern technology
+				</p>
+			</div>
+
+			<div class="grid lg:grid-cols-2 gap-12 items-center">
+				<div>
+					<h3 class="text-2xl font-bold mb-6 dark:text-white">Game Features</h3>
+					<div class="space-y-4">
+						<div class="flex items-start space-x-3">
+							<div class="flex-shrink-0 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+								<span class="text-white text-sm">✓</span>
+							</div>
+							<div>
+								<h4 class="font-semibold dark:text-white">Real-time Multiplayer</h4>
+								<p class="text-gray-600 dark:text-gray-300">Challenge friends or players worldwide in instant matches</p>
+							</div>
+						</div>
+						<div class="flex items-start space-x-3">
+							<div class="flex-shrink-0 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+								<span class="text-white text-sm">✓</span>
+							</div>
+							<div>
+								<h4 class="font-semibold dark:text-white">AI Opponents</h4>
+								<p class="text-gray-600 dark:text-gray-300">Practice against intelligent AI with adaptive difficulty</p>
+							</div>
+						</div>
+						<div class="flex items-start space-x-3">
+							<div class="flex-shrink-0 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+								<span class="text-white text-sm">✓</span>
+							</div>
+							<div>
+								<h4 class="font-semibold dark:text-white">Tournament Mode</h4>
+								<p class="text-gray-600 dark:text-gray-300">Compete in structured tournaments for ultimate bragging rights</p>
+							</div>
+						</div>
+						<div class="flex items-start space-x-3">
+							<div class="flex-shrink-0 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+								<span class="text-white text-sm">✓</span>
+							</div>
+							<div>
+								<h4 class="font-semibold dark:text-white">Mobile-Optimized</h4>
+								<p class="text-gray-600 dark:text-gray-300">Touch controls and responsive design for mobile gameplay</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="tw-card p-8">
+					<h3 class="text-xl font-bold mb-6 dark:text-white">Game Modes</h3>
+					<div class="space-y-4">
+						<div class="border-l-4 border-blue-500 pl-4">
+							<h4 class="font-semibold text-blue-600 dark:text-blue-400">Singleplayer</h4>
+							<p class="text-gray-600 dark:text-gray-300 text-sm">Train against AI opponents with varying skill levels</p>
+						</div>
+						<div class="border-l-4 border-green-500 pl-4">
+							<h4 class="font-semibold text-green-600 dark:text-green-400">Multiplayer</h4>
+							<p class="text-gray-600 dark:text-gray-300 text-sm">1v1 matches with players around the world</p>
+						</div>
+						<div class="border-l-4 border-purple-500 pl-4">
+							<h4 class="font-semibold text-purple-600 dark:text-purple-400">Tournament</h4>
+							<p class="text-gray-600 dark:text-gray-300 text-sm">Bracket-style competitions with multiple rounds</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Tech Stack Section -->
+	<section class="py-16 bg-gray-50 dark:bg-gray-800">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="text-center mb-12">
+				<h2 class="text-3xl sm:text-4xl font-bold mb-4 dark:text-white">⚡ Tech Stack</h2>
+				<p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+					Built with modern technologies for optimal performance and scalability
+				</p>
+			</div>
+
+			<div class="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+				<!-- Frontend -->
+				<div class="tw-card p-6">
+					<h3 class="text-xl font-bold mb-4 text-blue-600 dark:text-blue-400">🎨 Frontend</h3>
+					<ul class="space-y-2 text-gray-600 dark:text-gray-300">
+						<li class="flex items-center"><span class="mr-2">•</span> TypeScript for type safety</li>
+						<li class="flex items-center"><span class="mr-2">•</span> Vanilla Web Components</li>
+						<li class="flex items-center"><span class="mr-2">•</span> Babylon.js for 3D graphics</li>
+						<li class="flex items-center"><span class="mr-2">•</span> Canvas 2D for mobile</li>
+						<li class="flex items-center"><span class="mr-2">•</span> TailwindCSS for styling</li>
+						<li class="flex items-center"><span class="mr-2">•</span> WebSocket for real-time communication</li>
+					</ul>
+				</div>
+
+				<!-- Backend -->
+				<div class="tw-card p-6">
+					<h3 class="text-xl font-bold mb-4 text-green-600 dark:text-green-400">⚙️ Backend</h3>
+					<ul class="space-y-2 text-gray-600 dark:text-gray-300">
+						<li class="flex items-center"><span class="mr-2">•</span> Node.js runtime</li>
+						<li class="flex items-center"><span class="mr-2">•</span> Fastify web framework</li>
+						<li class="flex items-center"><span class="mr-2">•</span> WebSocket server</li>
+						<li class="flex items-center"><span class="mr-2">•</span> SQLite database</li>
+						<li class="flex items-center"><span class="mr-2">•</span> bcrypt for authentication</li>
+						<li class="flex items-center"><span class="mr-2">•</span> TypeScript throughout</li>
+					</ul>
+				</div>
+
+				<!-- DevOps & Tools -->
+				<div class="tw-card p-6">
+					<h3 class="text-xl font-bold mb-4 text-purple-600 dark:text-purple-400">🛠️ DevOps & Tools</h3>
+					<ul class="space-y-2 text-gray-600 dark:text-gray-300">
+						<li class="flex items-center"><span class="mr-2">•</span> Docker containerization</li>
+						<li class="flex items-center"><span class="mr-2">•</span> Docker Compose orchestration</li>
+						<li class="flex items-center"><span class="mr-2">•</span> Nginx reverse proxy</li>
+						<li class="flex items-center"><span class="mr-2">•</span> NPM package management</li>
+						<li class="flex items-center"><span class="mr-2">•</span> ESLint code quality</li>
+						<li class="flex items-center"><span class="mr-2">•</span> Hot reload development</li>
+					</ul>
+				</div>
+			</div>
+
+			<!-- Architecture Overview -->
+			<div class="mt-12">
+				<div class="tw-card p-8">
+					<h3 class="text-2xl font-bold mb-6 dark:text-white">🏗️ Architecture</h3>
+					<div class="grid md:grid-cols-2 gap-8">
+						<div>
+							<h4 class="font-semibold mb-3 text-primary">Client-Server Architecture</h4>
+							<ul class="space-y-2 text-gray-600 dark:text-gray-300">
+								<li>• SPA (Single Page Application) architecture</li>
+								<li>• Component-based UI with Web Components</li>
+								<li>• Real-time bidirectional communication</li>
+								<li>• RESTful API for data operations</li>
+								<li>• WebSocket for game state synchronization</li>
+							</ul>
+						</div>
+						<div>
+							<h4 class="font-semibold mb-3 text-primary">Game Engine Features</h4>
+							<ul class="space-y-2 text-gray-600 dark:text-gray-300">
+								<li>• 60 FPS game loop for smooth gameplay</li>
+								<li>• Physics simulation for ball mechanics</li>
+								<li>• AI opponent with adaptive behavior</li>
+								<li>• Device-aware rendering (2D/3D)</li>
+								<li>• Collision detection and response</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- CTA Section -->
+	<section class="py-16 bg-gradient-to-r from-primary to-accent">
+		<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+			<h2 class="text-3xl sm:text-4xl font-bold mb-6 text-white">Ready to Play?</h2>
+			<p class="text-xl mb-8 text-gray-100 max-w-2xl mx-auto">
+				Join the ultimate ping-pong experience and challenge players worldwide!
+			</p>
+			<div class="flex flex-col sm:flex-row gap-4 justify-center">
+				<a href="/register" data-link class="bg-white text-primary hover:bg-gray-100 font-bold py-3 px-8 rounded-lg text-lg transition-colors">
+					🎮 Create Account
+				</a>
+				<a href="/login" data-link class="border-2 border-white text-white hover:bg-white hover:text-primary font-bold py-3 px-8 rounded-lg text-lg transition-colors">
+					🚀 Start Playing
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<!-- Footer -->
+	<footer class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-white py-12 border-t border-gray-200 dark:border-gray-700">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+				<!-- Project Info -->
+				<div>
+					<div class="flex items-center mb-4">
+						<span class="text-2xl mr-2">🏓</span>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white">ft_transcendence</h3>
+					</div>
+					<p class="text-gray-600 dark:text-gray-300 mb-4">
+						The ultimate ping-pong experience with cutting-edge 3D graphics, AI opponents, and real-time multiplayer action.
+					</p>
+					<p class="text-gray-500 dark:text-gray-400 text-sm">
+						© 2025 ft_transcendence. All rights reserved.
+					</p>
+				</div>
+
+				<!-- Team Contacts -->
+				<div>
+					<h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Connect with Our Team</h3>
+					<div class="space-y-3">
+						<a href="https://linkedin.com/in/sergii-moroz-424393196" target="_blank" rel="noopener noreferrer" 
+						   class="flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+							<svg class="w-5 h-5 mr-3 fill-current" viewBox="0 0 24 24">
+								<path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+							</svg>
+							Sergii Moroz (smoroz)
+						</a>
+						<a href="https://linkedin.com/in/aleks-anokhin" target="_blank" rel="noopener noreferrer" 
+						   class="flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+							<svg class="w-5 h-5 mr-3 fill-current" viewBox="0 0 24 24">
+								<path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+							</svg>
+							Alex Anokhin (olanokhi)
+						</a>
+						<a href="https://www.linkedin.com/in/oliferovych/" target="_blank" rel="noopener noreferrer" 
+						   class="flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+							<svg class="w-5 h-5 mr-3 fill-current" viewBox="0 0 24 24">
+								<path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+							</svg>
+							Dmytro Oliferovych (dolifero)
+						</a>
+					</div>
+				</div>
+
+				<!-- Quick Links -->
+				<div>
+					<h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Quick Links</h3>
+					<div class="space-y-2">
+						<a href="/login" data-link class="block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+							🚀 Start Playing
+						</a>
+						<a href="/register" data-link class="block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+							📝 Create Account
+						</a>
+						<a href="/leaderboard" data-link class="block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+							🏆 Leaderboard
+						</a>
+						<a href="/profile" data-link class="block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">
+							👤 Profile
+						</a>
+					</div>
+				</div>
+			</div>
+
+			<!-- Bottom Bar -->
+			<div class="border-t border-gray-300 dark:border-gray-700 mt-8 pt-8 flex flex-col sm:flex-row justify-between items-center">
+				<p class="text-gray-500 dark:text-gray-400 text-sm mb-4 sm:mb-0">
+					Built with ❤️ using TypeScript, Fastify, and Babylon.js
+				</p>
+				<div class="flex space-x-6">
+					<a href="https://github.com/sergii-moroz/transcendence" target="_blank" rel="noopener noreferrer" 
+					   class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+						<svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+							<path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+						</svg>
+					</a>
+					<a href="mailto:olanokhi@student.42heilbronn.de" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+						<svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+							<path d="M0 3v18h24v-18h-24zm21.518 2l-9.518 7.713-9.518-7.713h19.036zm-19.518 14v-11.817l10 8.104 10-8.104v11.817h-20z"/>
+						</svg>
+					</a>
+					<a href="https://42heilbronn.de" target="_blank" rel="noopener noreferrer" 
+					   class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+						<svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+							<path d="M12 0c-6.626 0-12 5.373-12 12s5.374 12 12 12 12-5.373 12-12-5.374-12-12-12zm0 22c-5.523 0-10-4.477-10-10s4.477-10 10-10 10 4.477 10 10-4.477 10-10 10z"/>
+							<text x="12" y="16" text-anchor="middle" font-size="8" font-weight="bold">42</text>
+						</svg>
+					</a>
+				</div>
+			</div>
+		</div>
+	</footer>
+</div>

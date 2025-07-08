@@ -78,8 +78,8 @@ export const acceptGameInviteSchema = {
 			type: 'object',
       required: ['success', 'gameID'],
 			properties: {
-        success: { type: 'boolean' },
-        gameID: { type: 'string' }
+				success: { type: 'boolean' },
+				gameID: { type: 'string' }
 			},
 		},
 		400: errorResponseSchema,

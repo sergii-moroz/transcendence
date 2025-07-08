@@ -44,7 +44,7 @@ export class HomeContent extends HTMLElement {
 					<play-card
 						title="Tournament"
 						description="Compete in elimination brackets with 4 players"
-						button-text="Join"
+						button-text="Play Tournament"
 						href="/tournament-list"
 						icon="icon-home-tournament"
 						accent-color="purple"

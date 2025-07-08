@@ -1,6 +1,8 @@
 import 'fastify';
 import { JwtUserPayload } from '../src/types/user.js';
 import { WebSocket } from '@fastify/websocket';
+import { Tournament } from '../src/services/tournament.ts';
+import { Game } from '../src/services/game.ts';
 
 declare module 'fastify' {
 	interface FastifyInstance {

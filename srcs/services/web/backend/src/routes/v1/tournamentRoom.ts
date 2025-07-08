@@ -35,19 +35,14 @@ export const tournamentRoomSock = async (app: FastifyInstance) => {
 				}
 				console.custom('INFO', `User: ${req.user.username} connected to tournament: ${tournamentId}`);
 				tournament.addPlayer(socket, userId, userName);
-				socket.send(JSON.stringify({
-					type: 'joinedRoom',
-					message: `You have joined tournament room`
-				}));
-				tournament.sendMatchupData();
-				console.custom('INFO', 'Users in tournament room:', tournament.players.map(player => player[0]));
+				console.custom('INFO', 'Users in tournament room:', Array.from(tournament.playerSockets.values()).map(s => s.name));
 			}
 		});
 
 		socket.on('close', () => {
 			console.custom('INFO', `User: ${userName} disconnected from tournament room: ${tournamentId}`);
-			if (tournament.players.some(([id]) => id === userId)) {
-				tournament.players = tournament.players.filter(([id]) => id !== userId);
+			if (tournament.playerSockets.has(userId)) {
+				tournament.playerSockets.delete(userId);
 			}
 			handleTimeout(tournament);
 		})
@@ -61,12 +56,12 @@ export const tournamentRoomSock = async (app: FastifyInstance) => {
 	function handleTimeout(tournament: Tournament) {
 		if (!tournament.deleteTimeout) {
 			tournament.deleteTimeout = setTimeout(() => {
-				if (tournament.players.length === 0 && tournament.activeGames === 0) {
+				if (tournament.playerSockets.size === 0 && tournament.activeGames === 0) {
 					app.tournaments.delete(tournament.id);
 					console.custom('INFO', `Tournament room ${tournament.id} closed due to inactivity`);
 				}
 				tournament.deleteTimeout = null;
-			}, 10000);
+			}, 1000);
 		}
 	}
 }

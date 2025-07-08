@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import { db } from '../db/connections.js'
 import { GAME_MODES } from '../public/types/game-history.types.js';
-import { aiOpponent, resetAIState } from './aiOpponent.js';
+import { aiOpponent, createAIState } from './aiOpponent.js';
 import { updatePlayerStats } from './stats.services.js';
 
 export class Game {
@@ -22,18 +22,19 @@ export class Game {
 	tournamentId: string | null;
 	private game_mode: GAME_MODES = GAME_MODES.Multiplayer
 	private gameStartTime: number = 0
+	private aiState: any = null; // Store AI state per game instance
 
 	constructor(tournamentId: string | null = null, game_mode: GAME_MODES = GAME_MODES.Multiplayer) {
 		this.tournamentId = tournamentId;
 		this.players = new Map();
 		this.standardBallSpeed = 4;
 		this.state = {
-			ball: { x: 0, y: 0, dx: this.standardBallSpeed, dy: this.standardBallSpeed },
+			ball: { x: 0, y: 0, dx: 3, dy: 3 },
 			paddles: {
 				player1: { y: 0 },
 				player2: { y: 0 }
 			},
-			scores: { player1: 0, player2: 0, user1: 'bing', user2: 'ai' },
+			scores: { player1: 0, player2: 0, user1: 'bing', user2: 'AI' },
 			hit: false
 		};
 		this.winnerId = null;
@@ -41,7 +42,7 @@ export class Game {
 		this.gameRunning = false;
 		this.game_mode = game_mode;
 		if (this.game_mode === GAME_MODES.Singleplayer) {
-			resetAIState();
+			this.aiState = createAIState();
 		}
 	}
 
@@ -82,36 +83,28 @@ export class Game {
 	}
 
 	removePlayer(player: WebSocket) {
-		let winner;
-		let loser;
-
 		for (const [role, user] of this.players.entries()) {
 			if (user.socket === player) {
 				user.socket.close();
-				loser = user;
+				this.players.delete(role);
 			} else {
 				user.socket?.send(JSON.stringify({
-					type: 'victory',
+					type: 'gameOver',
 					message: `${user.username} wins!`,
 					winner: role,
 					tournamentId: this.tournamentId,
 				}));
-				winner = user;
+				this.players.delete(role);
 			}
-		}
-		if(winner && loser) {
-			this.updateDatabase(winner, loser);
 		}
 	}
 
-	removeAllPlayers() {
-		// console.custom("WARN", "aaa");
+	close(message?: string) {
 		for (const [role, user] of this.players.entries()) {
 			user.socket?.send(JSON.stringify({
-				type: 'Error',
-				message: `game was closed`
+				type: 'closed',
+				message: `${message ? message : "game was closed"}`
 			}));
-			this.players.delete(role);
 		}
 	}
 
@@ -122,20 +115,22 @@ export class Game {
 		const FIELD_X = 250, FIELD_Y = 150;
 		const PADDLE_X1 = -FIELD_X + 10, PADDLE_X2 = FIELD_X - 10;
 		const PADDLE_HEIGHT = 30;
+		const BALL_RADIUS = 5;
 		setInterval(() => {
 			frameCounter++;
 			if(!this.gameRunning) return;
 			this.state.hit = false
+			// Update ball position
 			this.state.ball.x += this.state.ball.dx;
 			this.state.ball.y += this.state.ball.dy;
 
 			if (this.game_mode === GAME_MODES.Singleplayer) {
-				aiOpponent(this.state.paddles.player2, frameCounter, this.state.ball);
+				aiOpponent(this.state.paddles.player2, frameCounter, this.state.ball, this.aiState);
 			}
 
 			// Ball collision with paddles (simplified)
 			if (
-				this.state.ball.x <= PADDLE_X1 &&
+				this.state.ball.x <= PADDLE_X1 + BALL_RADIUS &&
 				Math.abs(this.state.ball.y - this.state.paddles.player1.y) < PADDLE_HEIGHT
 			) {
 				this.state.ball.dx *= -1;
@@ -143,7 +138,7 @@ export class Game {
 				this.state.ball.dy *= 1.05; // Increase speed after hitting paddle
 				this.state.hit = true
 			} else if (
-				this.state.ball.x >= PADDLE_X2 &&
+				this.state.ball.x >= PADDLE_X2 - BALL_RADIUS &&
 				Math.abs(this.state.ball.y - this.state.paddles.player2.y) < PADDLE_HEIGHT
 			) {
 				this.state.ball.dx *= -1;
@@ -153,27 +148,26 @@ export class Game {
 			}
 
 			// Ball collision with walls
-			if (this.state.ball.y <= -FIELD_Y || this.state.ball.y >= FIELD_Y) {
+			if (this.state.ball.y <= -FIELD_Y + BALL_RADIUS || this.state.ball.y >= FIELD_Y - BALL_RADIUS) {
 				this.state.ball.dy *= -1;
 				this.state.hit = true
 			}
 
 			// Scoring
-			if (this.state.ball.x <= -FIELD_X + 5) {
+			if (this.state.ball.x <= -FIELD_X + BALL_RADIUS) {
 				this.state.scores.player2++
 				this.state.ball.dx = this.standardBallSpeed; // Reset ball speed
 				this.state.ball.dy = this.standardBallSpeed; // Reset ball speed
 				this.state.ball.x = PADDLE_X2 - 10;
 				this.state.ball.y = this.state.paddles.player2.y
 			}
-			if (this.state.ball.x >= FIELD_X - 5) {
+			if (this.state.ball.x >= FIELD_X - BALL_RADIUS) {
 				this.state.scores.player1++
 				this.state.ball.dx = this.standardBallSpeed; // Reset ball speed
 				this.state.ball.dy = this.standardBallSpeed; // Reset ball speed
 				this.state.ball.x = PADDLE_X1 + 10;
 				this.state.ball.y = this.state.paddles.player1.y
 			}
-
 			this.players.forEach(player => {
 				player.socket?.send(JSON.stringify({
 					type: 'gameState',
@@ -252,6 +246,9 @@ export class Game {
 			saveGameResults(gameResults)
 		} else {
 			db.run(
+				`UPDATE user_stats SET t_wins = t_wins + 1 WHERE user_id = ?`, [winner.id]
+			);
+			db.run(
 				`UPDATE user_stats SET t_losses = t_losses + 1 WHERE user_id = ?`, [loser.id]
 			);
 		}
@@ -265,7 +262,7 @@ export class Game {
 				player = role;
 			}
 		}
-		const STEP = 3;
+		const STEP = 4;
 		const MIN_Y = -150 + 30, MAX_Y = 150 - 30;
 		if (player == "player1") {
 			if (input === 'up' && this.state.paddles.player1.y > MIN_Y) {
@@ -296,6 +293,7 @@ interface GameProps {
 }
 
 export const saveGameResults = async (game: GameProps): Promise<void> => {
+console.log("GAME MODE ID:", game.gameModeId);
 	return new Promise((resolve, reject) => {
 		db.run(`
 			INSERT INTO games (

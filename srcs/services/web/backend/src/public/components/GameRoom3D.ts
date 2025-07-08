@@ -55,6 +55,8 @@ export class Game3D extends HTMLElement {
 	private scoreBoard: ScoreBoard | null = null
 	private infoBoard: InfoBoard | null = null
 
+	private homeBtn: HTMLElement | null = null
+
 	constructor() {
 		super()
 	}
@@ -64,6 +66,9 @@ export class Game3D extends HTMLElement {
 		this.render()
 		this.handleSocket()
 		this.initializeScene()
+		this.homeBtn = this.querySelector("#home-btn");
+		this.homeBtn?.addEventListener('click', this.handleBackHome);
+		window.addEventListener("popstate", this.handleBackHome);
 		document.addEventListener('keydown', this.handleKeyDown);
 		document.addEventListener('keyup', this.handleKeyUp);
 		document.addEventListener('pointerdown', this.handlePointerDown)
@@ -75,6 +80,8 @@ export class Game3D extends HTMLElement {
 		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
 			this.socket.close()
 		}
+		this.homeBtn?.removeEventListener('click', this.handleBackHome);
+		window.removeEventListener("popstate", this.handleBackHome);
 		document.removeEventListener('keydown', this.handleKeyDown);
 		document.removeEventListener('keyup', this.handleKeyUp);
 		document.removeEventListener('pointerdown', this.handlePointerDown)
@@ -84,7 +91,12 @@ export class Game3D extends HTMLElement {
 	private render() {
 		this.innerHTML = `
 			<div class="relative z-0 w-full">
-				<canvas class="w-full h-full block "></canvas>
+           		<canvas class="w-full h-full block"></canvas>
+			</div>
+			<div class="flex justify-center mt-2">
+				<a id='home-btn' class="tw-btn w-20 my-2">
+					Home
+				</a>
 			</div>
 		`
 	}
@@ -286,8 +298,13 @@ export class Game3D extends HTMLElement {
 			}
 
 			if (data.type === 'Error') {
-				this.socket?.send(JSON.stringify({ type: 'exit' }));
 				console.error('Game3D: WebSocket error:', data.message);
+				Router.navigateTo('/home');
+			}
+
+			if (data.type === 'closed') {
+				this.socket?.send(JSON.stringify({ type: 'deleteGameBeforeStart' }));
+				alert(data.message);
 				Router.navigateTo('/home');
 			}
 
@@ -322,10 +339,15 @@ export class Game3D extends HTMLElement {
 		};
 
 		this.socket.onerror = (err: Event) => {
-			this.socket?.send(JSON.stringify({ type: 'exit' }));
 			console.error('Game3D: WebSocket error:', err);
 			Router.navigateTo('/home');
 		};
+	}
+
+	handleBackHome = () => {
+		if (!this.latestState) //if game hasnt started
+			this.socket?.send(JSON.stringify({ type: 'deleteGameBeforeStart' }));
+		Router.navigateTo('/home');
 	}
 
 	handleKeyDown = (e: KeyboardEvent) => {
