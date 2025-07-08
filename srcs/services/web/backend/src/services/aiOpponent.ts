@@ -11,6 +11,11 @@ interface PredictionResult {
 	willHit: boolean;
 }
 
+interface AIState {
+	aiTargetY: number;
+	lastPredictionUpdate: number;
+}
+
 class AIBallPredictor {
 	private static readonly FIELD_Y = 150;
 	private static readonly PADDLE_X = 240; // AI paddle X position (adjust based on your game)
@@ -102,16 +107,14 @@ class AIBallPredictor {
 	}
 }
 
-// AI state to track target position and last update time
-let aiTargetY = 0;
-let lastPredictionUpdate = 0;
-
-export function resetAIState() {
-	aiTargetY = 0;
-	lastPredictionUpdate = 0;
+export function createAIState(): AIState {
+	return {
+		aiTargetY: 0,
+		lastPredictionUpdate: 0
+	};
 }
 
-export function aiOpponent(paddle: any, frameCounter: number, ball: any) {
+export function aiOpponent(paddle: any, frameCounter: number, ball: any, aiState: AIState) {
 	const AI_SPEED = 3; // Reduced speed for smoother movement
 	const PREDICTION_UPDATE_INTERVAL = 62; // Update prediction every 62 frames (roughly 1 second at 60fps)
 
@@ -119,25 +122,25 @@ export function aiOpponent(paddle: any, frameCounter: number, ball: any) {
 	const MAX_Y = 150 - 30;
 
 	// Update AI prediction periodically (once per second)
-	if (lastPredictionUpdate === 0 || frameCounter - lastPredictionUpdate >= PREDICTION_UPDATE_INTERVAL) {
+	if (aiState.lastPredictionUpdate === 0 || frameCounter - aiState.lastPredictionUpdate >= PREDICTION_UPDATE_INTERVAL) {
 		const prediction = AIBallPredictor.predictBallHit(ball);
-		aiTargetY = AIBallPredictor.calculateOptimalPaddleY(
+		aiState.aiTargetY = AIBallPredictor.calculateOptimalPaddleY(
 			prediction,
 			paddle.y,
 			'medium' // Adjust difficulty as needed
 		);
-		lastPredictionUpdate = frameCounter;
+		aiState.lastPredictionUpdate = frameCounter;
 	}
 
 	// Smoothly move AI paddle toward target position every frame
-	const diff = aiTargetY - paddle.y;
+	const diff = aiState.aiTargetY - paddle.y;
 	
 	if (Math.abs(diff) > AI_SPEED) {
 		// Move toward target
 		paddle.y += Math.sign(diff) * AI_SPEED;
 	} else {
 		// Close enough, set exact position
-		paddle.y = aiTargetY;
+		paddle.y = aiState.aiTargetY;
 	}
 
 	// Ensure paddle stays within bounds
