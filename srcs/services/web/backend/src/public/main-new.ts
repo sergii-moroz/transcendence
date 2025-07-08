@@ -44,6 +44,7 @@ import { DlgResetConfirmation } from "./components/2fa/dlg-reset-confirmation.js
 import { ProfileData } from "./components/profile-data.js";
 import { simpleHeader } from "./components/simple-Header.js";
 import { ThreeRingDonut } from "./components/donut-chart.js";
+import { popupManager } from "./popupManager.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
 customElements.define('btn-theme-toggle', ButtonThemeToggle)
@@ -112,3 +113,4 @@ customElements.define('simple-header', simpleHeader)
 customElements.define('three-ring-donut', ThreeRingDonut);
 
 Router.init()
+popupManager.init();

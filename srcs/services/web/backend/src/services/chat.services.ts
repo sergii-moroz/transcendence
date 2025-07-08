@@ -164,3 +164,17 @@ export const deleteGameInvite = async (friendName: string, user_id: number): Pro
 		);
 	});
 }
+
+export const sendMessage = (text: string, owner: string, socket: WebSocket) => {
+	try {
+		const message = {
+			type: 'chatMessage',
+			owner,
+			message: text
+		}
+		socket.send(JSON.stringify(message));
+	} catch (error) {
+		console.custom("ERROR", error);
+		socket.send(JSON.stringify({type: "error", message: "Message processing on the server failed"}));
+	}
+}

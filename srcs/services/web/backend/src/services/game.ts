@@ -99,14 +99,12 @@ export class Game {
 		}
 	}
 
-	removeAllPlayers() {
-		// console.custom("WARN", "aaa");
+	close(message?: string) {
 		for (const [role, user] of this.players.entries()) {
 			user.socket?.send(JSON.stringify({
-				type: 'Error',
-				message: `game was closed`
+				type: 'closed',
+				message: `${message ? message : "game was closed"}`
 			}));
-			this.players.delete(role);
 		}
 	}
 
@@ -117,6 +115,7 @@ export class Game {
 		const FIELD_X = 250, FIELD_Y = 150;
 		const PADDLE_X1 = -FIELD_X + 10, PADDLE_X2 = FIELD_X - 10;
 		const PADDLE_HEIGHT = 30;
+		const BALL_RADIUS = 5;
 		setInterval(() => {
 			frameCounter++;
 			if(!this.gameRunning) return;
@@ -131,7 +130,7 @@ export class Game {
 
 			// Ball collision with paddles (simplified)
 			if (
-				this.state.ball.x <= PADDLE_X1 &&
+				this.state.ball.x <= PADDLE_X1 + BALL_RADIUS &&
 				Math.abs(this.state.ball.y - this.state.paddles.player1.y) < PADDLE_HEIGHT
 			) {
 				this.state.ball.dx *= -1;
@@ -139,7 +138,7 @@ export class Game {
 				this.state.ball.dy *= 1.05; // Increase speed after hitting paddle
 				this.state.hit = true
 			} else if (
-				this.state.ball.x >= PADDLE_X2 &&
+				this.state.ball.x >= PADDLE_X2 - BALL_RADIUS &&
 				Math.abs(this.state.ball.y - this.state.paddles.player2.y) < PADDLE_HEIGHT
 			) {
 				this.state.ball.dx *= -1;
@@ -149,20 +148,20 @@ export class Game {
 			}
 
 			// Ball collision with walls
-			if (this.state.ball.y <= -FIELD_Y || this.state.ball.y >= FIELD_Y) {
+			if (this.state.ball.y <= -FIELD_Y + BALL_RADIUS || this.state.ball.y >= FIELD_Y - BALL_RADIUS) {
 				this.state.ball.dy *= -1;
 				this.state.hit = true
 			}
 
 			// Scoring
-			if (this.state.ball.x <= -FIELD_X + 5) {
+			if (this.state.ball.x <= -FIELD_X + BALL_RADIUS) {
 				this.state.scores.player2++
 				this.state.ball.dx = this.standardBallSpeed; // Reset ball speed
 				this.state.ball.dy = this.standardBallSpeed; // Reset ball speed
 				this.state.ball.x = PADDLE_X2 - 10;
 				this.state.ball.y = this.state.paddles.player2.y
 			}
-			if (this.state.ball.x >= FIELD_X - 5) {
+			if (this.state.ball.x >= FIELD_X - BALL_RADIUS) {
 				this.state.scores.player1++
 				this.state.ball.dx = this.standardBallSpeed; // Reset ball speed
 				this.state.ball.dy = this.standardBallSpeed; // Reset ball speed
@@ -263,7 +262,7 @@ export class Game {
 				player = role;
 			}
 		}
-		const STEP = 3;
+		const STEP = 4;
 		const MIN_Y = -150 + 30, MAX_Y = 150 - 30;
 		if (player == "player1") {
 			if (input === 'up' && this.state.paddles.player1.y > MIN_Y) {

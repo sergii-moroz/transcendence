@@ -77,7 +77,31 @@ export class VictoryScreen extends HTMLElement {
 
 			// Scale and reposition model
 			for (const mesh of meshes) {
-				mesh.scaling.set(scaleFactor, scaleFactor, scaleFactor);
+				mesh.scaling.set(0.1 * scaleFactor, 0.1 * scaleFactor, 0.1 * scaleFactor);
+				mesh.rotation.z = -Math.PI / 2; // -90 degrees
+
+				// Animation parameters
+				const duration = 40; // frames (about 0.7s at 60fps)
+				let frame = 0;
+
+				this.scene.onBeforeRenderObservable.add(() => {
+					if (frame <= duration) {
+						// Progress from 0 to 1
+						const t = frame / duration;
+
+						// Ease out (cubic)
+						const ease = 1 - Math.pow(1 - t, 3);
+
+						// Animate scaling
+						const scale = 0.1 + (1 - 0.1) * ease;
+						mesh.scaling.set(scale * scaleFactor, scale * scaleFactor, scale * scaleFactor);
+
+						// Animate rotation
+						mesh.rotation.z = -Math.PI / 2 * (1 - ease);
+
+						frame++;
+					}
+				});
 				mesh.position.subtractInPlace(center);
 			}
 
