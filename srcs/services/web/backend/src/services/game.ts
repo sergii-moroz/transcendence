@@ -30,7 +30,7 @@ export class Game {
 		this.players = new Map();
 		this.standardBallSpeed = 4;
 		this.state = {
-			ball: { x: 0, y: 0, dx: 3, dy: 3 },
+			ball: { x: 0, y: 0, dx: 4, dy: 4 },
 			paddles: {
 				player1: { y: 0 },
 				player2: { y: 0 }
