@@ -70,7 +70,8 @@ export class Game {
 		else if (this.players.size === 1) {
 			this.players.set('player2', {socket, id, username});
 			this.state.scores.user2 = this.players.get('player2')!.username;
-			this.startLoop();
+			// this.startLoop();
+			this.startCountdown();
 			console.custom('INFO', `${this.gameRoomId}: Player 2 joined`);
 		}
 		else {
@@ -107,6 +108,25 @@ export class Game {
 				message: `${message ? message : "game was closed"}`
 			}));
 		}
+	}
+
+	startCountdown() {
+		let count = 4;
+		const countdownInterval = setInterval(() => {
+			count--;
+			if (count > 0) {
+				this.players.forEach(player => {
+					player.socket?.send(JSON.stringify({
+						type: 'countdown',
+						count
+					}));
+				});
+			}
+			else {
+				clearInterval(countdownInterval);
+				this.startLoop(); // Actually start the game
+			}
+		}, 1000);
 	}
 
 	startLoop() {

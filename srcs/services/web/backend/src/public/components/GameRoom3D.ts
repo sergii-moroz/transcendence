@@ -56,6 +56,7 @@ export class Game3D extends HTMLElement {
 	private infoBoard: InfoBoard | null = null
 
 	private homeBtn: HTMLElement | null = null
+	private preGameScreen: HTMLElement | null = null;
 
 	constructor() {
 		super()
@@ -105,6 +106,7 @@ export class Game3D extends HTMLElement {
 		this.canvas = this.querySelector('canvas')
 		if (!this.canvas) return
 
+		this.createPregameScreen();
 		// Initialize Babylon.js engine
 		this.engine = new Engine(this.canvas, true, {
 			preserveDrawingBuffer: true,
@@ -188,6 +190,46 @@ export class Game3D extends HTMLElement {
 			this.updateGameObjects()
 			this.sendInput();
 		})
+	}
+
+	private createPregameScreen() {
+		if (!this.canvas) return;
+		
+		this.preGameScreen = document.createElement('div');
+		this.preGameScreen.className = `flex flex-col z-10 absolute inset-0 bg-black/50 justify-center items-center text-white text-2xl`;
+		
+		const waitingText = document.createElement('div');
+		waitingText.className = 'text-center font-bold';
+		waitingText.id = 'waiting-text';
+		waitingText.textContent = 'Waiting for other player to join...';
+		
+		const countdownText = document.createElement('div');
+		countdownText.className = `text-4xl font-bold mt-4 hidden`;
+		countdownText.id = 'countdown-text';
+		
+		this.preGameScreen.appendChild(waitingText);
+		this.preGameScreen.appendChild(countdownText);
+		this.canvas.parentElement?.appendChild(this.preGameScreen);
+	}
+
+	private updateCountdown(count: number | undefined) {
+		if (!this.preGameScreen) return;
+		
+		const waitingText = this.preGameScreen.querySelector('#waiting-text') as HTMLElement;
+		const countdownText = this.preGameScreen.querySelector('#countdown-text') as HTMLElement;
+		
+		if (waitingText && countdownText && count) {
+			waitingText.textContent = 'Game starting in...';
+			countdownText.style.display = 'block';
+			countdownText.textContent = count.toString();
+		}
+	}
+
+	private removePregameScreen() {
+		if (this.preGameScreen) {
+			this.preGameScreen.remove();
+			this.preGameScreen = null;
+		}
 	}
 
 	private async createField() {
@@ -293,7 +335,12 @@ export class Game3D extends HTMLElement {
 		this.socket.onmessage = (event) => {
 			const data = JSON.parse(event.data) as gameJson;
 
+			if (data.type === 'countdown') {
+				this.updateCountdown(data.count);
+			}
+
 			if (data.type === 'gameState') {
+				this.removePregameScreen()
 				this.latestState = data.state as GameState;
 			}
 
@@ -408,6 +455,7 @@ export class Game3D extends HTMLElement {
 
 	private cleanup() {
 		this.resizeObserver?.disconnect()
+		this.removePregameScreen()
 
 		if (this.engine) {
 			this.engine.dispose()

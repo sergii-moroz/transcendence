@@ -39,10 +39,11 @@ export interface GameState {
 
 export interface gameJson {
 	type: string;
-	state: GameState;
+	state?: GameState;
 	message?: string;
 	winner?: string;
 	tournamentId?: string | null;
+	count?: number;
 }
 
 export interface tournamentListJson {
