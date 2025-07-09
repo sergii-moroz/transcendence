@@ -7,10 +7,10 @@ export async function up() {
 			{ username: 'ai', password: 'password', bio: 'This is the AI profile.' },
 			{ username: 'admin', password: 'password', bio: 'This is the admin profile.' },
 			{ username: 'smoroz', password: 'password', bio: 'Sergii likes coffee.' },
-			{ username: 'olanokhi', password: 'password', bio: 'Alex likes chocolate.' },
 			{ username: 'tecker', password: 'password', bio: 'elephant', avatar: "/uploads/hans.jpg" },
-			{ username: 'smoreron', password: 'password', bio: 'Serhio observes the service.' },
 			{ username: 'dolifero', password: 'password', bio: 'Dima is developing a game.', avatar: "/uploads/hans.jpg" },
+			{ username: 'olanokhi', password: 'password', bio: 'Alex likes chocolate.' },
+			{ username: 'smoreron', password: 'password', bio: 'Serhio observes the service.' },
 		];
 
 		db.serialize(() => {
