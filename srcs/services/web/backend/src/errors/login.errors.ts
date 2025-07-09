@@ -6,6 +6,12 @@ export const UserNotFoundError = createError(
 	401
 );
 
+export const UserAlreadySignedIn = createError(
+	'USER_ALREADY_SIGNED_IN',
+	'User is already signed in',
+	409
+);
+
 export const InvalidCredentialsError = createError(
 	'FST_INVALID_CREDENTIALS',
 	'Invalid username or password',

@@ -41,6 +41,10 @@ class SocialSocketHandler {
 			this.socket = null;
 			if (event.code === 1000) {
 				await Router.logout();
+				popupManager.addPopup({
+					type: 'error',
+					message: 'User is already signed in!'
+				})
 				console.log('Social Socket: User is already signed in!');
 			}
 			if (API.refreshTimeout) {

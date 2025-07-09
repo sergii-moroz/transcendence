@@ -261,10 +261,6 @@ export class API {
 		try {
 			const res = await fetch('/api/tokenInfo', postRequestInit)
 			if (!res.ok) {
-				if (res.status === 401) {
-					Router.navigateTo('/login');
-					return;
-				}
 				throw new Error('getting token info failed');
 			}
 
