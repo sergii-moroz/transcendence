@@ -1,34 +1,52 @@
+###########################################################
+# Stage 1 — build                                          #
+###########################################################
 FROM node:23-alpine AS builder
-# create app directory
-WORKDIR /app
-# Install Python and build tools for native module compilation
-RUN apk update && apk upgrade
+
+# Базовые утилиты для сборки нативных зависимостей
 RUN apk add --no-cache python3 make g++
-# Copy package files first for better layer caching
-COPY backend/package.json backend/package-lock.json ./
-# Install dependencies
+
+# Рабочая директория всего проекта
+WORKDIR /app
+
+# 1. Копируем только манифесты — это самый кэшируемый слой
+COPY backend/package*.json ./backend/
+
+# 2. Ставим зависимости
+WORKDIR /app/backend
 RUN npm ci
-# Copy the rest of the application
+
+# 3. Копируем остальной код
 COPY backend/ .
-# Build TypeScript to JavaScript
+
+# 4. Сборка TypeScript → JavaScript
 RUN npm run build
 
 
-# Stage 2: Production image
-# ==========================================
+###########################################################
+# Stage 2 — production                                     #
+###########################################################
 FROM node:23-alpine
-WORKDIR /app
-# Install production dependencies only
-COPY backend/package.json backend/package-lock.json ./
+
+# Рабочая директория рантайма
+WORKDIR /app/backend
+
+# 1. Копируем package-манифесты, ставим ТОЛЬКО prod-зависимости
+COPY backend/package*.json ./
 RUN npm ci --omit=dev
-# Copy built files from builder
-COPY --from=builder /app/dist ./dist
+
+# 2. Подтягиваем собранный JS из первого этапа
+COPY --from=builder /app/backend/dist ./dist
+
+# 3. (опц.) передаём переменные окружения и другие нужные файлы
 COPY backend/.env .
-# Expose the port your Fastify app listens on (adjust if needed)
+
+# Сервис слушает порт 4242
 EXPOSE 4242
 
-# Health check
+# Health-check для оркестраторов
 HEALTHCHECK --interval=30s --timeout=3s \
-CMD wget --no-verbose --tries=1 --spider http://localhost:4242/health || exit 1
-# Run the application
+  CMD wget --no-verbose --tries=1 --spider http://localhost:4242/health || exit 1
+
+# Запуск приложения
 CMD ["node", "dist/index.js"]

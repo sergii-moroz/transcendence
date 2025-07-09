@@ -17,7 +17,7 @@ services:
   logstash:
     image: docker.elastic.co/logstash/logstash:8.13.4
     volumes:
-      - ./services/observability/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+      - ./srcs/services/observability/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
     networks: [transnet]
     ports:
       - "5044:5044"
@@ -45,7 +45,7 @@ services:
     ports:
       - "5601:5601"
     volumes:
-      - ./services/observability/kibana/ft_saved.ndjson:/tmp/ft_saved.ndjson:ro
+      - ./srcs/services/observability/kibana/ft_saved.ndjson:/tmp/ft_saved.ndjson:ro
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
       interval: 30s
@@ -71,8 +71,8 @@ services:
       - --storage.tsdb.path=/prometheus
       - --storage.tsdb.retention.time=15d
     volumes:
-      - ./services/observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./services/observability/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - ./srcs/services/observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./srcs/services/observability/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
     networks: [transnet]
     ports:
       - "9090:9090"
@@ -87,8 +87,8 @@ services:
       - "3000:3000"
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./services/observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
-      - ./services/observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./srcs/services/observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards
+      - ./srcs/services/observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
 
   node-exporter:
     image: prom/node-exporter:latest
@@ -122,12 +122,12 @@ services:
     container_name: ft_transcendence
     image: ft_transcendence
     build:
-      context: ./services/web
+      context: ./srcs/services/web
       dockerfile: Dockerfile
     ports:
       - "4242:4242"
     env_file:
-      - ./services/web/backend/.env
+      - ./srcs/services/web/backend/.env
     networks: [transnet]
     logging:
       driver: gelf
@@ -139,7 +139,7 @@ services:
     image: grafana/k6:latest
     profiles: ["manual"]
     volumes:
-      - ./services/observability/grafana/test_script.js:/test_script.js:ro
+      - ./srcs/services/observability/grafana/test_script.js:/test_script.js:ro
     command:
       - run
       - --out
