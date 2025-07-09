@@ -1,4 +1,3 @@
-import { iconHomeTrophy } from "./components/icons/icons.js";
 import { Router } from "./router-static.js";
 
 export interface PopupData {
@@ -14,7 +13,7 @@ class popupHandler {
 	private root: HTMLElement | null = null; 
 	private autoDismiss: NodeJS.Timeout | null = null;
 	init() {
-		console.log('popup Manager initilized')
+		// console.log('popup Manager initilized')
 		this.root = document.getElementById('popup')!;
 		this.root.addEventListener('click', this.clickHandler);
 		// this.addPopup({

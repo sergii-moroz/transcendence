@@ -12,7 +12,7 @@ class SocialSocketHandler {
 		this.socket = new WebSocket("/ws/chat");
 
 		this.socket.onopen = () => {
-			console.log('social Socket got connected');
+			// console.log('social Socket got connected');
 		}
 
 		this.socket.onmessage = (messageBuffer: MessageEvent) => {
@@ -37,7 +37,7 @@ class SocialSocketHandler {
 		}
 
 		this.socket.onclose = async (event: CloseEvent) => {
-			console.log('social Socket closed');
+			// console.log('social Socket closed');
 			this.socket = null;
 			if (event.code === 1000) {
 				await Router.logout();
@@ -48,7 +48,7 @@ class SocialSocketHandler {
 				console.log('Social Socket: User is already signed in!');
 			}
 			if (API.refreshTimeout) {
-				console.log('delete token refresh Timeout');
+				console.info('delete token refresh Timeout');
 				clearTimeout(API.refreshTimeout);
 				API.refreshTimeout = null;
 			}
@@ -64,7 +64,7 @@ class SocialSocketHandler {
 		if (!this.socket) return;
 		this.socket.close();
 		this.socket = null;
-		console.log('disconnecting social socket')
+		// console.log('disconnecting social socket')
 	}
 
 	setMessageCallback(func: (data: any) => void) {

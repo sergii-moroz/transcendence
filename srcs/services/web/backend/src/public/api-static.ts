@@ -1,5 +1,6 @@
 import { JwtUserPayload } from "../types/user.js"
 import { Router } from "./router-static.js"
+import { socialSocketManager } from "./SocialWebSocket.js";
 import { GAME_MODES } from "./types/game-history.types.js"
 
 export class API {
@@ -93,7 +94,7 @@ export class API {
 	 */
 	static async logout() {
 		if (this.refreshTimeout) {
-			console.log('delete token refresh Timeout');
+			console.info('delete token refresh Timeout');
 			clearTimeout(this.refreshTimeout);
 			this.refreshTimeout = null;
 		}
@@ -214,6 +215,8 @@ export class API {
 				? await response.clone().json().catch(() => null)
 				: null
 
+			console.error('api call failed: ', error.message)
+
 			if (error?.code === 'FST_MIDDLEWARE_ACCESS_TOKEN_EXPIRED' || error?.code === 'FST_MIDDLEWARE_NO_ACCESS_TOKEN') {
 				const refreshed = await this.refreshToken()
 				if (refreshed) {
@@ -261,18 +264,18 @@ export class API {
 		try {
 			const res = await fetch('/api/tokenInfo', postRequestInit)
 			if (!res.ok) {
-				throw new Error('getting token info failed');
+				throw new Error(`getting token info failed: ${(await res.json()).message}`);
 			}
 
 			const {expireTime} = await res.json();
 			const expiresIn = expireTime * 1000 - Date.now(); 
 			const refreshIn = Math.max(0, expiresIn - 20000); //refresh 20s before it would expire
 
-			console.log(`Schedued token refresh in ${Math.floor(refreshIn / 1000)}s`)
+			console.info(`Schedued token refresh in ${Math.floor(refreshIn / 1000)}s`)
 			this.refreshTimeout = setTimeout(() => this.refreshToken(), refreshIn);
 		} catch (err) {
 			console.error(`error setting token refresh timeout: `, err);
-			Router.navigateTo('/login');
+			// Router.navigateTo('/login');
 		}
 	}
 
@@ -289,13 +292,17 @@ export class API {
 		const postRequestInit = this.postRequestInit({}, {includeCSRF: true})
 
 		try {
+			console.warn('trying to refresh the access token');
 			const res = await fetch('/api/refresh', postRequestInit)
-			console.log('access token got refreshed');
+			const json = await res.json();
+			if (!json.success) throw new Error(json.message);
+			console.info('access token got refreshed');
 			this.scheduleTokenRefresh();
 			return res.ok;
 		} catch (err) {
 			console.error(`error refreshing token: `, err);
-			Router.navigateTo('/login');
+			Router.navigateTo('/unauthorized');
+			socialSocketManager.disconnect();
 			return false;
 		}
 	}

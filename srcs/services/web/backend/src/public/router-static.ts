@@ -41,14 +41,14 @@ export class Router {
 		if (!this.initSocket && !this.publicRoutes.includes(path)) {
 			this.username = (await API.getUser()).username; //this also calls API.scheduleTokenRefresh() if token is expired
 			if (this.username) {
+				// console.log('aaa');
 				socialSocketManager.init();
 				if (!API.refreshTimeout) {
 					await API.scheduleTokenRefresh();
-					// console.log('aaa');
 				}
 				this.initSocket = true;
 			} else {
-				route = routes["unauthorized"]
+				route = routes["/unauthorized"]
 			}
 		}
 
