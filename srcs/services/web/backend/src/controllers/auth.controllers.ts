@@ -9,7 +9,7 @@ import { AccessTokenInvalidError, NoAccessTokenError, NoRefreshTokenError } from
 import { playerConnected,  playerDisconnected} from '../plugins/metrics.js';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
-export const TOKEN_EXPIRATION_TIME = 40 as number; //in sec
+export const TOKEN_EXPIRATION_TIME = 60 * 3 as number; //in sec
 
 
 export const handleLogout = async (
