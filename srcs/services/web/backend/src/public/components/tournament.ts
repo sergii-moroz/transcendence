@@ -57,7 +57,7 @@ export class Tournament extends HTMLElement {
 	}
 
 	handleOpen = () => {
-		console.log('WebSocket connection established.');
+		console.log('Tournament: WebSocket connection established.');
 		this.socket!.send(JSON.stringify({ type: 'joinRoom' }));
 	}
 
@@ -120,7 +120,8 @@ export class Tournament extends HTMLElement {
 		if(this.socket && this.socket.readyState === WebSocket.OPEN) {
 			this.socket.close();
 		}
-		console.log('WebSocket connection closed.');
+		else
+			console.log('Tournament: WebSocket connection closed.');
 	}
 
 	handleError = (event: Event) => {

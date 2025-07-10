@@ -23,7 +23,7 @@ import { LoginForm } from "./components/login-form.js";
 import { ModalLoginMenu } from "./components/modal-login-menu.js";
 import { RegisterForm } from "./components/register-form.js";
 import { Matchmaking } from "./components/match-making.js";
-import { GameRoom } from "./components/game.js";
+// import { GameRoom } from "./components/game.js";
 import { TournamentList } from "./components/tournament-list.js";
 import { Tournament } from "./components/tournament.js";
 import { Router } from "./router-static.js";
@@ -93,7 +93,8 @@ customElements.define('icon-home-tournament', IconHomeTournament)
 customElements.define('match-making', Matchmaking)
 
 // Game
-customElements.define('game-room', GameRoom)
+// customElements.define('game-room', GameRoom)
+customElements.define('game-3d', Game3D)
 customElements.define('singleplayer-game', SinglePlayerRoom);
 customElements.define('loss-screen', LossScreen)
 customElements.define('victory-screen', VictoryScreen)
@@ -103,7 +104,6 @@ customElements.define('tournament-list', TournamentList)
 customElements.define('tournament-room', Tournament)
 customElements.define('tournament-victory-screen', TournamentVictoryScreen)
 
-customElements.define('game-3d', Game3D)
 
 //Profile
 customElements.define('profile-user-data', ProfileData)

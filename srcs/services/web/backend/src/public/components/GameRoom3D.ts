@@ -330,7 +330,7 @@ export class Game3D extends HTMLElement {
 		this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/game/${this.gameRoomId}`);
 
 		this.socket.onopen = () => {
-			console.log('WebSocket connection established.');
+			console.log('Game: WebSocket connection established.');
 		}
 
 		this.socket.onmessage = (event) => {
@@ -383,7 +383,7 @@ export class Game3D extends HTMLElement {
 		};
 
 		this.socket.onclose = () => {
-			console.log("WebSocket connection got closed by server");
+			console.log('Game: WebSocket connection closed.');
 		};
 
 		this.socket.onerror = (err: Event) => {

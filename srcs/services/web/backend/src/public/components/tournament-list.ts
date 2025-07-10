@@ -47,7 +47,7 @@ export class TournamentList extends HTMLElement {
 		this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/tournament-list`);
 
 		this.socket.onopen = () => {
-			console.log('WebSocket connection established.');
+			console.log('TournamentLobby: WebSocket connection established.');
 		}
 		this.socket.onmessage = this.handleMessage;
 		this.socket.onclose = this.handleClose;
@@ -67,7 +67,7 @@ export class TournamentList extends HTMLElement {
 		const createBtn = target.closest('button[data-size]');
 		if (createBtn) {
 			const size = createBtn.getAttribute('data-size');
-			console.log(`size: ${size}`);
+			// console.log(`size: ${size}`);
 			this.socket?.send(JSON.stringify({ type: 'createTournament', maxPlayers: Number(size) }));
 			console.log(`Creating tournament with ${size} players...`);
 			this.querySelector('#create-tournament-popup')?.remove();
@@ -102,9 +102,10 @@ export class TournamentList extends HTMLElement {
 	handleClose = () => {
 		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
 			this.socket.close();
-			console.log('Disconnecting from socket, page unload...');
+			console.log('TournamentLobby: Disconnecting from socket, page unload...');
 		}
-		console.log('WebSocket connection closed.');
+		else
+			console.log('TournamentLobby: WebSocket connection closed.');
 	}
 
 	handleError = (event: Event) => {
@@ -155,7 +156,7 @@ export class TournamentList extends HTMLElement {
 		}
 		listElement.innerHTML = '';
 
-		console.log('updateTournamentList called with:', tournaments);
+		// console.log('updateTournamentList called with:', tournaments);
 
 		if(!tournaments || tournaments.length === 0) {
 			listElement.innerHTML = '<li class="tw-card py-4 px-6 bg-gray-50 dark:bg-gray-700/50 shadow-none hover:scale-[1.01]">No active tournaments available.</li>';

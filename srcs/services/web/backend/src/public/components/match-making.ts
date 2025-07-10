@@ -18,7 +18,7 @@ export class Matchmaking extends HTMLElement {
 	disconnectedCallback() {
 		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
 			this.socket.close();
-			console.log('Disconnecting from socket, page unload...');
+			console.log('MatchMaking: Disconnecting from socket, page unload...');
 		}
 	}
 
@@ -34,7 +34,7 @@ export class Matchmaking extends HTMLElement {
 	}
 
 	handleOpen = () => {
-		console.log('WebSocket connection established.');
+		console.log('MatchMaking: WebSocket connection established.');
 	}
 
 	handleMessage = (event: MessageEvent) => {
@@ -50,8 +50,10 @@ export class Matchmaking extends HTMLElement {
 	handleClose = () => {
 		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
 			this.socket.close();
-			console.log('Disconnecting from socket, page unload...');
+			console.log('MatchMaking: Disconnecting from socket, page unload...');
 		}
+		else
+			console.log('MatchMaking: WebSocket connection closed.');
 	}
 
 	handleError = async (err: Event) => {
