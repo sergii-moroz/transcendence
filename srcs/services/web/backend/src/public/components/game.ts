@@ -41,7 +41,7 @@ export class GameRoom extends HTMLElement {
 
 	render = () => {
 		this.innerHTML = `
-		<div style="display: flex; flex-direction: column; align-items: center;">
+		<div class="flex flex-col items-center">
 			<h2 id="score"></h2>
 			<canvas id="game"></canvas>
 		</div>
