@@ -7,8 +7,10 @@ class SocialSocketHandler {
 	private socket: WebSocket | null = null;
 	private messageCallback: ((data: any) => void) | null = null;
 
-	init() {
+	async init() {
 		if (this.socket) return;
+		const res = await API.ping()
+		if (!res.success) return;
 		this.socket = new WebSocket("/ws/chat");
 
 		this.socket.onopen = () => {

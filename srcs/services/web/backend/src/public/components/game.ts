@@ -49,7 +49,8 @@ export class GameRoom extends HTMLElement {
 	}
 
 	handleSocket = async () => {
-		await API.ping()
+		const res = await API.ping()
+		if (!res.success) return;
 		this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/game/${this.gameRoomId}`);
 
 		this.socket.onopen = () => {

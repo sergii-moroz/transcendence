@@ -297,7 +297,8 @@ export class API {
 			const json = await res.json();
 			if (!json.success) throw new Error(json.message);
 			console.info('access token got refreshed');
-			this.scheduleTokenRefresh();
+			setTimeout(() => this.scheduleTokenRefresh(), 100);
+			// this.scheduleTokenRefresh()
 			return res.ok;
 		} catch (err) {
 			console.error(`error refreshing token: `, err);
