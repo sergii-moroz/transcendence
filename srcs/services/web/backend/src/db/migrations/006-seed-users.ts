@@ -5,7 +5,6 @@ export async function up() {
 	return new Promise<void>((resolve, reject) => {
 		const users = [
 			{ username: 'ai', password: 'password', funFact: 'This is the AI profile.' },
-			{ username: 'admin', password: 'password', funFact: 'This is the admin profile.' },
 			{ username: 'smoroz', password: 'password', funFact: 'Sergii likes coffee.' },
 			{ username: 'tecker', password: 'password', funFact: 'elephant', avatar: "/uploads/hans.jpg" },
 			{ username: 'dolifero', password: 'password', funFact: 'Dima is developing a game.', avatar: "/uploads/hans.jpg" },
