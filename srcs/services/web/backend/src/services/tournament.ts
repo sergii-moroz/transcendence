@@ -179,7 +179,10 @@ export class Tournament {
 			this.knownPlayers.set(player1[0], {eliminated: false, name: player1[1], redirectToGameId: game.gameRoomId});
 			this.knownPlayers.set(player2[0], {eliminated: false, name: player2[1], redirectToGameId: game.gameRoomId});
 			
+			this.addReplaceMatchup(game, {id: player1[0], username: player1[1], score: 0}, {id: player2[0], username: player2[1], score: 0});
+			this.sendMatchupData();
 			this.informPlayersAboutNewGame(player1, player2, game.gameRoomId);
+
 			console.custom('DEBUG', `Tournament: Game room ${game.gameRoomId} created with players ${player1[0]}:(${player1[1]}) and ${player2[0]}:(${player2[1]})`);
 		}
 	}
@@ -241,7 +244,7 @@ export class Tournament {
 							winnerName = player.username;
 						}
 					}
-					this.addMatchup(game);
+					this.addReplaceMatchup(game, null, null);
 					this.sendMatchupData();
 					this.activeGames--;
 					this.games.delete(game.gameRoomId);
@@ -256,16 +259,36 @@ export class Tournament {
 		}, 500);
 	}
 
-	addMatchup(game: Game) {
-		const player1 = game.players.get('player1')!;
-		const player2 = game.players.get('player2')!;
-		this.matchups.push({
+	addReplaceMatchup(game: Game, 
+		player1: {id: string, username: string, score: number} | null = null, 
+		player2: {id: string, username: string, score: number} | null = null
+	) {
+		if (!player1) {
+			const p1 = game.players.get('player1');
+			player1 = p1
+				? { id: p1.id, username: p1.username, score: game.state.scores.player1 }
+				: { id: '', username: '', score: 0 };
+		}
+		if (!player2) {
+			const p2 = game.players.get('player2');
+			player2 = p2
+				? { id: p2.id, username: p2.username, score: game.state.scores.player2 }
+				: { id: '', username: '', score: 0 };
+		}
+		const newMatchup = {
 			gameId: game.gameRoomId,
 			round: this.round,
 			p1: { id: player1.id, name: player1.username, score: game.state.scores.player1 },
 			p2: { id: player2.id, name: player2.username, score: game.state.scores.player2 },
 			winnerId: game.winnerId
-		});
+		};
+
+		const idx = this.matchups.findIndex(match => match.gameId === game.gameRoomId);
+		if (idx !== -1) {
+			this.matchups[idx] = newMatchup;
+		} else {
+			this.matchups.push(newMatchup);
+		}
 		console.custom('DEBUG', `Tournament: Matchup added for game ${game.gameRoomId} in round ${this.round}`);
 	}
 

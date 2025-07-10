@@ -78,9 +78,7 @@ export class Tournament extends HTMLElement {
 
 		if (data.type === 'victory') {
 			console.log(`Victory message: ${data.message}`);
-			setTimeout(() => {
-				Router.navigateTo('/tournament-victory-screen');
-			}, 10000);
+			Router.navigateTo('/tournament-victory-screen');
 		}
 
 		if (data.type === 'matchupData') {
