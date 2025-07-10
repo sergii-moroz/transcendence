@@ -4,13 +4,13 @@ import bcrypt from 'bcrypt'
 export async function up() {
 	return new Promise<void>((resolve, reject) => {
 		const users = [
-			{ username: 'ai', password: 'password', bio: 'This is the AI profile.' },
-			{ username: 'admin', password: 'password', bio: 'This is the admin profile.' },
-			{ username: 'smoroz', password: 'password', bio: 'Sergii likes coffee.' },
-			{ username: 'tecker', password: 'password', bio: 'elephant', avatar: "/uploads/hans.jpg" },
-			{ username: 'dolifero', password: 'password', bio: 'Dima is developing a game.', avatar: "/uploads/hans.jpg" },
-			{ username: 'olanokhi', password: 'password', bio: 'Alex likes chocolate.' },
-			{ username: 'smoreron', password: 'password', bio: 'Serhio observes the service.' },
+			{ username: 'ai', password: 'password', funFact: 'This is the AI profile.' },
+			{ username: 'admin', password: 'password', funFact: 'This is the admin profile.' },
+			{ username: 'smoroz', password: 'password', funFact: 'Sergii likes coffee.' },
+			{ username: 'tecker', password: 'password', funFact: 'elephant', avatar: "/uploads/hans.jpg" },
+			{ username: 'dolifero', password: 'password', funFact: 'Dima is developing a game.', avatar: "/uploads/hans.jpg" },
+			{ username: 'olanokhi', password: 'password', funFact: 'Alex likes chocolate.' },
+			{ username: 'smoreron', password: 'password', funFact: 'Serhio observes the service.' },
 		];
 
 		db.serialize(() => {
