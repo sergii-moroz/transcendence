@@ -64,7 +64,8 @@ export class Game {
 			if (this.game_mode === GAME_MODES.Singleplayer) {
 				this.players.set('player2', {socket: null, id: '1', username: 'AI'});
 				console.custom('INFO', `${this.gameRoomId}: AI opponent joined`);
-				this.startLoop();
+				// this.startLoop();
+				this.startCountdown();
 			}
 		}
 		else if (this.players.size === 1) {
