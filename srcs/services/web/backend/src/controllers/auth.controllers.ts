@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { createUser, findUserByUsername, verifyPassword } from "../services/userService.js";
-import { InvalidCredentialsError, UserAlreadySignedIn, UserNotFoundError } from "../errors/login.errors.js";
+import { InvalidCredentialsError, InvalidUser, UserAlreadySignedIn, UserNotFoundError } from "../errors/login.errors.js";
 import { ACCESS_TOKEN_SECRET, createCsrfToken, generate2FAAccessToken, generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../services/tokenService.js";
 import { validateRegisterInput } from "../services/authService.js";
 import { RegisterInputProps } from "../types/registration.js";
@@ -32,6 +32,7 @@ export const handleLogin = async (
 		let { username, password } = req.body as {username: string, password: string};
 		username = username.toLowerCase();
 
+		if (username === 'ai') throw new InvalidUser()
 		if (req.server.onlineUsers.has(username)) throw new UserAlreadySignedIn()
 		const user = await findUserByUsername(username)
 
