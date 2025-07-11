@@ -116,3 +116,19 @@ docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml ex
 # plagin
 docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml exec grafana \
   grafana-cli plugins ls
+
+
+
+Logstash							
+curl -s "http://localhost:9200/ft-*/_search?size=5&sort=@timestamp:desc&pretty"
+
+Elasticsearch 
+curl -s http://localhost:9200 | jq
+curl -s http://localhost:9200
+
+elast pass
+elastic:kibanapass
+kib pass 
+kib_us kib_pass 
+
+curl -u kib_us:kib_pass http://localhost:9200/_security/_authenticate
