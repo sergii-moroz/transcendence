@@ -83,7 +83,7 @@ export class TopPlayerCard extends HTMLElement {
 					${iconHomeTrophy}
 				</div>
 				<div class="flex-1">
-					<div class="font-medium">${item.username}</div>
+					<a href='/profile/${item.username}' data-link class="font-medium hover:underline transition-all cursor-pointer">${item.username}</a>
 					<div class="text-xs dark:text-gray-400 text-gray-500">
 						${item.wins} wins • ${total} matches
 					</div>
