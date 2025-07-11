@@ -32,6 +32,25 @@ export const getFriendRequests = async (id: number): Promise<Friend[]> => {
 	})
 }
 
+export const getFriendNames = async (id: number): Promise<string[]> => {
+	return new Promise<string[]>((resolve, reject) => {
+		db.all<{username: string}>(' \
+			SELECT u.username from friends f \
+			JOIN users u on u.id = \
+				case \
+					when f.inviter_id = ? then f.recipient_id \
+					else f.inviter_id \
+				end \
+			WHERE (inviter_id = ? and status = "accepted") or (recipient_id = ? and status = "accepted") \
+			ORDER by created_at',
+			[id, id, id],
+			(err, rows) => {
+				if (err) return reject(err);
+				resolve(rows.map(row => row.username));
+		})
+	})
+}
+
 export const getFriendList = async (req: FastifyRequest): Promise<{online: Friend[], offline: Friend[]}> => {
 	const id = req.user.id;
 	const allFriends = await new Promise<Friend[]>((resolve, reject) => {

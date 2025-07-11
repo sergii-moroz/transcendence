@@ -19,6 +19,7 @@ import { findUserIdByUsername } from "../services/userService.js";
 import { FriendInvalid } from "../errors/friends.error.js";
 import { Game } from "../services/game.js";
 import { GAME_MODES } from "../public/types/game-history.types.js";
+import { getFriendNames } from "../services/friends.services.js";
 
 export const handleChatInit = async (
 	req:		FastifyRequest,
@@ -54,6 +55,7 @@ export const handleSocialSocket = async (
 
 		req.server.onlineUsers.set(req.user.username, socket);
 		console.custom("INFO", `${req.user.username} is now online`);
+		sendStatusUpdateToFriends(req);
 
 		socket.on('message', async (messageBuffer: Buffer) => {
 			try {
@@ -79,6 +81,7 @@ export const handleSocialSocket = async (
 
 		socket.on('close', () => {
 			req.server.onlineUsers.delete(req.user.username);
+			sendStatusUpdateToFriends(req);
 			console.custom("INFO", `${req.user.username} is now offline`);
 		})
 
@@ -92,6 +95,25 @@ export const handleSocialSocket = async (
 	}
 }
 
+export const sendStatusUpdateToFriends = async (req: FastifyRequest, specificFriend?: string) => {
+	let friends: string[];
+
+	if (specificFriend)
+		friends = [specificFriend];
+	else
+		friends = await getFriendNames(req.user.id);
+
+	for (const friend of friends) {
+		const friendSocket = req.server.onlineUsers.get(friend);
+		if (friendSocket) {
+			friendSocket.send(JSON.stringify({
+				type: 'reloadFriends'
+			}))
+		}
+	}
+
+}
+
 export const handleGameInviteCreation = async (
 	req:		FastifyRequest,
 	reply:	FastifyReply
@@ -102,13 +124,16 @@ export const handleGameInviteCreation = async (
 		req.server.gameInstances.set(game.gameRoomId, game);
 		await addGameInvite(friendName, req.user.id, game.gameRoomId);
 
+		const isUserblocked = await isBlocked(req.user.id, friendName);
 		const friendSocket = req.server.onlineUsers.get(friendName);
-		if (friendSocket) {
-			friendSocket.send(JSON.stringify({
-				type: 'chatGameInvite',
-				owner: req.user.username,
-				gameRoomId: game.gameRoomId
-			}))
+		if (!isUserblocked && friendSocket) {
+			if (friendSocket) {
+				friendSocket.send(JSON.stringify({
+					type: 'chatGameInvite',
+					owner: req.user.username,
+					gameRoomId: game.gameRoomId
+				}))
+			}
 		}
 		reply.status(200).send( { success: true, gameID: game.gameRoomId });
 	} catch (error) {
