@@ -12,6 +12,7 @@ import {
 	getFriendRequests,
 	undblockFriend
 } from "../services/friends.services.js";
+import { sendStatusUpdateToFriends } from "./chat.controllers.js";
 
 // template :)
 // export const handleFriendListSidebar = async (
@@ -51,6 +52,7 @@ export const handleFriendAdding = async (
 		const friendName = (req.body as { name: string }).name.toLowerCase();
 		await addFriend(friendName, req.user.id);
 		reply.status(200).send({ success: true });
+		sendStatusUpdateToFriends(req, friendName);
 	} catch (error) {
 		throw error;
 	}
@@ -64,6 +66,7 @@ export const handleFriendAccepting = async (
 		const friendName = (req.body as { name: string }).name;
 		await acceptFriend(friendName, req.user.id);
 		reply.status(200).send({ success: true });
+		sendStatusUpdateToFriends(req, friendName);
 	} catch (error) {
 		throw error;
 	}
@@ -77,6 +80,7 @@ export const handleFriendRemove = async (
 		const friendName = (req.body as { name: string }).name;
 		await deleteFriend(friendName, req.user.id);
 		reply.status(200).send({ success: true });
+		sendStatusUpdateToFriends(req, friendName);
 	} catch (error) {
 		throw error;
 	}

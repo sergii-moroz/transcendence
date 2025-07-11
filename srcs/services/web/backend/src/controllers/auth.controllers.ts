@@ -1,6 +1,6 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { createUser, findUserByUsername, verifyPassword } from "../services/userService.js";
-import { InvalidCredentialsError, InvalidUser, UserAlreadySignedIn, UserNotFoundError } from "../errors/login.errors.js";
+import { InvalidCredentialsError, InvalidUser, InvalidUsernameError, UserAlreadySignedIn, UserNotFoundError } from "../errors/login.errors.js";
 import { ACCESS_TOKEN_SECRET, createCsrfToken, generate2FAAccessToken, generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../services/tokenService.js";
 import { validateRegisterInput } from "../services/authService.js";
 import { RegisterInputProps } from "../types/registration.js";
@@ -9,7 +9,7 @@ import { AccessTokenInvalidError, NoAccessTokenError, NoRefreshTokenError } from
 import { playerConnected,  playerDisconnected} from '../plugins/metrics.js';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 
-export const TOKEN_EXPIRATION_TIME = 60 * 3 as number; //in sec
+export const TOKEN_EXPIRATION_TIME = 60 * 15 as number; //in sec
 
 
 export const handleLogout = async (
@@ -88,7 +88,14 @@ export const handleRegister = async (
 		username = username.toLowerCase();
 		const hashed = await bcrypt.hash(password, 10);
 
-		const userId = await createUser(username, hashed)
+		let userId: number;
+		try {
+			userId = await createUser(username, hashed);
+			if (!userId) return;
+		} catch {
+			throw new InvalidUsernameError();
+		}
+
 
 		const user = { id: userId, username: username};
 		const accessToken = generateAccessToken(user);

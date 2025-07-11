@@ -251,7 +251,10 @@ export class ChatView extends HTMLElement {
 			return;
 		}
 		const res = await API.createGameInvite(this.name);
-		if (!res.success) return showErrorState(this.querySelector('#sidebar-chat'));
+		if (!res.success) {
+			console.error(`inviting to game failed: ${res.message}`);
+			return;
+		}
 		Router.navigateTo(`/game/${res.gameID}`);
 	}
 

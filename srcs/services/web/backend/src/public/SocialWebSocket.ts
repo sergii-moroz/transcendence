@@ -6,6 +6,7 @@ import { API } from "./api-static.js";
 class SocialSocketHandler {
 	private socket: WebSocket | null = null;
 	private messageCallback: ((data: any) => void) | null = null;
+	private friendReloadCallback: (() => void) | null = null;
 
 	async init() {
 		if (this.socket) return;
@@ -14,7 +15,7 @@ class SocialSocketHandler {
 		this.socket = new WebSocket("/ws/chat");
 
 		this.socket.onopen = () => {
-			// console.log('social Socket got connected');
+			console.log('social Socket got connected');
 		}
 
 		this.socket.onmessage = (messageBuffer: MessageEvent) => {
@@ -23,6 +24,11 @@ class SocialSocketHandler {
 				if (data.type == 'chatMessage' || data.type == 'chatGameInvite') {
 					const callback = this.messageCallback || popupManager.addPopup;
 					callback(data)
+				}
+				else if (data.type == 'reloadFriends') {
+					if (this.friendReloadCallback) {
+						this.friendReloadCallback();
+					}
 				}
 				else if (data.type == 'tournamentNextGame' || data.type == 'tournamentInfo') {
 					if (!window.location.pathname.includes('/tournament/'))
@@ -64,17 +70,25 @@ class SocialSocketHandler {
 
 	disconnect() {
 		if (!this.socket) return;
+		console.log('disconnecting social socket')
 		this.socket.close();
 		this.socket = null;
-		// console.log('disconnecting social socket')
 	}
 
 	setMessageCallback(func: (data: any) => void) {
 		this.messageCallback = func;
 	}
 
-	removeMessageCallback() {
+	removeFriendsReloadCallback() {
 		this.messageCallback = null;
+	}
+
+	setFriendsReloadCallback(func: () => void) {
+		this.friendReloadCallback = func;
+	}
+
+	removeMessageCallback() {
+		this.friendReloadCallback = null;
 	}
 
 	send(message: MessageToServer) {
