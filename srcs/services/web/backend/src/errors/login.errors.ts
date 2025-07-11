@@ -18,6 +18,12 @@ export const InvalidCredentialsError = createError(
 	401
 );
 
+export const InvalidUsernameError = createError(
+	'FST_INVALID_USERNAME',
+	'Invalid username',
+	401
+);
+
 export const InvalidUser = createError(
 	'USER_ISNT_VALID',
 	'You cant sign into this user',
