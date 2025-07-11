@@ -13,6 +13,7 @@ import {
 	undblockFriend
 } from "../services/friends.services.js";
 import { sendStatusUpdateToFriends } from "./chat.controllers.js";
+import { AIError } from "../errors/friends.error.js";
 
 // template :)
 // export const handleFriendListSidebar = async (
@@ -50,6 +51,7 @@ export const handleFriendAdding = async (
 ) => {
 	try {
 		const friendName = (req.body as { name: string }).name.toLowerCase();
+		if (friendName == 'ai') throw new AIError();
 		await addFriend(friendName, req.user.id);
 		reply.status(200).send({ success: true });
 		sendStatusUpdateToFriends(req, friendName);

@@ -18,9 +18,9 @@ export const FriendInvalidCustom = createError(
 	400
 );
 
-export const AdminError = createError(
-	'CANT_DO_THIS_WITH_ADMIN',
-	'You cant perform this action on admin user',
+export const AIError = createError(
+	'CANT_DO_THIS_WITH_AI',
+	'You cant perform this action on ai user',
 	400
 );
 

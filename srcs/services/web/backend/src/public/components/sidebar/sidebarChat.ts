@@ -270,8 +270,6 @@ export class ChatView extends HTMLElement {
 	}
 
 	block = async () => {
-		if (this.name == "admin")
-			return alert("cant block admin user!");
 		const res = await API.blockFriend(this.name);
 		if (!res.success) {
 			console.error(`blocking friend failed: ${res.message}`);
@@ -293,9 +291,7 @@ export class ChatView extends HTMLElement {
 	}
 
 	unfriend = async () => {
-		if (this.name == "admin")
-			return alert("cant delete admin user from friends!");
-		if (confirm("Are you sure you want to delete sidebar friend?")) {
+		if (confirm("Are you sure you want to delete this friend?")) {
 			const res = await API.deleteFriend(this.name);
 			if (!res.success) {
 				console.error(`deleting friend failed: ${res.message}`);
