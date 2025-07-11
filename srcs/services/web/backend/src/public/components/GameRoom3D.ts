@@ -219,7 +219,7 @@ export class Game3D extends HTMLElement {
 		const countdownText = this.preGameScreen.querySelector('#countdown-text') as HTMLElement;
 		
 		if (waitingText && countdownText && count) {
-			waitingText.textContent = 'Game starting in...';
+			waitingText.textContent = 'Game starts in...';
 			countdownText.style.display = 'block';
 			countdownText.textContent = count.toString();
 		}
