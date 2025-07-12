@@ -18,12 +18,11 @@ import {
 	Vector3,
 } from "@babylonjs/core"
 
-import { gameJson, GameState } from "../types.js"
+import { GameState } from "../types.js"
 import { Router } from "../router-static.js"
 import { HitEffect } from "../utils/hit-effect.js"
 import { clamp, loadRandomCharacter } from "../utils/utils.js"
 import { ScoreBoard } from "../utils/score.js"
-import { API } from "../api-static.js"
 import { InfoBoard } from "../utils/info-board.js"
 
 const STEP = 4
@@ -58,12 +57,12 @@ export class TwoPlayersGame extends HTMLElement {
 
 	private preGameScreen: HTMLElement | null = null
 
-	private gameRoomId: string | null = null
-	private socket: WebSocket | null = null
 	private state: GameState | null = null
 	private gameOver: boolean = false
 	private gameOverMessage: { message: string, winner: string } | null = null
 	private homeBtn: HTMLElement | null = null
+	private gameRunning: boolean = false
+	private matchId: string = ""
 
 	constructor() {
 		super()
@@ -73,16 +72,21 @@ export class TwoPlayersGame extends HTMLElement {
 				player1: { y: 0 },
 				player2: { y: 0 }
 			},
-			scores: { player1: 0, player2: 0, user1: 'Player 1', user2: 'Player 2' },
+			scores: {
+				player1: 0,
+				player2: 0,
+				user1: this.getAttribute('player-1') || 'Player 1',
+				user2: this.getAttribute('player-2') || 'Player 2'
+			},
 			hit: false
 		}
+
+		this.matchId = this.getAttribute('match-id') || "unknown"
 	}
 
 	connectedCallback() {
-		this.gameRoomId = window.location.pathname.split('/')[2]
 		this.render()
 		this.initializeScene()
-		this.homeBtn = this.querySelector("#home-btn");
 		this.homeBtn?.addEventListener('click', this.handleBackHome);
 		window.addEventListener("popstate", this.handleBackHome);
 		document.addEventListener('keydown', this.handleKeyDown);
@@ -93,10 +97,6 @@ export class TwoPlayersGame extends HTMLElement {
 
 	disconnectedCallback() {
 		this.cleanup()
-		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-			this.socket.close()
-		}
-		this.homeBtn?.removeEventListener('click', this.handleBackHome);
 		window.removeEventListener("popstate", this.handleBackHome);
 		document.removeEventListener('keydown', this.handleKeyDown);
 		document.removeEventListener('keyup', this.handleKeyUp);
@@ -180,6 +180,7 @@ export class TwoPlayersGame extends HTMLElement {
 		// Run render loop
 		this.engine.runRenderLoop(() => {
 			this.scene?.render()
+			this.updateGameState()
 			this.updateGameObjects()
 			this.sendInput();
 		})
@@ -203,19 +204,6 @@ export class TwoPlayersGame extends HTMLElement {
 		this.preGameScreen.appendChild(waitingText);
 		this.preGameScreen.appendChild(countdownText);
 		this.canvas.parentElement?.appendChild(this.preGameScreen);
-	}
-
-	private updateCountdown(count: number | undefined) {
-		if (!this.preGameScreen) return;
-
-		const waitingText = this.preGameScreen.querySelector('#waiting-text') as HTMLElement;
-		const countdownText = this.preGameScreen.querySelector('#countdown-text') as HTMLElement;
-
-		if (waitingText && countdownText && count) {
-			waitingText.textContent = 'Game starts in...';
-			countdownText.style.display = 'block';
-			countdownText.textContent = count.toString();
-		}
 	}
 
 	private removePregameScreen() {
@@ -282,7 +270,73 @@ export class TwoPlayersGame extends HTMLElement {
 	}
 
 	private updateGameState() {
-		// this.latestState =
+		const FIELD_X = 250, FIELD_Y = 150
+		const PADDLE_X1 = -FIELD_X + 10, PADDLE_X2 = FIELD_X - 10
+		const PADDLE_HEIGHT = 30
+		const BALL_RADIUS = 5
+		const BALL_SPEED = 4
+
+		if (!this.state || !this.gameRunning) return
+
+		this.state.hit = false
+
+		// Update ball position
+		this.state.ball.x += this.state.ball.dx
+		this.state.ball.y += this.state.ball.dy
+
+		// Ball collision with paddles (simplified)
+		if (
+			this.state.ball.x <= PADDLE_X1 + BALL_RADIUS &&
+			Math.abs(this.state.ball.y - this.state.paddles.player1.y) < PADDLE_HEIGHT
+		) {
+			this.state.ball.dx *= -1;
+			this.state.ball.dx *= 1.05; // Increase speed after hitting paddle
+			this.state.ball.dy *= 1.05; // Increase speed after hitting paddle
+			this.state.hit = true
+		} else if (
+			this.state.ball.x >= PADDLE_X2 - BALL_RADIUS &&
+			Math.abs(this.state.ball.y - this.state.paddles.player2.y) < PADDLE_HEIGHT
+		) {
+			this.state.ball.dx *= -1;
+			this.state.ball.dx *= 1.05; // Increase speed after hitting paddle
+			this.state.ball.dy *= 1.05; // Increase speed after hitting paddle
+			this.state.hit = true
+		}
+
+		// Ball collision with walls
+		if (this.state.ball.y <= -FIELD_Y + BALL_RADIUS || this.state.ball.y >= FIELD_Y - BALL_RADIUS) {
+			this.state.ball.dy *= -1;
+			this.state.hit = true
+		}
+
+		// Scoring
+		if (this.state.ball.x <= -FIELD_X + BALL_RADIUS) {
+			this.state.scores.player2++
+			this.state.ball.dx = BALL_SPEED // Reset ball speed
+			this.state.ball.dy = BALL_SPEED // Reset ball speed
+			this.state.ball.x = PADDLE_X2 - 10;
+			this.state.ball.y = this.state.paddles.player2.y
+		}
+		if (this.state.ball.x >= FIELD_X - BALL_RADIUS) {
+			this.state.scores.player1++
+			this.state.ball.dx = BALL_SPEED // Reset ball speed
+			this.state.ball.dy = BALL_SPEED // Reset ball speed
+			this.state.ball.x = PADDLE_X1 + 10;
+			this.state.ball.y = this.state.paddles.player1.y
+		}
+
+		// Stop the game
+		if (this.state.scores.player1 >= 7 || this.state.scores.player2 >= 7) {
+			this.gameRunning = false
+
+			const winnerId = this.state.scores.player1 < this.state.scores.player2 ? "1" : "0"
+			const winnerName = winnerId ? this.state.scores.user2 : this.state.scores.user1
+
+			this.dispatchEvent(new CustomEvent('game-finished', {
+				bubbles: true,
+				detail: { id: winnerId, name: winnerName, matchId: this.matchId }
+			}))
+		}
 	}
 
 	private updateGameObjects() {
@@ -321,74 +375,6 @@ export class TwoPlayersGame extends HTMLElement {
 
 	}
 
-	// handleSocket = async () => {
-	// 	const res = await API.ping()
-	// 	if (!res.success) return;
-	// 	this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/game/${this.gameRoomId}`);
-
-	// 	this.socket.onopen = () => {
-	// 		console.log('Game: WebSocket connection established.');
-	// 	}
-
-	// 	this.socket.onmessage = (event) => {
-	// 		const data = JSON.parse(event.data) as gameJson;
-
-	// 		if (data.type === 'countdown') {
-	// 			this.updateCountdown(data.count);
-	// 		}
-
-	// 		if (data.type === 'gameState') {
-	// 			this.removePregameScreen()
-	// 			this.latestState = data.state as GameState;
-	// 		}
-
-	// 		if (data.type === 'Error') {
-	// 			console.error('Game3D: WebSocket error:', data.message);
-	// 			Router.navigateTo('/home');
-	// 		}
-
-	// 		if (data.type === 'closed') {
-	// 			this.socket?.send(JSON.stringify({ type: 'deleteGameBeforeStart' }));
-	// 			alert(data.message);
-	// 			Router.navigateTo('/home');
-	// 		}
-
-	// 		if (data.type === 'victory') {
-	// 			this.gameOver = true;
-	// 			this.gameOverMessage = {
-	// 				message: data.message as string,
-	// 				winner: data.winner as string
-	// 			};
-
-	// 			if (data.tournamentId !== null) {
-	// 				console.log("Redirecting to tournament:", data.tournamentId);
-	// 				Router.navigateTo(`/tournament/${data.tournamentId}`);
-	// 			} else {
-	// 				Router.navigateTo('/victory-screen');
-	// 				}
-	// 		}
-
-	// 		if (data.type === 'defeat') {
-	// 			this.gameOver = true;
-	// 			this.gameOverMessage = {
-	// 				message: data.message as string,
-	// 				winner: data.winner as string
-	// 			};
-
-	// 			Router.navigateTo('/loss-screen');
-	// 		}
-	// 	};
-
-	// 	this.socket.onclose = () => {
-	// 		console.log('Game: WebSocket connection closed.');
-	// 	};
-
-	// 	this.socket.onerror = (err: Event) => {
-	// 		console.error('Game3D: WebSocket error:', err);
-	// 		Router.navigateTo('/home');
-	// 	};
-	// }
-
 	handleBackHome = () => Router.navigateTo('/home')
 
 	handleKeyDown = (e: KeyboardEvent) => {
@@ -396,6 +382,7 @@ export class TwoPlayersGame extends HTMLElement {
 
 		if (this.preGameScreen) {
 			this.removePregameScreen()
+			this.gameRunning = true
 		}
 
 		e.preventDefault();
@@ -473,6 +460,7 @@ export class TwoPlayersGame extends HTMLElement {
 		this.removePregameScreen()
 
 		if (this.engine) {
+			this.engine.stopRenderLoop();
 			this.engine.dispose()
 			this.engine = null
 		}
