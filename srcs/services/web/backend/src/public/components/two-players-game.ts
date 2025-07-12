@@ -78,5 +78,152 @@ export class TwoPlayersGame extends HTMLElement {
 		}
 	}
 
+	connectedCallback() {
+		this.gameRoomId = window.location.pathname.split('/')[2]
+		this.render()
+		this.initializeScene()
+		this.homeBtn = this.querySelector("#home-btn");
+		this.homeBtn?.addEventListener('click', this.handleBackHome);
+		window.addEventListener("popstate", this.handleBackHome);
+		document.addEventListener('keydown', this.handleKeyDown);
+		document.addEventListener('keyup', this.handleKeyUp);
+		document.addEventListener('pointerdown', this.handlePointerDown)
+		document.addEventListener('pointerup', this.handlePointerUp)
+	}
+
+	disconnectedCallback() {
+		this.cleanup()
+		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+			this.socket.close()
+		}
+		this.homeBtn?.removeEventListener('click', this.handleBackHome);
+		window.removeEventListener("popstate", this.handleBackHome);
+		document.removeEventListener('keydown', this.handleKeyDown);
+		document.removeEventListener('keyup', this.handleKeyUp);
+		document.removeEventListener('pointerdown', this.handlePointerDown)
+		document.removeEventListener('pointerup', this.handlePointerUp)
+	}
+
+	private render() {
+		this.innerHTML = `
+			<div class="relative z-0 w-full">
+				<canvas class="w-full h-full block"></canvas>
+			</div>
+		`
+	}
+
+	private async initializeScene() {
+		this.canvas = this.querySelector('canvas')
+		if (!this.canvas) return
+
+		this.createPregameScreen();
+
+		// Initialize Babylon.js engine
+		this.engine = new Engine(this.canvas, true, {
+			preserveDrawingBuffer: true,
+			stencil: true
+		})
+		this.scene = new Scene(this.engine)
+
+		// Static camera setup
+		const alpha = 15
+		const camera = new UniversalCamera("camera-1", new Vector3(0, -400 * Math.sin(alpha * Math.PI / 180), -400 * Math.cos(alpha * Math.PI / 180)), this.scene);
+		camera.mode = Camera.PERSPECTIVE_CAMERA
+		camera.rotation = new Vector3(0, 0, 0); // Lock rotation
+		camera.lockedTarget = Vector3.Zero(); // Look at center
+		this.cameras.push(camera)
+
+		const camera2 = new UniversalCamera("camera-2", new Vector3(400, 0, -400), this.scene);
+		camera2.mode = Camera.PERSPECTIVE_CAMERA
+		camera2.rotation.z = Math.PI/2
+		camera2.rotation.y = -40 / 90 * Math.PI/2
+		this.cameras.push(camera2)
+
+		const camera3 = new UniversalCamera("camera-3", new Vector3(-400, 0, -400), this.scene);
+		camera3.mode = Camera.PERSPECTIVE_CAMERA
+		camera3.rotation.z = -Math.PI/2
+		camera3.rotation.y = 40 / 90 * Math.PI/2
+		this.cameras.push(camera3)
+
+		// Lighting
+		const hdr = new HDRCubeTexture("../textures/citrus_orchard_road_puresky_1k.hdr", this.scene, 128, false, true, false, true);
+		const rotationMatrix = Matrix.RotationX(Math.PI / 2);
+		hdr.coordinatesMode = Texture.PROJECTION_MODE;
+		hdr.getReflectionTextureMatrix().multiplyToRef(rotationMatrix, hdr.getReflectionTextureMatrix());
+
+		this.scene.environmentTexture = hdr
+
+		// create game objects
+		this.createField()
+		this.createBall()
+		this.hitEffect = new HitEffect(this.scene)
+		this.createCharacter()
+		this.scoreBoard = new ScoreBoard(this.scene)
+		this.scoreBoard.setPosition(0, 149.5, 0)
+		this.infoBoard = new InfoBoard(this.scene)
+		this.infoBoard.setPosition(0, -100, 28)
+		this.infoBoard.updateInfo("▼ down", "up ▲")
+		this.infoBoard.setVisibility(0)
+
+		// Handle resize
+		this.resizeObserver = new ResizeObserver(() => {
+			this.engine?.resize()
+			if (this.engine?.hostInformation.isMobile) {
+				this.infoBoard?.setVisibility(1)
+			} else {
+				this.infoBoard?.setVisibility(0)
+			}
+		})
+
+		this.resizeObserver.observe(this.canvas)
+
+		// Run render loop
+		this.engine.runRenderLoop(() => {
+			this.scene?.render()
+			this.updateGameObjects()
+			this.sendInput();
+		})
+	}
+
+	private createPregameScreen() {
+		if (!this.canvas) return
+
+		this.preGameScreen = document.createElement('div');
+		this.preGameScreen.className = `flex flex-col z-10 absolute inset-0 bg-black/50 justify-center items-center text-white text-2xl`;
+
+		const waitingText = document.createElement('div');
+		waitingText.className = 'text-center font-bold';
+		waitingText.id = 'waiting-text';
+		waitingText.textContent = 'Press any key to start...';
+
+		const countdownText = document.createElement('div');
+		countdownText.className = `text-4xl font-bold mt-4 hidden`;
+		countdownText.id = 'countdown-text';
+
+		this.preGameScreen.appendChild(waitingText);
+		this.preGameScreen.appendChild(countdownText);
+		this.canvas.parentElement?.appendChild(this.preGameScreen);
+	}
+
+	private updateCountdown(count: number | undefined) {
+		if (!this.preGameScreen) return;
+
+		const waitingText = this.preGameScreen.querySelector('#waiting-text') as HTMLElement;
+		const countdownText = this.preGameScreen.querySelector('#countdown-text') as HTMLElement;
+
+		if (waitingText && countdownText && count) {
+			waitingText.textContent = 'Game starts in...';
+			countdownText.style.display = 'block';
+			countdownText.textContent = count.toString();
+		}
+	}
+
+	private removePregameScreen() {
+		if (this.preGameScreen) {
+			this.preGameScreen.remove();
+			this.preGameScreen = null;
+		}
+	}
+
 
 }
