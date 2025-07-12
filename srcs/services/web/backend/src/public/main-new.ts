@@ -46,6 +46,7 @@ import { simpleHeader } from "./components/simple-Header.js";
 import { ThreeRingDonut } from "./components/donut-chart.js";
 import { popupManager } from "./popupManager.js";
 import { TwoPlayersGame } from "./components/two-players-game.js";
+import { IconHomeTwoPlayers } from "./components/icons/icon-home-local-game.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
 customElements.define('btn-theme-toggle', ButtonThemeToggle)
@@ -89,6 +90,7 @@ customElements.define('icon-user-round', IconUserRound)
 customElements.define('icon-home-single-player', IconHomeSingleplayer)
 customElements.define('icon-home-multiplayer', IconHomeMultiplayer)
 customElements.define('icon-home-tournament', IconHomeTournament)
+customElements.define('icon-home-two-players', IconHomeTwoPlayers)
 
 // Matchmaking
 customElements.define('match-making', Matchmaking)
