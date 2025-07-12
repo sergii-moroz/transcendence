@@ -292,5 +292,150 @@ export class TwoPlayerPage extends HTMLElement {
     `;
 	}
 
+	private renderTournamentBracket(): string {
+    if (!this.tournamentState) return '';
+
+    // Group matches by round
+    const rounds: Record<number, Match[]> = {};
+    this.tournamentState.matches.forEach(match => {
+        if (!rounds[match.round]) {
+            rounds[match.round] = [];
+        }
+        rounds[match.round].push(match);
+    });
+
+    // Sort rounds
+    const sortedRounds = Object.keys(rounds).map(Number).sort((a, b) => a - b);
+    const totalRounds = Math.max(...sortedRounds);
+
+    return `
+        <div id="bracket-tree" class="flex flex-row gap-8 items-center justify-center relative">
+            ${sortedRounds.map(round => `
+                <div class="round-container flex flex-col items-center" style="gap: ${rounds[round].length > 4 ? '6px' : '32px'}" data-round="${round}">
+                    <h3 class="text-lg font-bold mb-2">${this.getRoundName(round, totalRounds)}</h3>
+                    ${rounds[round].map((match, index) => `
+                        <div class="match-container" id="match-${match.id}" data-match-id="${match.id}">
+                            ${this.renderMatch(match)}
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('')}
+        </div>
+    `;
+	}
+
+	private getRoundName(round: number, totalRounds: number): string {
+			if (round === totalRounds) return 'Winner';
+			if (round === totalRounds - 1) return 'Final';
+			if (round === totalRounds - 2) return 'Semifinals';
+			if (round === totalRounds - 3) return 'Quarterfinals';
+			return `Round ${round}`;
+	}
+
+  private renderMatch2(match: Match): string {
+    const isMatchComplete = match.winner !== null;
+    const isFinal = !match.nextMatchId;
+    const canSetWinner = !isMatchComplete && match.players.every(p => p !== null);
+
+    return `
+      <div class="match mb-4 p-3 border rounded ${isMatchComplete ? 'bg-gray-50' : ''}">
+        <div class="match-info mb-2">
+          <span class="text-sm text-gray-500">Match ${match.id}</span>
+        </div>
+        <div class="players space-y-2">
+          ${match.players.map((player, index) => `
+            <div class="player flex items-center justify-between p-2
+                  ${isMatchComplete && match.winner === index ? 'bg-green-100 font-bold' : ''}
+                  ${isMatchComplete && match.winner !== index && player !== null ? 'opacity-50' : ''}">
+              <span>
+                ${player ? player.name : 'Bye'}
+                ${player?.sourceMatch ? `<small class="text-gray-500">(from Match ${player.sourceMatch})</small>` : ''}
+              </span>
+              ${canSetWinner ? `
+                <button class="set-winner p-1 bg-blue-100 text-xs rounded"
+                  data-match-id="${match.id}" data-winner-index="${index}">
+                  Winner
+                </button>
+              ` : ''}
+            </div>
+          `).join('')}
+        </div>
+        ${isMatchComplete && !isFinal ? `
+          <div class="mt-2 text-sm text-gray-600">
+            Advances to ${match.nextMatchId}
+          </div>
+        ` : ''}
+        ${isFinal && isMatchComplete ? `
+          <div class="mt-2 p-2 bg-yellow-100 text-center font-bold">
+            Tournament Winner: ${match.players[match.winner!]?.name || ''}
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+}
+
+// Data structures
+interface TournamentState {
+  players: string[];
+  matches: Match[];
+}
+
+interface Match {
+  id: string;
+  round: number;
+  players: (TournamentPlayer | null)[];
+  nextMatchId: string | null;
+  winner: number | null; // index of the winning player
+}
+
+interface TournamentPlayer {
+  name: string;
+  sourceMatch?: string; // ID of the match this player came from
+}
+
+// Helper function to create tournament bracket
+function createTournamentBracket(players: string[]): TournamentState {
+  const validCounts = [2, 4, 8];
+  if (!validCounts.includes(players.length)) {
+    throw new Error(`Invalid number of players. Must be 2, 4, or 8.`);
+  }
+
+  const matches: Match[] = [];
+  const rounds = Math.log2(players.length) + 1;
+
+  // Create all matches first
+  for (let round = 1; round <= rounds; round++) {
+    const matchesInRound = round === rounds ? 1 : players.length / Math.pow(2, round);
+    for (let i = 0; i < matchesInRound; i++) {
+      const matchId = `m${round}-${i+1}`;
+      const nextMatchId = round < rounds ? `m${round+1}-${Math.floor(i/2)+1}` : null;
+
+      matches.push({
+        id: matchId,
+        round,
+        players: [],
+        nextMatchId,
+        winner: null
+      });
+    }
+  }
+
+  // Assign first round matches
+  const firstRoundMatches = matches.filter(m => m.round === 1);
+  const shuffledPlayers = [...players].sort(() => Math.random() - 0.5); // Shuffle players
+
+  for (let i = 0; i < firstRoundMatches.length; i++) {
+    const match = firstRoundMatches[i];
+    match.players = [
+      { name: shuffledPlayers[i*2] },
+      i*2+1 < shuffledPlayers.length ? { name: shuffledPlayers[i*2+1] } : null
+    ];
+  }
+
+  return {
+    players: shuffledPlayers,
+    matches
+  };
 
 }
