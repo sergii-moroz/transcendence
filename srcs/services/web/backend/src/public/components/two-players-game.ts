@@ -225,5 +225,198 @@ export class TwoPlayersGame extends HTMLElement {
 		}
 	}
 
+	private async createField() {
+		if (!this.scene) return
+		// Create field boundaries
+		const linePoints = [
+			new Vector3(-this.fieldWidth, -this.fieldHeight, 0),
+			new Vector3(-this.fieldWidth, this.fieldHeight, 0),
+			new Vector3(this.fieldWidth, this.fieldHeight, 0),
+			new Vector3(this.fieldWidth, -this.fieldHeight, 0),
+			new Vector3(-this.fieldWidth, -this.fieldHeight, 0)
+		]
+		MeshBuilder.CreateLines("walls", { points: linePoints }, this.scene)
+
+		// Create floor
+		const ground = await this.loadField(this.scene)
+		ground.position.z = 30
+	}
+
+	private createBall() {
+		if (!this.scene) return
+
+		this.ball = MeshBuilder.CreateSphere("ball", { diameter: 10 }, this.scene)
+		const ballMat = new PBRMaterial("ballMat", this.scene)
+		ballMat.albedoColor = new Color3(1, 1, 1)
+		ballMat.metallic = 0.0
+		ballMat.roughness = 0.5
+		this.ball.material = ballMat
+
+		// Create ball trail
+		this.ballTrail = new TrailMesh("ballTrail", this.ball, this.scene, 0.5, 30, true)
+		const trailMat = new StandardMaterial("trailMat", this.scene)
+		trailMat.emissiveColor = new Color3(0.8, 0.8, 1)
+		trailMat.alpha = 0.6
+		this.ballTrail.material = trailMat
+	}
+
+	private async createCharacter() {
+		if (!this.scene) return
+
+		this.character1 = await loadRandomCharacter(this.scene)
+		this.character1.rotate(new Vector3(0, 0, 1), Math.PI / 2, Space.WORLD);
+		this.character1.position.x = -this.fieldWidth - 5
+		this.character1.position.z = 30
+
+		this.character2 = await loadRandomCharacter(this.scene)
+		this.character2.rotate(new Vector3(0, 0, 1), -Math.PI / 2, Space.WORLD);
+		this.character2.position.x = this.fieldWidth + 5
+		this.character2.position.z = 30
+
+		this.paddle1 = await this.loadPaddle(this.scene)
+		this.paddle2 = await this.loadPaddle(this.scene)
+		this.paddle1.scaling = new Vector3(20, 20, 20)
+		this.paddle2.scaling = new Vector3(20, 20, 20)
+		this.paddle1.position.x = -this.fieldWidth + 5
+		this.paddle2.position.x = this.fieldWidth - 5
+	}
+
+	private updateGameState() {
+		// this.latestState =
+	}
+
+	private updateGameObjects() {
+		if (!this.state || !this.ball || !this.character1 || !this.character2) return
+		if (!this.paddle1 || !this.paddle2) return
+
+		// update ball position
+		this.ball.position.x = this.state.ball.x
+		this.ball.position.y = this.state.ball.y
+		this.ball.position.z = 0
+
+		// Update paddles
+		this.character1.position.y = this.state.paddles.player1.y
+		this.character2.position.y = this.state.paddles.player2.y
+
+		const deltaY1 = this.ball.position.y - this.character1.position.y
+		const clampedY1 = clamp(deltaY1, -25, 25)
+		this.paddle1.position.y = this.character1.position.y + clampedY1
+		this.paddle1.rotationQuaternion = null
+		this.paddle1.rotation.x = (clampedY1 / 25) * (Math.PI / 2) + Math.PI
+
+		const deltaY2 = this.ball.position.y - this.character2.position.y
+		const clampedY2 = clamp(deltaY2, -25, 25)
+		this.paddle2.position.y = this.character2.position.y + clampedY2
+		this.paddle2.rotationQuaternion = null
+		this.paddle2.rotation.x = (clampedY2 / 25) * (Math.PI / 2) + Math.PI
+
+		this.scoreBoard?.updateScore(this.state.scores.player1, this.state.scores.player2, this.state.scores.user1, this.state.scores.user2)
+
+		if (this.state.hit) {
+			this.hitEffect?.playHitEffect({
+				x: this.state.ball.x,
+				y: this.state.ball.y
+			})
+		}
+
+	}
+
+	// handleSocket = async () => {
+	// 	const res = await API.ping()
+	// 	if (!res.success) return;
+	// 	this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/game/${this.gameRoomId}`);
+
+	// 	this.socket.onopen = () => {
+	// 		console.log('Game: WebSocket connection established.');
+	// 	}
+
+	// 	this.socket.onmessage = (event) => {
+	// 		const data = JSON.parse(event.data) as gameJson;
+
+	// 		if (data.type === 'countdown') {
+	// 			this.updateCountdown(data.count);
+	// 		}
+
+	// 		if (data.type === 'gameState') {
+	// 			this.removePregameScreen()
+	// 			this.latestState = data.state as GameState;
+	// 		}
+
+	// 		if (data.type === 'Error') {
+	// 			console.error('Game3D: WebSocket error:', data.message);
+	// 			Router.navigateTo('/home');
+	// 		}
+
+	// 		if (data.type === 'closed') {
+	// 			this.socket?.send(JSON.stringify({ type: 'deleteGameBeforeStart' }));
+	// 			alert(data.message);
+	// 			Router.navigateTo('/home');
+	// 		}
+
+	// 		if (data.type === 'victory') {
+	// 			this.gameOver = true;
+	// 			this.gameOverMessage = {
+	// 				message: data.message as string,
+	// 				winner: data.winner as string
+	// 			};
+
+	// 			if (data.tournamentId !== null) {
+	// 				console.log("Redirecting to tournament:", data.tournamentId);
+	// 				Router.navigateTo(`/tournament/${data.tournamentId}`);
+	// 			} else {
+	// 				Router.navigateTo('/victory-screen');
+	// 				}
+	// 		}
+
+	// 		if (data.type === 'defeat') {
+	// 			this.gameOver = true;
+	// 			this.gameOverMessage = {
+	// 				message: data.message as string,
+	// 				winner: data.winner as string
+	// 			};
+
+	// 			Router.navigateTo('/loss-screen');
+	// 		}
+	// 	};
+
+	// 	this.socket.onclose = () => {
+	// 		console.log('Game: WebSocket connection closed.');
+	// 	};
+
+	// 	this.socket.onerror = (err: Event) => {
+	// 		console.error('Game3D: WebSocket error:', err);
+	// 		Router.navigateTo('/home');
+	// 	};
+	// }
+
+	handleBackHome = () => Router.navigateTo('/home')
+
+	handleKeyDown = (e: KeyboardEvent) => {
+		if (!this.scene || this.gameOver) return;
+
+		if (this.preGameScreen) {
+			this.removePregameScreen()
+		}
+
+		e.preventDefault();
+		if (e.key === '1') {
+			this.scene.activeCamera = this.cameras[0]
+		} else if (e.key === '2') {
+			this.scene.activeCamera = this.cameras[1]
+		} else if (e.key === '3') {
+			this.scene.activeCamera = this.cameras[2]
+		} else {
+			this.keysPressed[e.key] = true;
+		}
+	};
+
+	handleKeyUp = (e: KeyboardEvent) => {
+		if (this.gameOver) return;
+		// if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+			e.preventDefault();
+			this.keysPressed[e.key] = false;
+		// }
+	};
+
 
 }
