@@ -6,7 +6,7 @@ import { API } from "./api-static.js";
 class SocialSocketHandler {
 	private socket: WebSocket | null = null;
 	private messageCallback: ((data: any) => void) | null = null;
-	private friendReloadCallback: (() => void) | null = null;
+	private changeFriendStatusCallback: (() => void) | null = null;
 
 	async init() {
 		if (this.socket) return;
@@ -25,9 +25,9 @@ class SocialSocketHandler {
 					const callback = this.messageCallback || popupManager.addPopup;
 					callback(data)
 				}
-				else if (data.type == 'reloadFriends') {
-					if (this.friendReloadCallback) {
-						this.friendReloadCallback();
+				else if (data.type == 'friendStatusChanged') {
+					if (this.changeFriendStatusCallback) {
+						this.changeFriendStatusCallback();
 					}
 				}
 				else if (data.type == 'tournamentNextGame' || data.type == 'tournamentInfo') {
@@ -79,16 +79,16 @@ class SocialSocketHandler {
 		this.messageCallback = func;
 	}
 
-	removeFriendsReloadCallback() {
+	removeMessageCallback() {
 		this.messageCallback = null;
 	}
 
-	setFriendsReloadCallback(func: () => void) {
-		this.friendReloadCallback = func;
+	setFriendsStatusChangeCallback(func: () => void) {
+		this.changeFriendStatusCallback = func;
 	}
 
-	removeMessageCallback() {
-		this.friendReloadCallback = null;
+	removeFriendStatusChangeCallback() {
+		this.changeFriendStatusCallback = null;
 	}
 
 	send(message: MessageToServer) {

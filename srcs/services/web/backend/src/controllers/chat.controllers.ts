@@ -107,7 +107,7 @@ export const sendStatusUpdateToFriends = async (req: FastifyRequest, specificFri
 		const friendSocket = req.server.onlineUsers.get(friend);
 		if (friendSocket) {
 			friendSocket.send(JSON.stringify({
-				type: 'reloadFriends'
+				type: 'friendStatusChanged'
 			}))
 		}
 	}

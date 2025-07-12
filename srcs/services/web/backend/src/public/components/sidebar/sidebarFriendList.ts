@@ -19,7 +19,7 @@ export class FriendListView extends HTMLElement {
 	}
 
 	async connectedCallback() {
-		socialSocketManager.setFriendsReloadCallback(() => {
+		socialSocketManager.setFriendsStatusChangeCallback(() => {
 			this.loadFriendList();
 		});
 		this.el_close = this.querySelector('#close-btn');
@@ -40,7 +40,7 @@ export class FriendListView extends HTMLElement {
 	}
 
 	disconnectedCallback() {
-		socialSocketManager.removeFriendsReloadCallback();
+		socialSocketManager.removeFriendStatusChangeCallback();
 
 		this.el_close?.removeEventListener('click', this.switchToCollapseSidebar);
 		this.el_backdrop?.removeEventListener('click', this.switchToCollapseSidebar);

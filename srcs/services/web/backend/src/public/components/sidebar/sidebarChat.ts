@@ -43,6 +43,9 @@ export class ChatView extends HTMLElement {
 				this.addGameInvitation();
 			}
 		});
+		socialSocketManager.setFriendsStatusChangeCallback(() => {
+			this.loadChat();
+		});
 
 		this.el_back = this.querySelector('#back-to-friends-btn');
 		this.el_backdrop = this.querySelector('#backdrop');
@@ -74,6 +77,7 @@ export class ChatView extends HTMLElement {
 
 	disconnectedCallback() {
 		socialSocketManager.removeMessageCallback();
+		socialSocketManager.removeFriendStatusChangeCallback();
 
 		this.el_back?.removeEventListener('click', this.switchToFriendListSidebar);
 		window.removeEventListener('keydown', this.switchToFriendListSidebar);
