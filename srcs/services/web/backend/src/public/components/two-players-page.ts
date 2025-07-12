@@ -43,7 +43,13 @@ export class TwoPlayerPage extends HTMLElement {
         this.startTournament();
       } else if (target.matches('button.clear-tournament')) {
         this.clearTournament();
-      } else if (target.matches('button.set-winner')) {
+      } else if (target.matches('button.play-game')) {
+				const player1 = target.dataset.player1 || "Player 1"
+				const player2 = target.dataset.player2 || "Player 2"
+				const matchId = target.dataset.matchId || ""
+
+				this.playGame(player1, player2, matchId)
+			} else if (target.matches('button.set-winner')) {
         const matchId = target.dataset.matchId;
         const winnerIndex = target.dataset.winnerIndex;
         if (matchId && winnerIndex) {
@@ -54,8 +60,8 @@ export class TwoPlayerPage extends HTMLElement {
   }
 
   private addPlayer() {
-    const input = this.querySelector('input') as HTMLInputElement;
-    const nickname = input.value.trim();
+		const input = this.querySelector('input') as HTMLInputElement
+		const nickname = this.formatName(input.value.trim())
 
     if (nickname && !this.players.includes(nickname)) {
       this.players.push(nickname);
@@ -116,34 +122,40 @@ export class TwoPlayerPage extends HTMLElement {
   private render() {
     this.innerHTML = `
       <div class="tournament-container">
-        <div class="player-management">
-          <div class="flex items-center mb-4">
-            <input type="text" placeholder="nickname" class="p-2 border rounded">
-            <button class="add-player ml-2 p-2 bg-blue-500 text-white rounded">Add</button>
-          </div>
+				<div class="flex justify-center">
+					<div class="player-management">
+						<div class="flex items-center mb-4">
+							<input type="text" placeholder="nickname" class="p-2 border rounded">
+							<button class="add-player ml-2 p-2 bg-blue-500 text-white rounded">Add</button>
+						</div>
 
-          <div class="player-list mb-4">
-            <h3 class="text-lg font-bold">Players (${this.players.length})</h3>
-            <ul class="list-disc pl-5">
-              ${this.players.map(player => `<li>${player}</li>`).join('')}
-            </ul>
-          </div>
+						<div class="player-list mb-4">
+							<h3 class="text-lg font-bold">Players (${this.players.length})</h3>
+							<ul class="list-disc pl-5">
+								${this.players.map(player => `<li>${player}</li>`).join('')}
+							</ul>
+						</div>
 
-          <div class="flex space-x-2 mb-4">
-            <button class="start-tournament p-2 bg-green-500 text-white rounded
-              ${!this.isValidPlayerCount() ? 'opacity-50 cursor-not-allowed' : ''}"
-              ${!this.isValidPlayerCount() ? 'disabled' : ''}>
-              Start Tournament
-            </button>
-            <button class="clear-tournament p-2 bg-red-500 text-white rounded">
-              Clear Tournament
-            </button>
-          </div>
-        </div>
+						<div class="flex space-x-2 mb-4">
+							<button class="start-tournament p-2 bg-green-500 text-white rounded
+								${!this.isValidPlayerCount() ? 'opacity-50 cursor-not-allowed' : ''}"
+								${!this.isValidPlayerCount() ? 'disabled' : ''}>
+								Start Tournament
+							</button>
+							<button class="clear-tournament p-2 bg-red-500 text-white rounded">
+								Clear Tournament
+							</button>
+						</div>
+					</div>
+				</div>
 
         <div class="tournament-bracket">
           ${this.tournamentState ? this.renderTournamentBracket() : ''}
         </div>
+
+				<!-- game container -->
+				<div id="game-container" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden">
+				</div>
       </div>
     `;
 
@@ -229,6 +241,11 @@ export class TwoPlayerPage extends HTMLElement {
     svg.appendChild(polyline);
 	}
 
+	private formatName(name?: string): string {
+		if (!name) return '???';
+		return name.length > 8 ? name.slice(0, 8) + '…' : name;
+	}
+
 	private renderMatch(match: Match): string {
     const isMatchComplete = match.winner !== null;
     const isFinal = !match.nextMatchId;
@@ -276,7 +293,13 @@ export class TwoPlayerPage extends HTMLElement {
 					}
         </div>
 				${!isMatchComplete && !isFinal && match.players.length == 2 ? `
-					<button class="tw-btn w-full">Play</button>
+					<button class="play-game tw-btn w-full"
+						data-player1="${match.players[0]?.name}"
+						data-player2="${match.players[1]?.name}"
+						data-match-id="${match.id}"
+					>
+						Play
+					</button>
 				` : ''}
         ${isMatchComplete && !isFinal ? `
           <div class="mt-1 text-xs text-gray-500">
@@ -332,47 +355,37 @@ export class TwoPlayerPage extends HTMLElement {
 			return `Round ${round}`;
 	}
 
-  private renderMatch2(match: Match): string {
-    const isMatchComplete = match.winner !== null;
-    const isFinal = !match.nextMatchId;
-    const canSetWinner = !isMatchComplete && match.players.every(p => p !== null);
+	private playGame(player1: string, player2: string, matchId: string) {
+		const container = this.querySelector('#game-container')
+		container?.classList.remove('hidden')
+		if (!container) return
 
-    return `
-      <div class="match mb-4 p-3 border rounded ${isMatchComplete ? 'bg-gray-50' : ''}">
-        <div class="match-info mb-2">
-          <span class="text-sm text-gray-500">Match ${match.id}</span>
-        </div>
-        <div class="players space-y-2">
-          ${match.players.map((player, index) => `
-            <div class="player flex items-center justify-between p-2
-                  ${isMatchComplete && match.winner === index ? 'bg-green-100 font-bold' : ''}
-                  ${isMatchComplete && match.winner !== index && player !== null ? 'opacity-50' : ''}">
-              <span>
-                ${player ? player.name : 'Bye'}
-                ${player?.sourceMatch ? `<small class="text-gray-500">(from Match ${player.sourceMatch})</small>` : ''}
-              </span>
-              ${canSetWinner ? `
-                <button class="set-winner p-1 bg-blue-100 text-xs rounded"
-                  data-match-id="${match.id}" data-winner-index="${index}">
-                  Winner
-                </button>
-              ` : ''}
-            </div>
-          `).join('')}
-        </div>
-        ${isMatchComplete && !isFinal ? `
-          <div class="mt-2 text-sm text-gray-600">
-            Advances to ${match.nextMatchId}
-          </div>
-        ` : ''}
-        ${isFinal && isMatchComplete ? `
-          <div class="mt-2 p-2 bg-yellow-100 text-center font-bold">
-            Tournament Winner: ${match.players[match.winner!]?.name || ''}
-          </div>
-        ` : ''}
-      </div>
-    `;
-  }
+		container.innerHTML = `
+			<two-players-game player-1="${player1}" player-2="${player2}" match-id="${matchId}"></two-players-game>
+			<button id="btn-close" class="tw-btn">Close</button>
+		`
+
+		const btnClose = container.querySelector('#btn-close')
+		btnClose?.addEventListener('click', () => {
+			container.classList.add('hidden')
+			container.innerHTML = ''
+		})
+
+		container.addEventListener('game-finished', (event: Event) => {
+			const customEvent = event as CustomEvent
+			const matchId = customEvent.detail.matchId
+			const winnerIndex = customEvent.detail.id
+
+			setTimeout(() => {
+				container.classList.add('hidden')
+				container.innerHTML = ''
+
+				if (matchId && winnerIndex) {
+					this.setMatchWinner(matchId, parseInt(winnerIndex));
+				}
+			}, 1000);
+		})
+	}
 }
 
 // Data structures
