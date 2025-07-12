@@ -47,6 +47,7 @@ import { ThreeRingDonut } from "./components/donut-chart.js";
 import { popupManager } from "./popupManager.js";
 import { TwoPlayersGame } from "./components/two-players-game.js";
 import { IconHomeTwoPlayers } from "./components/icons/icon-home-local-game.js";
+import { TwoPlayerPage } from "./components/two-players-page.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
 customElements.define('btn-theme-toggle', ButtonThemeToggle)
@@ -115,6 +116,7 @@ customElements.define('profile-user-data', ProfileData)
 //header
 customElements.define('simple-header', simpleHeader)
 customElements.define('three-ring-donut', ThreeRingDonut);
+customElements.define('two-players-page', TwoPlayerPage)
 
 Router.init()
 popupManager.init();
