@@ -62,6 +62,17 @@ export class HomeContent extends HTMLElement {
 					<top-player-card></top-player-card>
 
 				</div>
+
+				<div class="grid grid-cols-1">
+					<play-card
+						title="Local games"
+						description="Play against your friends"
+						button-text="Play local"
+						href="/two-players"
+						icon="icon-home-two-players"
+						accent-color="pink"
+					></play-card>
+				</div>
 			</div>
 		`;
 	}
