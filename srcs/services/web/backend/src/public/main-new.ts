@@ -45,6 +45,7 @@ import { ProfileData } from "./components/profile-data.js";
 import { simpleHeader } from "./components/simple-Header.js";
 import { ThreeRingDonut } from "./components/donut-chart.js";
 import { popupManager } from "./popupManager.js";
+import { TwoPlayersGame } from "./components/two-players-game.js";
 
 customElements.define('modal-login-menu', ModalLoginMenu)
 customElements.define('btn-theme-toggle', ButtonThemeToggle)
@@ -96,6 +97,7 @@ customElements.define('match-making', Matchmaking)
 // customElements.define('game-room', GameRoom)
 customElements.define('game-3d', Game3D)
 customElements.define('singleplayer-game', SinglePlayerRoom);
+customElements.define('two-players-game', TwoPlayersGame);
 customElements.define('loss-screen', LossScreen)
 customElements.define('victory-screen', VictoryScreen)
 

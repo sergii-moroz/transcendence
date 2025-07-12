@@ -12,11 +12,11 @@ const APP_TITLE = "ft_transcendence"
 
 export const routes: tRoutes = {
 
-	"404": {
-		template: "/templates/404.html",
-		title: `404 | ${APP_TITLE}`,
-		description: "Page not found"
-	},
+	// "404": {
+	// 	template: "/templates/404.html",
+	// 	title: `404 | ${APP_TITLE}`,
+	// 	description: "Page not found"
+	// },
 
 	"/unauthorized": {
 		template: "/templates/unauthorized.html",
@@ -24,11 +24,17 @@ export const routes: tRoutes = {
 		description: "Unauthorized"
 	},
 
-	"error": {
-		template: 'error',
-		title: `error | ${APP_TITLE}`,
-		description: "there was an error"
+	"/two-players": {
+		template: "/templates/two-players.html",
+		title: `Two players game | ${APP_TITLE}`,
+		description: "Local Two players game. Use one keyboard"
 	},
+
+	// "error": {
+	// 	template: 'error',
+	// 	title: `error | ${APP_TITLE}`,
+	// 	description: "there was an error"
+	// },
 
 	"/": {
 		template: "/templates/index.html",
@@ -169,7 +175,7 @@ export const routes: tRoutes = {
 	"/profile/:username": {
 		template: "/templates/profile/profile.html",
 		title: `Password Reset Verify | ${APP_TITLE}`,
-		description: "Password Reset Verify"
+		description: "User's profile page"
 	},
 
 	"/loss-screen": {
