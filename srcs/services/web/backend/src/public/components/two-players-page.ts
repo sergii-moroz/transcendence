@@ -56,7 +56,15 @@ export class TwoPlayerPage extends HTMLElement {
           this.setMatchWinner(matchId, parseInt(winnerIndex));
         }
       }
-    });
+    })
+
+		this.addEventListener('keydown', (e: KeyboardEvent) => {
+			const target = e.target as HTMLElement;
+
+			if (target.matches('input') && e.key === 'Enter') {
+				this.addPlayer()
+			}
+		})
   }
 
   private addPlayer() {
@@ -121,13 +129,15 @@ export class TwoPlayerPage extends HTMLElement {
 
   private render() {
     this.innerHTML = `
-      <div class="tournament-container">
-				<div class="flex justify-center">
+      <div class="tournament-container space-y-6">
+				<div class="tw-card flex justify-center py-6">
 					<div class="player-management">
 						<div class="flex items-center mb-4">
-							<input type="text" placeholder="nickname" class="p-2 border rounded">
-							<button class="add-player ml-2 p-2 bg-blue-500 text-white rounded">Add</button>
+							<input type="text" placeholder="nickname" class="p-2 tw-input">
+							<button class="add-player ml-2 py-2 px-4 bg-blue-500 text-white rounded">Add</button>
 						</div>
+
+						<p class="text-gray-500 text-sm mb-4">*Add 2, 4 or 8 nicknames to create a tournament</p>
 
 						<div class="player-list mb-4">
 							<h3 class="text-lg font-bold">Players (${this.players.length})</h3>
@@ -136,7 +146,7 @@ export class TwoPlayerPage extends HTMLElement {
 							</ul>
 						</div>
 
-						<div class="flex space-x-2 mb-4">
+						<div class="flex space-x-2">
 							<button class="start-tournament p-2 bg-green-500 text-white rounded
 								${!this.isValidPlayerCount() ? 'opacity-50 cursor-not-allowed' : ''}"
 								${!this.isValidPlayerCount() ? 'disabled' : ''}>
@@ -258,7 +268,7 @@ export class TwoPlayerPage extends HTMLElement {
     const player2Trophy = isMatchComplete && match.winner === 1 ? ' 🏆' : '';
 
     return `
-      <div class="tw-card p-2 min-w-[180px] text-center relative shadow-none" style="margin: 12px 0">
+      <div class="tw-card p-4 min-w-[180px] text-center relative shadow-none" style="margin: 12px 0">
         <div class="match-info mb-1 text-xs text-gray-500">
           ${match.id}
         </div>
@@ -269,12 +279,6 @@ export class TwoPlayerPage extends HTMLElement {
               ${player1Trophy}
               ${match.players[0]?.sourceMatch ? `<small class="text-gray-400 text-xs">(${match.players[0].sourceMatch})</small>` : ''}
             </span>
-            ${(canSetWinner && !isFinal) ? `
-              <button class="set-winner p-1 bg-blue-100 text-xs rounded"
-                data-match-id="${match.id}" data-winner-index="0">
-                Winner
-              </button>
-            ` : '<span></span>'}
           </div>
 					${!isFinal ? `
 						<div class="flex justify-between items-center">
@@ -283,17 +287,11 @@ export class TwoPlayerPage extends HTMLElement {
 								${player2Trophy}
 								${match.players[1]?.sourceMatch ? `<small class="text-gray-400 text-xs">(${match.players[1].sourceMatch})</small>` : ''}
 							</span>
-							${(canSetWinner && !isFinal) ? `
-								<button class="set-winner p-1 bg-blue-100 text-xs rounded"
-									data-match-id="${match.id}" data-winner-index="1">
-									Winner
-								</button>
-							` : '<span></span>'}
 						</div>` : ""
 					}
         </div>
 				${!isMatchComplete && !isFinal && match.players.length == 2 ? `
-					<button class="play-game tw-btn w-full"
+					<button class="play-game tw-btn w-full mt-4"
 						data-player1="${match.players[0]?.name}"
 						data-player2="${match.players[1]?.name}"
 						data-match-id="${match.id}"
@@ -362,7 +360,9 @@ export class TwoPlayerPage extends HTMLElement {
 
 		container.innerHTML = `
 			<two-players-game player-1="${player1}" player-2="${player2}" match-id="${matchId}"></two-players-game>
-			<button id="btn-close" class="tw-btn">Close</button>
+			<div class="flex justify-center mt-2">
+				<button id="btn-close" class="tw-btn mx-auto">Close</button>
+			<div>
 		`
 
 		const btnClose = container.querySelector('#btn-close')
