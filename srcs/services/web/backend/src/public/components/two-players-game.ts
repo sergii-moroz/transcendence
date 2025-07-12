@@ -418,5 +418,110 @@ export class TwoPlayersGame extends HTMLElement {
 		// }
 	};
 
+	sendInput = () => {
+		if (!this.state || this.gameOver || !this.scene?.activeCamera) return
 
+		const activeCameraName = this.scene.activeCamera.name
+		switch (activeCameraName) {
+			case "camera-1":
+				if (this.keysPressed['ArrowUp'] && this.state.paddles.player2.y < MAX_Y) {
+					this.state.paddles.player2.y += STEP
+				}
+				if (this.keysPressed['ArrowDown'] && this.state.paddles.player2.y > MIN_Y) {
+					this.state.paddles.player2.y -= STEP
+				}
+				if ((this.keysPressed['W'] || this.keysPressed['w']) && this.state.paddles.player1.y < MAX_Y) {
+					this.state.paddles.player1.y += STEP
+				}
+				if ((this.keysPressed['S'] || this.keysPressed['s']) && this.state.paddles.player1.y > MIN_Y) {
+					this.state.paddles.player1.y -= STEP
+				}
+				break
+			case "camera-2":
+				if (this.keysPressed['ArrowRight'] && this.state.paddles.player2.y < MAX_Y) {
+					this.state.paddles.player2.y += STEP
+				}
+				if (this.keysPressed['ArrowLeft'] && this.state.paddles.player2.y > MIN_Y) {
+					this.state.paddles.player2.y -= STEP
+				}
+				if ((this.keysPressed['D'] || this.keysPressed['d']) && this.state.paddles.player1.y < MAX_Y) {
+					this.state.paddles.player1.y += STEP
+				}
+				if ((this.keysPressed['A'] || this.keysPressed['a']) && this.state.paddles.player1.y > MIN_Y) {
+					this.state.paddles.player1.y -= STEP
+				}
+				break
+			case "camera-3":
+				if (this.keysPressed['ArrowLeft'] && this.state.paddles.player2.y < MAX_Y) {
+					this.state.paddles.player2.y += STEP
+				}
+				if (this.keysPressed['ArrowRight'] && this.state.paddles.player2.y > MIN_Y) {
+					this.state.paddles.player2.y -= STEP
+				}
+				if ((this.keysPressed['A'] || this.keysPressed['a']) && this.state.paddles.player1.y < MAX_Y) {
+					this.state.paddles.player1.y += STEP
+				}
+				if ((this.keysPressed['D'] || this.keysPressed['d']) && this.state.paddles.player1.y > MIN_Y) {
+					this.state.paddles.player1.y -= STEP
+				}
+				break
+		}
+	}
+
+	private cleanup() {
+		this.resizeObserver?.disconnect()
+		this.removePregameScreen()
+
+		if (this.engine) {
+			this.engine.dispose()
+			this.engine = null
+		}
+
+		this.scene?.dispose()
+		this.scene = null
+
+		this.canvas = null
+	}
+
+	private async loadPaddle(scene: Scene):Promise<AbstractMesh> {
+		try {
+			const result: ISceneLoaderAsyncResult = await ImportMeshAsync(
+				"../models/paddle.glb", scene
+			)
+			const mesh = result.meshes[0]
+			return mesh
+		} catch (error) {
+			return MeshBuilder.CreateBox("paddle10", { width: 1, height: 10, depth: 10 }, this.scene )
+		}
+	}
+
+	private async loadField(scene: Scene):Promise<AbstractMesh> {
+		try {
+			const result: ISceneLoaderAsyncResult = await ImportMeshAsync(
+				"../models/field.glb", scene
+			)
+			const mesh = result.meshes[0]
+			return mesh
+		} catch (error) {
+			return MeshBuilder.CreateBox("paddle10", { width: 1, height: 10, depth: 10 }, this.scene )
+		}
+	}
+
+	// Handle Mobile Inputs
+	private handlePointerDown = (e: PointerEvent) => {
+		const x = e.clientX
+		const screenWidth = window.innerWidth
+
+		if (x < screenWidth / 2) {
+			this.keysPressed['ArrowDown'] = true
+		} else {
+			this.keysPressed['ArrowUp'] = true
+		}
+	}
+
+	private handlePointerUp = (e: PointerEvent) => {
+		if (this.gameOver) return
+		this.keysPressed['ArrowUp'] = false
+		this.keysPressed['ArrowDown'] = false
+	}
 }
