@@ -152,5 +152,145 @@ export class TwoPlayerPage extends HTMLElement {
     }
   }
 
+	private drawBracketLines() {
+    const bracket = this.querySelector('#bracket-tree') as HTMLElement;
+    if (!bracket) return;
+
+    // Wait for DOM to update
+    setTimeout(() => {
+        // Remove existing SVG if any
+        const existingSvg = bracket.querySelector('svg');
+        if (existingSvg) {
+            bracket.removeChild(existingSvg);
+        }
+
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("class", "absolute left-0 top-0 pointer-events-none");
+        svg.style.width = bracket.offsetWidth + "px";
+        svg.style.height = bracket.offsetHeight + "px";
+        svg.style.zIndex = "0";
+
+        const roundContainers = Array.from(bracket.querySelectorAll('.round-container'));
+        const matchContainersByRound = roundContainers.map(round =>
+            Array.from(round.querySelectorAll('.match-container'))
+        );
+
+        // For each round except the last, connect matches to next round
+        for (let round = 0; round < matchContainersByRound.length - 1; round++) {
+            const currentMatches = matchContainersByRound[round];
+            const nextMatches = matchContainersByRound[round + 1];
+
+            for (let i = 0; i < nextMatches.length; i++) {
+                // Each next match connects to two previous matches
+                const prev1 = currentMatches[i * 2] as HTMLElement
+                const prev2 = currentMatches[i * 2 + 1] as HTMLElement
+                const target = nextMatches[i] as HTMLElement
+
+                if (prev1 && target) {
+                    this.drawBracketLine(svg, prev1, target, bracket);
+                }
+                if (prev2 && target) {
+                    this.drawBracketLine(svg, prev2, target, bracket);
+                }
+            }
+        }
+
+        bracket.appendChild(svg);
+    }, 50);
+	}
+
+	private drawBracketLine(svg: SVGSVGElement, fromEl: HTMLElement, toEl: HTMLElement, container: HTMLElement) {
+    const fromRect = fromEl.getBoundingClientRect();
+    const toRect = toEl.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+
+    // Start at right center of fromEl, end at left center of toEl
+    const startX = fromRect.right - containerRect.left;
+    const startY = fromRect.top + fromRect.height / 2 - containerRect.top;
+    const endX = toRect.left - containerRect.left;
+    const endY = toRect.top + toRect.height / 2 - containerRect.top;
+
+    // 90-degree turn: horizontal, then vertical
+    const midX = (startX + endX) / 2;
+
+    const points = [
+        [startX, startY],
+        [midX, startY],
+        [midX, endY],
+        [endX, endY]
+    ];
+
+    const polyline = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+    polyline.setAttribute("points", points.map(p => p.join(",")).join(" "));
+    polyline.setAttribute("stroke", "#94a3b8"); // slate-400
+    polyline.setAttribute("stroke-width", "2");
+    polyline.setAttribute("fill", "none");
+    polyline.setAttribute("opacity", "1");
+    svg.appendChild(polyline);
+	}
+
+	private renderMatch(match: Match): string {
+    const isMatchComplete = match.winner !== null;
+    const isFinal = !match.nextMatchId;
+    const canSetWinner = !isMatchComplete && match.players.every(p => p !== null);
+
+    // Determine player classes and trophy emoji
+    const player1Class = (isMatchComplete && match.winner === 0) || (isFinal && match.players[0]) ? 'text-blue-600 font-bold' : '';
+    const player2Class = isMatchComplete && match.winner === 1 ? 'text-blue-600 font-bold' : '';
+    const player1Trophy = (isMatchComplete && match.winner === 0) || (isFinal && match.players[0]) ? ' 🏆' : '';
+    const player2Trophy = isMatchComplete && match.winner === 1 ? ' 🏆' : '';
+
+    return `
+      <div class="tw-card p-2 min-w-[180px] text-center relative shadow-none" style="margin: 12px 0">
+        <div class="match-info mb-1 text-xs text-gray-500">
+          ${match.id}
+        </div>
+        <div class="flex flex-col gap-1">
+          <div class="flex justify-between items-center">
+            <span class="${player1Class}">
+              ${match.players[0] ? match.players[0].name : '???'}
+              ${player1Trophy}
+              ${match.players[0]?.sourceMatch ? `<small class="text-gray-400 text-xs">(${match.players[0].sourceMatch})</small>` : ''}
+            </span>
+            ${(canSetWinner && !isFinal) ? `
+              <button class="set-winner p-1 bg-blue-100 text-xs rounded"
+                data-match-id="${match.id}" data-winner-index="0">
+                Winner
+              </button>
+            ` : '<span></span>'}
+          </div>
+					${!isFinal ? `
+						<div class="flex justify-between items-center">
+							<span class="${player2Class}">
+								${match.players[1] ? match.players[1].name : '???'}
+								${player2Trophy}
+								${match.players[1]?.sourceMatch ? `<small class="text-gray-400 text-xs">(${match.players[1].sourceMatch})</small>` : ''}
+							</span>
+							${(canSetWinner && !isFinal) ? `
+								<button class="set-winner p-1 bg-blue-100 text-xs rounded"
+									data-match-id="${match.id}" data-winner-index="1">
+									Winner
+								</button>
+							` : '<span></span>'}
+						</div>` : ""
+					}
+        </div>
+				${!isMatchComplete && !isFinal && match.players.length == 2 ? `
+					<button class="tw-btn w-full">Play</button>
+				` : ''}
+        ${isMatchComplete && !isFinal ? `
+          <div class="mt-1 text-xs text-gray-500">
+            Advances to ${match.nextMatchId}
+          </div>
+        ` : ''}
+        ${isFinal && isMatchComplete ? `
+          <div class="mt-1 p-1 bg-yellow-100 text-sm font-bold rounded">
+            Winner: ${match.players[match.winner!]?.name || ''}
+          </div>
+        ` : ''}
+      </div>
+    `;
+	}
+
 
 }
