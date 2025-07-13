@@ -145,3 +145,10 @@ curl -u elastic:kibanapass -X POST "http://localhost:9200/_security/user/kib_tes
 
 docker exec -it transcend10-kibana-1 bash
 /init/import_dashboard.sh
+
+
+
+
+polit
+curl -u elastic:kibanapass http://localhost:9200/_ilm/policy/log-retention-policy?pretty
+curl -u elastic:kibanapass http://elasticsearch:9200/_ilm/policy/log-retention-policy?pretty

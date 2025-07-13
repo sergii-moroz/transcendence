@@ -3,13 +3,14 @@
 services:
   # ----------------------- ELK stack -----------------------
   elasticsearch:
+    container_name: elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
     env_file:
       - srcs/services/web/backend/.env
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=true
-      #- ELASTIC_USERNAME=kibana_system_user
+      - ELASTIC_USERNAME=elastic
       - ELASTIC_PASSWORD
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
 
