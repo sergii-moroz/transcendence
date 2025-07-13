@@ -131,4 +131,13 @@ elastic:kibanapass
 kib pass 
 kib_us kib_pass 
 
-curl -u kib_us:kib_pass http://localhost:9200/_security/_authenticate
+curl -u elastic:kibanapass http://localhost:9200/_security/_authenticate
+http://localhost:5601/
+
+
+curl -u elastic:kibanapass -X POST "http://localhost:9200/_security/user/kib_test" -H "Content-Type: application/json" -d '{
+  "password": "kibanapass",
+  "roles": [ "kibana_system" ],
+  "full_name": "Custom Kibana User",
+  "email": "kibana@example.com"
+}'
