@@ -9,7 +9,7 @@
 ```
 ┌─────────────┐  filestream/Beats  ┌───────────┐   bulk HTTP   ┌────────┐
 │ Docker      │ ────────────────▶ │ Filebeat  │ ─────────────▶ │Elastic │
-│ daemon      │                  └───────────┘               │Search │
+│ daemon      │                    └───────────┘               │Search │
 └─────────────┘                         ▲                      └────────┘
                                         │ _cat / API
                                         ▼

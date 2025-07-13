@@ -58,13 +58,13 @@ services:
     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     - ELASTICSEARCH_USERNAME=kibana_system_user
     - ELASTICSEARCH_PASSWORD=kibanapass
-
-
     networks: [transnet]
     ports:
       - "5601:5601"
     volumes:
       - ./srcs/services/observability/kibana/ft_saved.ndjson:/tmp/ft_saved.ndjson:ro
+      - ./srcs/services/observability/kibana/import_dashboard.sh:/init/import_dashboard.sh:ro
+      - ./srcs/services/observability/kibana/ft_dashboard.ndjson:/init/ft_dashboard.ndjson:ro
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
       interval: 30s
@@ -74,11 +74,24 @@ services:
       - -c
       - |
         /usr/local/bin/kibana-docker &
-        sleep 30
+
+        echo "⏳ Waiting for Kibana API..."
+        until curl -s -u kibana_system_user:kibanapass http://localhost:5601/api/status >/dev/null; do
+          sleep 30
+        done
+
+        echo "📁 Importing ft_saved.ndjson..."
         curl -s -X POST -H 'kbn-xsrf: true' \
           http://localhost:5601/api/saved_objects/_import?overwrite=true \
           --form file=@/tmp/ft_saved.ndjson
+
+        echo "📊 Importing dashboard..."
+        chmod +x /init/import_dashboard.sh
+        sleep 10
+        /init/import_dashboard.sh
+
         wait
+
     depends_on:
       - elasticsearch
 

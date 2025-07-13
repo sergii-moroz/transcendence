@@ -141,3 +141,7 @@ curl -u elastic:kibanapass -X POST "http://localhost:9200/_security/user/kib_tes
   "full_name": "Custom Kibana User",
   "email": "kibana@example.com"
 }'
+
+
+docker exec -it transcend10-kibana-1 bash
+/init/import_dashboard.sh
