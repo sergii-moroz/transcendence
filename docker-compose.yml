@@ -4,11 +4,13 @@ services:
   # ----------------------- ELK stack -----------------------
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    env_file:
+      - srcs/services/web/backend/.env
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=true
       #- ELASTIC_USERNAME=kibana_system_user
-      - ELASTIC_PASSWORD=kibanapass
+      - ELASTIC_PASSWORD
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
 
     volumes:
@@ -29,7 +31,7 @@ services:
       - ./srcs/services/observability/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
     environment:
        - ELASTIC_USER=kibana_system_user
-       - ELASTIC_PASSWORD=kibanapass
+       - ELASTIC_PASSWORD
 
     networks: [transnet]
     ports:
@@ -57,7 +59,7 @@ services:
     environment:
     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     - ELASTICSEARCH_USERNAME=kibana_system_user
-    - ELASTICSEARCH_PASSWORD=kibanapass
+    - ELASTICSEARCH_PASSWORD
     networks: [transnet]
     ports:
       - "5601:5601"
@@ -111,9 +113,11 @@ services:
 
   grafana:
     image: grafana/grafana:latest
+    env_file:
+      - srcs/services/web/backend/.env
     environment:
       - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD
     networks: [transnet]
     ports:
       - "3000:3000"

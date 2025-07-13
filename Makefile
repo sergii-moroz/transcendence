@@ -6,6 +6,11 @@ MON_COMPOSE  := ./services/observability/docker-compose.monitoring.yml
 # Reproducible dependencies — lock‑файл бекенда
 LOCK := srcs/services/web/backend/package-lock.json
 
+ENV_SOURCE := srcs/services/web/backend/.env
+ENV_TARGET := .env
+
+
+
 $(LOCK):
 	@echo "🔧  Generating package-lock.json…"
 	cd srcs/services/web/backend && npm install --package-lock-only --ignore-scripts
@@ -17,14 +22,19 @@ $(LOCK):
 all: up
 
 # Build images only (useful in CI)
-build: $(LOCK)
+build: $(LOCK) $(ENV_TARGET)
 	@docker compose -f $(COMPOSE_FILE) build
 #	@docker compose -f $(MON_COMPOSE) build
 
 # Up stack, rebuilding images when Docker detects changes
-up: $(LOCK)
+up: $(LOCK) $(ENV_TARGET)
 	@docker compose -f $(COMPOSE_FILE) up --build -d
 #	@docker compose -f $(MON_COMPOSE) up -d
+
+
+$(ENV_TARGET): $(ENV_SOURCE)
+	@echo "📄 Copying .env to project root..."
+	cp $(ENV_SOURCE) $(ENV_TARGET)
 
 
 down:
@@ -47,9 +57,8 @@ clean: down
 
 # Full clean (incl. custom volumes / host dirs)
 fclean: clean
-	# @docker volume rm mariadb wordpress
-	# @rm -rf /home/$(USER)/data/mariadb/*
-	# @rm -rf /home/$(USER)/data/wordpress/*
+	@rm -f .env
+
 
 # Rebuild everything from scratch
 re: fclean all
