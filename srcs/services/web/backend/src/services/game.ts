@@ -3,7 +3,7 @@ import { db } from '../db/connections.js'
 import { GAME_MODES } from '../public/types/game-history.types.js';
 import { aiOpponent, createAIState } from './aiOpponent.js';
 import { updatePlayerStats } from './stats.services.js';
-import { matchDuration } from '../plugins/metrics.js';  
+import { matchDuration } from '../plugins/metrics.js';
 
 export class Game {
 	players: Map< string, {socket: WebSocket | null, id: string, username: string} >;
@@ -247,30 +247,21 @@ export class Game {
 	}
 
 	private async updateDatabase(winner: {socket: WebSocket | null, id: string, username: string}, loser: {socket: WebSocket | null, id: string, username: string}) {
+		const gameResults = {
+			gameId: this.gameRoomId,
+			gameModeId: this.game_mode,
+			player1Id: parseInt(this.players.get('player1')!.id),
+			player2Id: parseInt(this.players.get('player2')!.id),
+			score1: this.state.scores.player1,
+			score2: this.state.scores.player2,
+			duration: Math.floor((Date.now() - this.gameStartTime) / 1000),
+			techWin: false
+		}
+		matchDuration.observe(gameResults.duration);
+		saveGameResults(gameResults);
 		if(!this.tournamentId) {
-			// db.run(
-			// 	`UPDATE user_stats SET m_wins = m_wins + 1 WHERE user_id = ?`, [winner.id]
-			// );
-			// db.run(
-			// 	`UPDATE user_stats SET m_losses = m_losses + 1 WHERE user_id = ?`, [loser.id]
-			// );
 			await updatePlayerStats(winner.id, loser.id, this.game_mode)
-			const gameResults = {
-				gameId: this.gameRoomId,
-				gameModeId: this.game_mode,
-				player1Id: parseInt(this.players.get('player1')!.id),
-				player2Id: parseInt(this.players.get('player2')!.id),
-				score1: this.state.scores.player1,
-				score2: this.state.scores.player2,
-				duration: Math.floor((Date.now() - this.gameStartTime) / 1000),
-				techWin: false
-			}
-			matchDuration.observe(gameResults.duration);
-			saveGameResults(gameResults)
 		} else {
-			db.run(
-				`UPDATE user_stats SET t_wins = t_wins + 1 WHERE user_id = ?`, [winner.id]
-			);
 			db.run(
 				`UPDATE user_stats SET t_losses = t_losses + 1 WHERE user_id = ?`, [loser.id]
 			);

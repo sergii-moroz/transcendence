@@ -91,6 +91,17 @@ export class Tournament extends HTMLElement {
 			this.renderBracketTree(this.matchups);
 		}
 
+		if (data.type == 'eliminated') {
+			this.disablePlayButton();
+			alert("You were eliminated from this tournament!")
+			Router.navigateTo('/home')
+		}
+
+		if (data.type == 'disablePlayButton') {
+			this.disablePlayButton();
+			document.getElementById('waiting-message')!.textContent = 'Waiting for other players...';
+		}
+
 		if (data.type === 'Error') {
 			console.error(`Tournament: Error: ${data.message}`);
 			if(this.socket && this.socket.readyState === WebSocket.OPEN) {
@@ -112,6 +123,18 @@ export class Tournament extends HTMLElement {
 		playButton.classList.add('hover:text-green-500');
 		playButton.classList.add('hover:bg-transparent');
 		playButton.href = `/game/${data.gameRoomId}`;
+	}
+
+	disablePlayButton = () => {
+		const playButton = this.querySelector('#play-button') as HTMLAnchorElement;
+		if (!playButton) return;
+		playButton.classList.remove('tw-btn');
+		playButton.classList.remove('bg-green-500');
+		playButton.classList.remove('hover:border-green-500');
+		playButton.classList.remove('hover:text-green-500');
+		playButton.classList.remove('hover:bg-transparent');
+		playButton.classList.add('tw-btn-disabled');
+		playButton.href = '';
 	}
 
 	handleClose = () => {
