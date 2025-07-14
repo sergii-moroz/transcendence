@@ -14,7 +14,7 @@ COPY backend/package*.json ./backend/
 
 # 2. Ставим зависимости
 WORKDIR /app/backend
-RUN npm ci
+RUN npm i
 
 # 3. Копируем остальной код
 COPY backend/ .
@@ -43,7 +43,7 @@ WORKDIR /app/backend
 
 # 1. Копируем package-манифесты, ставим ТОЛЬКО prod-зависимости
 COPY backend/package*.json ./
-RUN npm ci --omit=dev
+RUN npm i --omit=dev
 
 # 2. Подтягиваем собранный JS из первого этапа
 COPY --from=builder /app/backend/dist ./dist
@@ -53,7 +53,7 @@ EXPOSE 443
 
 # Health-check для оркестраторов
 HEALTHCHECK --interval=30s --timeout=3s \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:4242/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider https://localhost:443/health || exit 1
 
 # Запуск приложения
 CMD ["node", "dist/index.js"]
