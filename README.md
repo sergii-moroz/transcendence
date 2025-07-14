@@ -95,6 +95,9 @@ curl -s http://localhost:9090/metrics | head -n 20
       http_requests_total
 curl -s "http://localhost:9090/api/v1/query?query=up"
 
+grafana 
+http://localhost:3000/
+
 # log Grafana
 docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml logs -f grafana
 
@@ -120,3 +123,39 @@ docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml ex
 # plagin
 docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml exec grafana \
   grafana-cli plugins ls
+
+
+
+Logstash							
+curl -s "http://localhost:9200/ft-*/_search?size=5&sort=@timestamp:desc&pretty"
+
+Elasticsearch 
+curl -s http://localhost:9200 | jq
+curl -s http://localhost:9200
+
+elast pass
+elastic:kibanapass
+kib pass 
+kib_us kib_pass 
+
+curl -u elastic:kibanapass http://localhost:9200/_security/_authenticate
+http://localhost:5601/
+
+
+curl -u elastic:kibanapass -X POST "http://localhost:9200/_security/user/kib_test" -H "Content-Type: application/json" -d '{
+  "password": "kibanapass",
+  "roles": [ "kibana_system" ],
+  "full_name": "kib test",
+  "email": "kibana@example.com"
+}'
+
+
+docker exec -it transcend10-kibana-1 bash
+/init/import_dashboard.sh
+
+
+
+
+polit
+curl -u elastic:kibanapass http://localhost:9200/_ilm/policy/log-retention-policy?pretty
+curl -u elastic:kibanapass http://elasticsearch:9200/_ilm/policy/log-retention-policy?pretty

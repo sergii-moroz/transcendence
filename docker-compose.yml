@@ -3,26 +3,44 @@
 services:
   # ----------------------- ELK stack -----------------------
   elasticsearch:
+    container_name: elasticsearch
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    env_file:
+      - srcs/services/web/backend/.env
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
+      - ELASTIC_USERNAME=elastic
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
+
     volumes:
       - esdata:/usr/share/elasticsearch/data
     networks: [transnet]
     ports:
       - "9200:9200"
+    healthcheck:
+      test: curl -s http://localhost:9200 || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
 
   logstash:
     image: docker.elastic.co/logstash/logstash:8.13.4
     volumes:
       - ./srcs/services/observability/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+    environment:
+       - ELASTIC_USER=kibana_system_user
+       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+
     networks: [transnet]
     ports:
       - "5044:5044"
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
+
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -40,12 +58,16 @@ services:
   kibana:
     image: docker.elastic.co/kibana/kibana:8.13.4
     environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    - ELASTICSEARCH_USERNAME=kibana_system_user
+    - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
     networks: [transnet]
     ports:
       - "5601:5601"
     volumes:
       - ./srcs/services/observability/kibana/ft_saved.ndjson:/tmp/ft_saved.ndjson:ro
+      - ./srcs/services/observability/kibana/import_dashboard.sh:/init/import_dashboard.sh:ro
+      - ./srcs/services/observability/kibana/ft_dashboard.ndjson:/init/ft_dashboard.ndjson:ro
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status || exit 1"]
       interval: 30s
@@ -55,11 +77,24 @@ services:
       - -c
       - |
         /usr/local/bin/kibana-docker &
-        sleep 30
+
+        echo "⏳ Waiting for Kibana API..."
+        until curl -s -u kibana_system_user:kibanapass http://localhost:5601/api/status >/dev/null; do
+          sleep 30
+        done
+
+        echo "📁 Importing ft_saved.ndjson..."
         curl -s -X POST -H 'kbn-xsrf: true' \
           http://localhost:5601/api/saved_objects/_import?overwrite=true \
           --form file=@/tmp/ft_saved.ndjson
+
+        echo "📊 Importing dashboard..."
+        chmod +x /init/import_dashboard.sh
+        sleep 10
+        /init/import_dashboard.sh
+
         wait
+
     depends_on:
       - elasticsearch
 
@@ -79,6 +114,11 @@ services:
 
   grafana:
     image: grafana/grafana:latest
+    env_file:
+      - srcs/services/web/backend/.env
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD
     networks: [transnet]
     ports:
       - "3000:3000"
@@ -129,7 +169,8 @@ services:
     logging:
       driver: gelf
       options:
-        gelf-address: "udp://127.0.0.1:5044"  # send logs to Logstash GELF input
+        gelf-address: "udp://172.18.0.10:5044"
+
 
 
   k6:
