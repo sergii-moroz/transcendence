@@ -91,6 +91,9 @@ curl -s http://localhost:9090/metrics | head -n 20
       http_requests_total
 curl -s "http://localhost:9090/api/v1/query?query=up"
 
+grafana 
+http://localhost:3000/
+
 # log Grafana
 docker compose -f ./srcs/services/observability/docker-compose.monitoring.yml logs -f grafana
 
