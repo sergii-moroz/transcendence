@@ -2,9 +2,28 @@ import { FastifyServerOptions } from "fastify";
 import "./services/utils.js";
 import { build } from "./app.js";
 import metricsPlugin from './plugins/metrics.js';
+import { fileURLToPath } from "url";
+import path from "path"
+import fs from "fs"
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
-const opts: FastifyServerOptions = { logger: true }
+interface CustomFastifyOptions extends FastifyServerOptions {
+	https?: {
+		key: Buffer,
+		cert: Buffer,
+		allowHTTP1?: boolean
+	}
+}
+
+const httpsOptions = {
+	key: fs.readFileSync(path.join(__dirname, 'ssl/server.key')),
+	cert: fs.readFileSync(path.join(__dirname, 'ssl/server.crt')),
+	allowHTTP1: true
+}
+
+const opts: CustomFastifyOptions = { logger: true, https: httpsOptions }
 
 if (process.stdout.isTTY) {
 	opts.logger = {
@@ -15,9 +34,10 @@ if (process.stdout.isTTY) {
 }
 
 const app = await build(opts)
+
 await app.register(metricsPlugin)
-const port: number = Number(process.env.PORT) || 4242
-const host: string = process.env.HOST || '127.0.0.1'
+const port: number = Number(process.env.PORT) || 443
+const host: string = process.env.HOST || '0.0.0.0'
 
 const start = async () => {
 	try {
