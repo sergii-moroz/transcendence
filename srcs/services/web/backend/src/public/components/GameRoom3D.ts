@@ -72,11 +72,17 @@ export class Game3D extends HTMLElement {
 		window.addEventListener("popstate", this.handleBackHome);
 		document.addEventListener('keydown', this.handleKeyDown);
 		document.addEventListener('keyup', this.handleKeyUp);
-		document.addEventListener('pointerdown', this.handlePointerDown)
-		document.addEventListener('pointerup', this.handlePointerUp)
+		if(this.engine?.hostInformation.isMobile) {
+			document.addEventListener('pointerdown', this.handlePointerDown)
+			document.addEventListener('pointerup', this.handlePointerUp)
+		}
 	}
 
 	disconnectedCallback() {
+		if(this.engine?.hostInformation.isMobile) {
+			document.removeEventListener('pointerdown', this.handlePointerDown)
+			document.removeEventListener('pointerup', this.handlePointerUp)
+		}
 		this.cleanup()
 		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
 			this.socket.close()
@@ -85,8 +91,6 @@ export class Game3D extends HTMLElement {
 		window.removeEventListener("popstate", this.handleBackHome);
 		document.removeEventListener('keydown', this.handleKeyDown);
 		document.removeEventListener('keyup', this.handleKeyUp);
-		document.removeEventListener('pointerdown', this.handlePointerDown)
-		document.removeEventListener('pointerup', this.handlePointerUp)
 	}
 
 	private render() {
@@ -194,19 +198,19 @@ export class Game3D extends HTMLElement {
 
 	private createPregameScreen() {
 		if (!this.canvas) return;
-		
+
 		this.preGameScreen = document.createElement('div');
 		this.preGameScreen.className = `flex flex-col z-10 absolute inset-0 bg-black/50 justify-center items-center text-white text-2xl`;
-		
+
 		const waitingText = document.createElement('div');
 		waitingText.className = 'text-center font-bold';
 		waitingText.id = 'waiting-text';
 		waitingText.textContent = 'Waiting for other player to join...';
-		
+
 		const countdownText = document.createElement('div');
 		countdownText.className = `text-4xl font-bold mt-4 hidden`;
 		countdownText.id = 'countdown-text';
-		
+
 		this.preGameScreen.appendChild(waitingText);
 		this.preGameScreen.appendChild(countdownText);
 		this.canvas.parentElement?.appendChild(this.preGameScreen);
@@ -214,10 +218,10 @@ export class Game3D extends HTMLElement {
 
 	private updateCountdown(count: number | undefined) {
 		if (!this.preGameScreen) return;
-		
+
 		const waitingText = this.preGameScreen.querySelector('#waiting-text') as HTMLElement;
 		const countdownText = this.preGameScreen.querySelector('#countdown-text') as HTMLElement;
-		
+
 		if (waitingText && countdownText && count) {
 			waitingText.textContent = 'Game starts in...';
 			countdownText.style.display = 'block';
