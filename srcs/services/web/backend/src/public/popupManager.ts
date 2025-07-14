@@ -1,4 +1,4 @@
-import { iconHomeTrophy } from "./components/icons/icons.js";
+import { API } from "./api-static.js";
 import { Router } from "./router-static.js";
 
 export interface PopupData {
@@ -14,7 +14,7 @@ class popupHandler {
 	private root: HTMLElement | null = null; 
 	private autoDismiss: NodeJS.Timeout | null = null;
 	init() {
-		console.log('popup Manager initilized')
+		// console.log('popup Manager initilized')
 		this.root = document.getElementById('popup')!;
 		this.root.addEventListener('click', this.clickHandler);
 		// this.addPopup({
@@ -26,7 +26,7 @@ class popupHandler {
 		
 	}
 
-	clickHandler = (e: Event) => {
+	clickHandler = async (e: Event) => {
 		const target = e.target as HTMLElement;
 
 		const closeBtn = target.closest('#close-btn') as HTMLElement | null;
@@ -36,10 +36,17 @@ class popupHandler {
 
 		const joinGameInvite = target.closest('#acceptGameInviteInPopup') as HTMLElement | null;
 		if (joinGameInvite) {
-			const gameID = joinGameInvite.getAttribute('gameRoomId');
-			if (gameID && confirm('are you sure you want to go there now?')) {
-				Router.navigateTo(`/game/${gameID}`);
-				this.dismissPopup()
+			if (confirm('are you sure you want to go there now?')) {
+				const friendName = joinGameInvite.getAttribute('friendName');
+				if (friendName) {
+					const res = await API.acceptGameInvite(friendName);
+					if (res.success) {
+						Router.navigateTo(`/game/${res.gameID}`);
+						this.dismissPopup()
+					}
+					else
+						alert(`game: ${res.gameID} isnt availiable anymore`);
+				}
 			}
 		}
 
@@ -138,13 +145,13 @@ class popupHandler {
 							`,
 					title: 'Game Invite',
 					message: `${data.owner} invited you to play a 1v1`,
-					button: `<button id='acceptGameInviteInPopup' class="action-btn px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-sm rounded-lg transition-colors" gameRoomId=${data.gameRoomId}>
+					button: `<button id='acceptGameInviteInPopup' class="action-btn px-3 py-1.5 bg-purple-500 hover:bg-purple-600 text-white text-sm rounded-lg transition-colors" friendName=${data.owner}>
 								Accept
 							</button>`,
 					defaultDismissTime: 5000
 				}
 			case 'tournamentNextGame':
-				if (!data.opponentName) return null;
+				if (!data.opponentName || !data.gameRoomId) return null;
 				return {
 					color: 'bg-indigo-500',
 					icon: `	<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-white">

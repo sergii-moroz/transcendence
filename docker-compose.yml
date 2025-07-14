@@ -162,9 +162,9 @@ services:
       context: ./srcs/services/web
       dockerfile: Dockerfile
     ports:
-      - "4242:4242"
+      - "443:443"
     env_file:
-      - ./srcs/services/web/backend/.env
+      - ./.env.transcendence
     networks: [transnet]
     logging:
       driver: gelf

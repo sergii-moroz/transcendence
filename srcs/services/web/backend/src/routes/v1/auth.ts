@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyPluginOptions } from "fastify";
 import { loginSchema, logoutSchema, registerSchema } from "../../schemas/auth.js";
 import { authenticate, checkCsrf } from "../../services/authService.js";
-import { handleLogin, handleLogout, handleRefresh, handleRegister } from "../../controllers/auth.controllers.js";
+import { handleLogin, handleLogout, handleRefresh, handleRegister, handleTokenInfo } from "../../controllers/auth.controllers.js";
 import { handlePasswordReset } from "../../controllers/api.controller.js";
 
 export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOptions) => {
@@ -31,6 +31,11 @@ export const authRoutes = async (app: FastifyInstance, opts: FastifyPluginOption
 
 	app.post('/refresh', {
 		handler:	handleRefresh
+	})
+
+	app.post('/tokenInfo', {
+		preHandler: [authenticate, checkCsrf],
+		handler:	handleTokenInfo
 	})
 
 	app.post('/password/reset', {

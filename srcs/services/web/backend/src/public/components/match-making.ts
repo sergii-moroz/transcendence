@@ -18,13 +18,14 @@ export class Matchmaking extends HTMLElement {
 	disconnectedCallback() {
 		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
 			this.socket.close();
-			console.log('Disconnecting from socket, page unload...');
+			console.log('MatchMaking: Disconnecting from socket, page unload...');
 		}
 	}
 
 	handleSocket = async () => {
-		await API.ping()
-		this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/matchmaking`);
+		const res = await API.ping();
+		if (!res.success) return;
+		this.socket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}/ws/matchmaking`);
 
 		this.socket.onopen = this.handleOpen;
 		this.socket.onmessage = this.handleMessage;
@@ -33,7 +34,7 @@ export class Matchmaking extends HTMLElement {
 	}
 
 	handleOpen = () => {
-		console.log('WebSocket connection established.');
+		console.log('MatchMaking: WebSocket connection established.');
 	}
 
 	handleMessage = (event: MessageEvent) => {
@@ -49,8 +50,10 @@ export class Matchmaking extends HTMLElement {
 	handleClose = () => {
 		if (this.socket && this.socket.readyState === WebSocket.OPEN) {
 			this.socket.close();
-			console.log('Disconnecting from socket, page unload...');
+			console.log('MatchMaking: Disconnecting from socket, page unload...');
 		}
+		else
+			console.log('MatchMaking: WebSocket connection closed.');
 	}
 
 	handleError = async (err: Event) => {

@@ -33,10 +33,10 @@ export class Tournament {
 		this.playerSockets = new Map();
 		this.knownPlayers = new Map();
 		this.matchups = new Array();
-		
+
 		this.allConnected = false;
 		this.isRunning = false;
-		
+
 		this.activeGames = 0;
 		this.maxPlayers = maxPlayers || 4;
 	}
@@ -86,7 +86,7 @@ export class Tournament {
 					message: `Matched with opponent, proceed to game room...`
 				}));
 				console.custom('DEBUG', `Tournament: Player ${id} redirected to game room ${redirectToGameId}`);
-			} 
+			}
 
 			const remaining = Array.from(this.knownPlayers.entries()).filter(
 				([_, info]) => !info.eliminated
@@ -178,7 +178,7 @@ export class Tournament {
 
 			this.knownPlayers.set(player1[0], {eliminated: false, name: player1[1], redirectToGameId: game.gameRoomId});
 			this.knownPlayers.set(player2[0], {eliminated: false, name: player2[1], redirectToGameId: game.gameRoomId});
-			
+
 			this.addReplaceMatchup(game, {id: player1[0], username: player1[1], score: 0}, {id: player2[0], username: player2[1], score: 0});
 			this.sendMatchupData();
 			this.informPlayersAboutNewGame(player1, player2, game.gameRoomId);
@@ -207,7 +207,7 @@ export class Tournament {
 					};
 					player.socialSocket?.send(JSON.stringify(message));
 				}
-				
+
 				const message = {
 					type: 'redirectToGame',
 					gameRoomId,
@@ -237,9 +237,11 @@ export class Tournament {
 					for (const player of game.players.values()) {
 						if (player.id !== winnerId) {
 							this.knownPlayers.set(String(player.id), {eliminated: true, name: player.username, redirectToGameId: null}); // eliminated
+							this.playerSockets.get(player.id)?.socket.send(JSON.stringify({type: 'eliminated'}));
 							console.custom('DEBUG', `Eliminated: ${player.id}, knownPlayers: ${JSON.stringify(Array.from(this.knownPlayers.entries()))}`);
 						} else {
 							this.knownPlayers.set(String(player.id), {eliminated: false, name: player.username, redirectToGameId: null}); // not eliminated
+							this.playerSockets.get(player.id)?.socket.send(JSON.stringify({type: 'disablePlayButton'}));
 							winnerSocket = player.socket;
 							winnerName = player.username;
 						}
@@ -259,8 +261,8 @@ export class Tournament {
 		}, 500);
 	}
 
-	addReplaceMatchup(game: Game, 
-		player1: {id: string, username: string, score: number} | null = null, 
+	addReplaceMatchup(game: Game,
+		player1: {id: string, username: string, score: number} | null = null,
 		player2: {id: string, username: string, score: number} | null = null
 	) {
 		if (!player1) {

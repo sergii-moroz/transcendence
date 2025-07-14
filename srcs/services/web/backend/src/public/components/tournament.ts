@@ -46,8 +46,9 @@ export class Tournament extends HTMLElement {
 	}
 
 	handleSocket = async () => {
-		await API.ping()
-		this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/tournament/${this.tournamentId}`);
+		const res = await API.ping()
+		if (!res.success) return;
+		this.socket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}/ws/tournament/${this.tournamentId}`);
 
 		this.socket.onopen = this.handleOpen;
 		this.socket.onmessage = this.handleMessage;
@@ -56,7 +57,7 @@ export class Tournament extends HTMLElement {
 	}
 
 	handleOpen = () => {
-		console.log('WebSocket connection established.');
+		console.log('Tournament: WebSocket connection established.');
 		this.socket!.send(JSON.stringify({ type: 'joinRoom' }));
 	}
 
@@ -90,6 +91,17 @@ export class Tournament extends HTMLElement {
 			this.renderBracketTree(this.matchups);
 		}
 
+		if (data.type == 'eliminated') {
+			this.disablePlayButton();
+			alert("You were eliminated from this tournament!")
+			Router.navigateTo('/home')
+		}
+
+		if (data.type == 'disablePlayButton') {
+			this.disablePlayButton();
+			document.getElementById('waiting-message')!.textContent = 'Waiting for other players...';
+		}
+
 		if (data.type === 'Error') {
 			console.error(`Tournament: Error: ${data.message}`);
 			if(this.socket && this.socket.readyState === WebSocket.OPEN) {
@@ -113,11 +125,24 @@ export class Tournament extends HTMLElement {
 		playButton.href = `/game/${data.gameRoomId}`;
 	}
 
+	disablePlayButton = () => {
+		const playButton = this.querySelector('#play-button') as HTMLAnchorElement;
+		if (!playButton) return;
+		playButton.classList.remove('tw-btn');
+		playButton.classList.remove('bg-green-500');
+		playButton.classList.remove('hover:border-green-500');
+		playButton.classList.remove('hover:text-green-500');
+		playButton.classList.remove('hover:bg-transparent');
+		playButton.classList.add('tw-btn-disabled');
+		playButton.href = '';
+	}
+
 	handleClose = () => {
 		if(this.socket && this.socket.readyState === WebSocket.OPEN) {
 			this.socket.close();
 		}
-		console.log('WebSocket connection closed.');
+		else
+			console.log('Tournament: WebSocket connection closed.');
 	}
 
 	handleError = (event: Event) => {

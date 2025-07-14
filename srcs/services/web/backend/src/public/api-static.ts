@@ -1,10 +1,10 @@
 import { JwtUserPayload } from "../types/user.js"
+import { Router } from "./router-static.js"
+import { socialSocketManager } from "./SocialWebSocket.js";
 import { GAME_MODES } from "./types/game-history.types.js"
 
 export class API {
-	static baseUrl: string
-	static refreshInterval: number
-	static refreshIntervalId: ReturnType<typeof setInterval> | null
+	static refreshTimeout: NodeJS.Timeout | null = null;
 
 	// ==========================================
 	// GET REQUEST
@@ -61,13 +61,10 @@ export class API {
 	 */
 	static async login(username: string, password: string) {
 		const response = await this.post('/api/login', { username, password })
-
-		// if (response.ok && response.status === 202) return response.json()
-
-		// if (response.ok) {
-		// 	this.startAutoRefresh()
-		// }
-		return response.json()
+		// const json = await response.json();
+		// if (json.success)
+		// 	this.scheduleTokenRefresh();
+		return response.json();
 	}
 
 	/**
@@ -96,6 +93,11 @@ export class API {
 	 * @returns A Promise resolving to the parsed JSON response from the server.
 	 */
 	static async logout() {
+		if (this.refreshTimeout) {
+			console.info('delete token refresh Timeout');
+			clearTimeout(this.refreshTimeout);
+			this.refreshTimeout = null;
+		}
 		const response = await this.post('/api/logout', {}, { includeCSRF: true })
 		return response.json()
 	}
@@ -213,6 +215,8 @@ export class API {
 				? await response.clone().json().catch(() => null)
 				: null
 
+			console.error('api call failed: ', error.message)
+
 			if (error?.code === 'FST_MIDDLEWARE_ACCESS_TOKEN_EXPIRED' || error?.code === 'FST_MIDDLEWARE_NO_ACCESS_TOKEN') {
 				const refreshed = await this.refreshToken()
 				if (refreshed) {
@@ -252,6 +256,29 @@ export class API {
 		}
 	}
 
+	static async scheduleTokenRefresh() {
+		if (this.refreshTimeout)
+			clearTimeout(this.refreshTimeout);
+		const postRequestInit = this.postRequestInit({}, {includeCSRF: true})
+
+		try {
+			const res = await fetch('/api/tokenInfo', postRequestInit)
+			if (!res.ok) {
+				throw new Error(`getting token info failed: ${(await res.json()).message}`);
+			}
+
+			const {expireTime} = await res.json();
+			const expiresIn = expireTime * 1000 - Date.now(); 
+			const refreshIn = Math.max(0, expiresIn - 20000); //refresh 20s before it would expire
+
+			console.info(`Schedued token refresh in ${Math.floor(refreshIn / 1000)}s`)
+			this.refreshTimeout = setTimeout(() => this.refreshToken(), refreshIn);
+		} catch (err) {
+			console.error(`error setting token refresh timeout: `, err);
+			// Router.navigateTo('/login');
+		}
+	}
+
 	/**
 	 * Attempts to refresh the access token by making a POST request to the refresh endpoint.
 	 *
@@ -265,10 +292,19 @@ export class API {
 		const postRequestInit = this.postRequestInit({}, {includeCSRF: true})
 
 		try {
+			console.warn('trying to refresh the access token');
 			const res = await fetch('/api/refresh', postRequestInit)
-			return res.ok
+			const json = await res.json();
+			if (!json.success) throw new Error(json.message);
+			console.info('access token got refreshed');
+			setTimeout(() => this.scheduleTokenRefresh(), 100);
+			// this.scheduleTokenRefresh()
+			return res.ok;
 		} catch (err) {
-			return false
+			console.error(`error refreshing token: `, err);
+			Router.navigateTo('/unauthorized');
+			socialSocketManager.disconnect();
+			return false;
 		}
 	}
 

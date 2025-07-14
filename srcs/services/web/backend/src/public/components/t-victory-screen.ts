@@ -18,7 +18,7 @@ export class TournamentVictoryScreen extends HTMLElement {
 
 	render() {
 		this.innerHTML = `
-			<canvas id="modelCanvas" style="width: 100%; height: 40vh; display: block; outline: none;"></canvas>
+			<canvas id="modelCanvas" class="w-full h-[40vh] block outline-none"></canvas>
 		`;
 	}
 
@@ -115,7 +115,7 @@ export class TournamentVictoryScreen extends HTMLElement {
 		} catch (err) {
 			console.error("Failed to load model:", err);
 		}
-		
+
 
 		this.engine.runRenderLoop(() => {
 			if (this.scene) this.scene.render();

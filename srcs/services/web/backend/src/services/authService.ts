@@ -43,7 +43,7 @@ export const validateRegisterInput = (input: RegisterInputProps): RegisterInputP
 }
 
 export const checkCsrf = async (
-	request:FastifyRequest,
+	request:FastifyRequest, 
 	reply: FastifyReply,
 ) => {
 	const csrfCookie = request.cookies.csrf_token;

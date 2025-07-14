@@ -1,14 +1,18 @@
 import { Router } from "./router-static.js";
 import { MessageToServer } from "../types/user.js";
 import { popupManager } from "./popupManager.js";
+import { API } from "./api-static.js";
 
 class SocialSocketHandler {
 	private socket: WebSocket | null = null;
 	private messageCallback: ((data: any) => void) | null = null;
+	private changeFriendStatusCallback: (() => void) | null = null;
 
-	init() {
+	async init() {
 		if (this.socket) return;
-		this.socket = new WebSocket("/ws/chat");
+		const res = await API.ping()
+		if (!res.success) return;
+		this.socket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}/ws/chat`);
 
 		this.socket.onopen = () => {
 			console.log('social Socket got connected');
@@ -20,6 +24,11 @@ class SocialSocketHandler {
 				if (data.type == 'chatMessage' || data.type == 'chatGameInvite') {
 					const callback = this.messageCallback || popupManager.addPopup;
 					callback(data)
+				}
+				else if (data.type == 'friendStatusChanged') {
+					if (this.changeFriendStatusCallback) {
+						this.changeFriendStatusCallback();
+					}
 				}
 				else if (data.type == 'tournamentNextGame' || data.type == 'tournamentInfo') {
 					if (!window.location.pathname.includes('/tournament/'))
@@ -36,11 +45,20 @@ class SocialSocketHandler {
 		}
 
 		this.socket.onclose = async (event: CloseEvent) => {
-			console.log('social Socket closed');
+			// console.log('social Socket closed');
 			this.socket = null;
 			if (event.code === 1000) {
 				await Router.logout();
+				popupManager.addPopup({
+					type: 'error',
+					message: 'User is already signed in!'
+				})
 				console.log('Social Socket: User is already signed in!');
+			}
+			if (API.refreshTimeout) {
+				console.info('delete token refresh Timeout');
+				clearTimeout(API.refreshTimeout);
+				API.refreshTimeout = null;
 			}
 		}
 
@@ -52,9 +70,9 @@ class SocialSocketHandler {
 
 	disconnect() {
 		if (!this.socket) return;
+		console.log('disconnecting social socket')
 		this.socket.close();
 		this.socket = null;
-		console.log('disconnecting social socket')
 	}
 
 	setMessageCallback(func: (data: any) => void) {
@@ -63,6 +81,14 @@ class SocialSocketHandler {
 
 	removeMessageCallback() {
 		this.messageCallback = null;
+	}
+
+	setFriendsStatusChangeCallback(func: () => void) {
+		this.changeFriendStatusCallback = func;
+	}
+
+	removeFriendStatusChangeCallback() {
+		this.changeFriendStatusCallback = null;
 	}
 
 	send(message: MessageToServer) {

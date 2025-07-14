@@ -80,7 +80,7 @@ export const getTopPlayers = async (key: GameMode, limit: number = 3): Promise<P
 				) / (1 + 3.8416 / (user_stats.${winsCol} + user_stats.${lossesCol})) AS wilson_score
 			FROM user_stats
 			JOIN users ON user_stats.user_id = users.id
-			WHERE user_stats.${winsCol} + user_stats.${lossesCol} > 0
+			WHERE user_stats.${winsCol} + user_stats.${lossesCol} > 0 AND users.username != 'ai'
 			ORDER BY wilson_score DESC
 			LIMIT ?
 		`

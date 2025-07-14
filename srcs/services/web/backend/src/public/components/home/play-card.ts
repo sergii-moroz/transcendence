@@ -57,3 +57,4 @@ export class PlayCard extends HTMLElement {
 //	text-purple-400	bg-purple-500	bg-purple-500/10
 //	text-red-400		bg-red-500		bg-red-500/10
 //	text-cyan-400		bg-cyan-500		bg-cyan-500/10
+//	text-pink-400		bg-pink-500		bg-pink-500/10

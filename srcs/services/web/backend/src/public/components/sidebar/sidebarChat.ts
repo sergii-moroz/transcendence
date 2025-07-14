@@ -43,6 +43,9 @@ export class ChatView extends HTMLElement {
 				this.addGameInvitation();
 			}
 		});
+		socialSocketManager.setFriendsStatusChangeCallback(() => {
+			this.loadChat();
+		});
 
 		this.el_back = this.querySelector('#back-to-friends-btn');
 		this.el_backdrop = this.querySelector('#backdrop');
@@ -74,6 +77,7 @@ export class ChatView extends HTMLElement {
 
 	disconnectedCallback() {
 		socialSocketManager.removeMessageCallback();
+		socialSocketManager.removeFriendStatusChangeCallback();
 
 		this.el_back?.removeEventListener('click', this.switchToFriendListSidebar);
 		window.removeEventListener('keydown', this.switchToFriendListSidebar);
@@ -251,7 +255,10 @@ export class ChatView extends HTMLElement {
 			return;
 		}
 		const res = await API.createGameInvite(this.name);
-		if (!res.success) return showErrorState(this.querySelector('#sidebar-chat'));
+		if (!res.success) {
+			console.error(`inviting to game failed: ${res.message}`);
+			return;
+		}
 		Router.navigateTo(`/game/${res.gameID}`);
 	}
 
@@ -267,8 +274,6 @@ export class ChatView extends HTMLElement {
 	}
 
 	block = async () => {
-		if (this.name == "admin")
-			return alert("cant block admin user!");
 		const res = await API.blockFriend(this.name);
 		if (!res.success) {
 			console.error(`blocking friend failed: ${res.message}`);
@@ -290,9 +295,7 @@ export class ChatView extends HTMLElement {
 	}
 
 	unfriend = async () => {
-		if (this.name == "admin")
-			return alert("cant delete admin user from friends!");
-		if (confirm("Are you sure you want to delete sidebar friend?")) {
+		if (confirm("Are you sure you want to delete this friend?")) {
 			const res = await API.deleteFriend(this.name);
 			if (!res.success) {
 				console.error(`deleting friend failed: ${res.message}`);
