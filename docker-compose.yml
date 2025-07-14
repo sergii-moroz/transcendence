@@ -9,9 +9,9 @@ services:
       - srcs/services/web/backend/.env
     environment:
       - discovery.type=single-node
-      - xpack.security.enabled=true
+      - xpack.security.enabled=false
       - ELASTIC_USERNAME=elastic
-      - ELASTIC_PASSWORD
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - ES_JAVA_OPTS=-Xms512m -Xmx512m
 
     volumes:
@@ -32,7 +32,7 @@ services:
       - ./srcs/services/observability/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
     environment:
        - ELASTIC_USER=kibana_system_user
-       - ELASTIC_PASSWORD
+       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
 
     networks: [transnet]
     ports:
@@ -60,7 +60,7 @@ services:
     environment:
     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     - ELASTICSEARCH_USERNAME=kibana_system_user
-    - ELASTICSEARCH_PASSWORD
+    - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
     networks: [transnet]
     ports:
       - "5601:5601"
