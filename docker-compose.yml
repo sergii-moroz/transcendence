@@ -32,9 +32,11 @@ services:
        - ELASTIC_USER=kibana_system_user
        - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
 
-    networks: [transnet]
+    networks:
+      transnet:
+        ipv4_address: 172.18.0.10
     ports:
-      - "5044:5044"
+      - "5044:5044/udp"
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -198,3 +200,6 @@ networks:
   transnet:
     driver: bridge
     name: transnet
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
