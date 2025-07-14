@@ -79,9 +79,6 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
     networks: [transnet]
     ports:
       - "3000:3000"
@@ -127,7 +124,7 @@ services:
     ports:
       - "443:443"
     env_file:
-      - ./srcs/services/web/backend/.env
+      - ./.env.transcendence
     networks: [transnet]
     logging:
       driver: gelf

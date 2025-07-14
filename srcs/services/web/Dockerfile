@@ -48,9 +48,6 @@ RUN npm ci --omit=dev
 # 2. Подтягиваем собранный JS из первого этапа
 COPY --from=builder /app/backend/dist ./dist
 
-# 3. (опц.) передаём переменные окружения и другие нужные файлы
-COPY backend/.env .
-
 # Сервис слушает порт 4242
 EXPOSE 443
 
