@@ -58,6 +58,7 @@ services:
     environment:
     - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     - ELASTICSEARCH_USERNAME=kibana_system_user
+    - SERVER_PUBLICBASEURL=https://localhost
     - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
     networks: [transnet]
     ports:
@@ -163,7 +164,7 @@ services:
     logging:
       driver: gelf
       options:
-        gelf-address: "udp://localhost:5044"
+        gelf-address: "udp://172.18.0.10:5044"
 
 
 
