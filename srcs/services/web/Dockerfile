@@ -4,7 +4,7 @@
 FROM node:23-alpine AS builder
 
 # Базовые утилиты для сборки нативных зависимостей
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 make g++ openssl
 
 # Рабочая директория всего проекта
 WORKDIR /app
@@ -22,6 +22,16 @@ COPY backend/ .
 # 4. Сборка TypeScript → JavaScript
 RUN npm run build
 
+RUN mkdir -p /app/backend/dist/ssl
+RUN openssl req \
+	-x509 \
+	-nodes \
+	-days 365 \
+	-newkey rsa:4096 \
+	-out /app/backend/dist/ssl/server.crt \
+	-keyout /app/backend/dist/ssl/server.key \
+	-subj "/C=DE/ST=IDF/L=Heilbronn/O=42/OU=42/CN=smoroz.42.fr/UID=smoroz"
+
 
 ###########################################################
 # Stage 2 — production                                     #
@@ -38,11 +48,8 @@ RUN npm ci --omit=dev
 # 2. Подтягиваем собранный JS из первого этапа
 COPY --from=builder /app/backend/dist ./dist
 
-# 3. (опц.) передаём переменные окружения и другие нужные файлы
-COPY backend/.env .
-
 # Сервис слушает порт 4242
-EXPOSE 4242
+EXPOSE 443
 
 # Health-check для оркестраторов
 HEALTHCHECK --interval=30s --timeout=3s \

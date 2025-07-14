@@ -55,19 +55,21 @@ export const handleLogin = async (
 		return reply
 			.setCookie('token', accessToken, {
 				httpOnly: true,
-				secure: false, // set to true in production with HTTPS // process.env.NODE_ENV === 'production'
+				secure: true, // set to true in production with HTTPS // process.env.NODE_ENV === 'production'
 				sameSite: 'strict',
 				path: '/',
 				maxAge: TOKEN_EXPIRATION_TIME
 			})
 			.setCookie('refreshToken', refreshToken, {
 				httpOnly: true,
+				secure: true, // set to true in production with HTTPS // process.env.NODE_ENV === 'production'
 				sameSite: 'strict',
 				path: '/',
 				maxAge: 60 * 60 * 24 * 7 // 7 days
 			})
 			.setCookie('csrf_token', csrfToken, {
 				httpOnly: false,
+				secure: true, // set to true in production with HTTPS // process.env.NODE_ENV === 'production'
 				sameSite: 'strict',
 				path: '/',
 				maxAge: TOKEN_EXPIRATION_TIME
@@ -106,19 +108,21 @@ export const handleRegister = async (
 		return reply
 			.setCookie('token', accessToken, {
 				httpOnly: true,
-				secure: false, // set to true in production with HTTPS
+				secure: true, // set to true in production with HTTPS // process.env.NODE_ENV === 'production'
 				sameSite: 'strict',
 				path: '/',
 				maxAge: TOKEN_EXPIRATION_TIME
 			})
 			.setCookie('refreshToken', refreshToken, {
 				httpOnly: true,
+				secure: true, // set to true in production with HTTPS
 				sameSite: 'strict',
 				path: '/',
 				maxAge: 60 * 60 * 24 * 7 // 7 days
 			})
 			.setCookie('csrf_token', csrfToken, {
 				httpOnly: false,
+				secure: true, // set to true in production with HTTPS
 				sameSite: 'strict',
 				path: '/',
 				maxAge: TOKEN_EXPIRATION_TIME
@@ -145,12 +149,14 @@ export const handleRefresh = async (
 		reply
 			.setCookie('token', accessToken, {
 				httpOnly: true,
+				secure: true, // set to true in production with HTTPS
 				sameSite: 'strict',
 				path: '/',
 				maxAge: TOKEN_EXPIRATION_TIME
 			})
 			.setCookie('csrf_token', csrfToken, {
 				httpOnly: false,
+				secure: true, // set to true in production with HTTPS
 				sameSite: 'strict',
 				path: '/',
 				maxAge: TOKEN_EXPIRATION_TIME

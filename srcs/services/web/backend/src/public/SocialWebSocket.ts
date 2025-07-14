@@ -12,7 +12,7 @@ class SocialSocketHandler {
 		if (this.socket) return;
 		const res = await API.ping()
 		if (!res.success) return;
-		this.socket = new WebSocket("/ws/chat");
+		this.socket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}/ws/chat`);
 
 		this.socket.onopen = () => {
 			console.log('social Socket got connected');

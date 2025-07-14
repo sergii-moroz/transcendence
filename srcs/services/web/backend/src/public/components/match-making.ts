@@ -25,7 +25,7 @@ export class Matchmaking extends HTMLElement {
 	handleSocket = async () => {
 		const res = await API.ping();
 		if (!res.success) return;
-		this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/matchmaking`);
+		this.socket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}/ws/matchmaking`);
 
 		this.socket.onopen = this.handleOpen;
 		this.socket.onmessage = this.handleMessage;
