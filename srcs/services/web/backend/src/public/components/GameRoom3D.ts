@@ -327,7 +327,7 @@ export class Game3D extends HTMLElement {
 	handleSocket = async () => {
 		const res = await API.ping()
 		if (!res.success) return;
-		this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/game/${this.gameRoomId}`);
+		this.socket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}/ws/game/${this.gameRoomId}`);
 
 		this.socket.onopen = () => {
 			console.log('Game: WebSocket connection established.');

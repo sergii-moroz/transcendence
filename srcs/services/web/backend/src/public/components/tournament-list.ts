@@ -44,7 +44,7 @@ export class TournamentList extends HTMLElement {
 	handleSocket = async () => {
 		const res = await API.ping()
 		if (!res.success) return;
-		this.socket = new WebSocket(`ws://${window.location.hostname}:${window.location.port}/ws/tournament-list`);
+		this.socket = new WebSocket(`wss://${window.location.hostname}:${window.location.port}/ws/tournament-list`);
 
 		this.socket.onopen = () => {
 			console.log('TournamentLobby: WebSocket connection established.');
