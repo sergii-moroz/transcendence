@@ -113,9 +113,6 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD
     networks: [transnet]
     ports:
       - "3000:3000"
@@ -155,6 +152,12 @@ services:
   ft_transcendence:
     container_name: ft_transcendence
     image: ft_transcendence
+    environment:
+    - HOST=0.0.0.0
+    - PORT=443
+    - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+    - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+    - JWT_2FA_ACCESS_SECRET=${JWT_2FA_ACCESS_SECRET}
     build:
       context: ./srcs/services/web
       dockerfile: Dockerfile
