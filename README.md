@@ -9,7 +9,7 @@ npm install
 
 ### ⚙️ Setup environment variables
 
-Copy the sample file and set your secrets:
+Run the environment generator script:
 ```bash
 bash env_gen.sh
 ```
