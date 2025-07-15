@@ -134,7 +134,10 @@ elastic:kibanapass
 kib pass 
 kib_us kib_pass 
 
-curl -u elastic:kibanapass http://localhost:9200/_security/_authenticate
+curl -u elastic:kibanapass http://localhost:9200/
+
+
+kibana
 http://localhost:5601/
 
 
@@ -155,3 +158,54 @@ docker exec -it transcend10-kibana-1 bash
 polit
 curl -u elastic:kibanapass http://localhost:9200/_ilm/policy/log-retention-policy?pretty
 curl -u elastic:kibanapass http://elasticsearch:9200/_ilm/policy/log-retention-policy?pretty
+
+
+◦ Deploy Elasticsearch 
+	curl http://localhost:9200
+◦ Configure Logstash to collect, 
+
+docker ps
+docker ps | grep logstash
+docker logs vt1-logstash-1 --tail 20
+docker exec -it vt1-logstash-1 cat /usr/share/logstash/pipeline/logstash.conf
+
+
+◦ Set up Kibana for visualizing
+
+http://localhost:5601/
+
+◦ Define data retention and archiving policies
+curl -u elastic:kabinapass http://localhost:9200/_ilm/policy/log-retention-policy?pretty
+
+◦ Implement security measures to protect log 
+cat .env | grep ELASTIC_PASSWORD
+
+
+Deploy Prometheus as the monitoring and alerting toolkit to collect metrics
+and monitor the health and performance of various system components.
+docker ps | grep prometheus
+http://localhost:9090
+
+
+◦ Configure data exporters and integrations to capture metrics from different
+services, databases, and infrastructure components.
+
+◦ Create custom dashboards and visualizations using Grafana to provide realtime insights into system metrics and performance.
+http://localhost:3000/
+◦ Set up alerting rules in Prometheus to proactively detect and respond to
+critical issues and anomalies.
+http://localhost:9090/alerts
+
+docker stop node_exporter
+
+
+
+◦ Ensure proper data retention and storage strategies for historical metrics data.
+
+http://localhost:9090/status
+
+◦ Implement secure authentication and access control 
+
+
+docker volume ls
+docker volume ls -q | grep 'sr' | xargs docker volume rm

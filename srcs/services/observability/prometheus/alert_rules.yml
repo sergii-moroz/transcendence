@@ -1,0 +1,20 @@
+groups:
+  - name: system_alerts
+    rules:
+      - alert: HighCPUUsage
+        expr: avg(rate(node_cpu_seconds_total{mode!="idle"}[1m])) > 0.4
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: " High CPU"
+          description: "CPU is above 70% on {{ $labels.instance }}"
+
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance unavailable"
+          description: "Instance {{ $labels.instance }} unavailable more then 1 min"
