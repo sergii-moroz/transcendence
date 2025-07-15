@@ -9,20 +9,16 @@ npm install
 
 ### ⚙️ Setup environment variables
 
-Copy the sample file and set your secrets:
+Run the environment generator script:
 ```bash
-cd srcs/services/web/backend/
-cp .env.sample .env
+bash env_gen.sh
 ```
-Edit `.env` and set the following variables to a secure, 32-character long random string:
+Edit `.env` and set the following variables to secure 32-character-long random strings:
 
 ```
-JWT_ACCESS_SECRET=supersecret-key-supersecret-key!
 JWT_ACCESS_SECRET=thirty_two_characters_long_string
 JWT_REFRESH_SECRET=refresh-secret
 JWT_2FA_ACCESS_SECRET=two-2fa-access-key-two-2fa-access-key
-HOST=0.0.0.0
-PORT=4242
 ```
 
 ### 🔧 Build the project
