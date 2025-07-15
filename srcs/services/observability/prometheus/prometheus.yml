@@ -1,6 +1,9 @@
 global:
   scrape_interval: 15s
 
+rule_files:
+  - /etc/prometheus/alert_rules.yml
+
 scrape_configs:
   # ─ Prometheus
   - job_name: 'prometheus'
@@ -26,3 +29,5 @@ scrape_configs:
       - targets: ['ft_transcendence:443']
     tls_config:
       insecure_skip_verify: true
+
+
