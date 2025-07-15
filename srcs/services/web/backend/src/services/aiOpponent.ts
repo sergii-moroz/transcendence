@@ -75,7 +75,7 @@ class AIBallPredictor {
 	static calculateOptimalPaddleY(
 		prediction: PredictionResult, 
 		currentPaddleY: number,
-		difficulty: 'easy' | 'medium' | 'hard' = 'medium'
+		difficulty: 'easy' | 'medium' | 'hard' | 'expert' = 'medium'
 	): number {
 		if (!prediction.willHit) {
 			return currentPaddleY; // Don't move if ball won't hit
@@ -83,21 +83,32 @@ class AIBallPredictor {
 
 		// Add some error based on difficulty
 		let errorMargin = 0;
+		let reactionDelay = 0;
 		switch (difficulty) {
 			case 'easy':
-				errorMargin = 30;
+				errorMargin = 40;
+				reactionDelay = 0.8; // Slower reaction
 				break;
 			case 'medium':
-				errorMargin = 15;
+				errorMargin = 20;
+				reactionDelay = 0.6;
 				break;
 			case 'hard':
-				errorMargin = 5;
+				errorMargin = 10;
+				reactionDelay = 0.4;
+				break;
+			case 'expert':
+				errorMargin = 3;
+				reactionDelay = 0.1; // Almost instant reaction
 				break;
 		}
 
 		// Add random error to make AI less perfect
 		const randomError = (Math.random() - 0.5) * errorMargin;
-		const targetY = prediction.predictedY + randomError;
+		
+		// Apply reaction delay - AI doesn't react immediately to ball direction changes
+		const delayedTarget = prediction.predictedY + (Math.random() < reactionDelay ? randomError : 0);
+		const targetY = delayedTarget;
 
 		// Clamp to paddle movement bounds
 		const MIN_Y = -150 + 30;
@@ -114,8 +125,15 @@ export function createAIState(): AIState {
 	};
 }
 
-export function aiOpponent(paddle: any, frameCounter: number, ball: any, aiState: AIState) {
-	const AI_SPEED = 3; // Reduced speed for smoother movement
+export function aiOpponent(paddle: any, frameCounter: number, ball: any, aiState: AIState, difficulty: 'easy' | 'medium' | 'hard' | 'expert' = 'medium') {
+	const AI_SPEED_MAP = {
+		easy: 2,    // Slower movement
+		medium: 3,  // Standard movement
+		hard: 4,    // Faster movement
+		expert: 5   // Very fast movement
+	};
+	
+	const AI_SPEED = AI_SPEED_MAP[difficulty];
 	const PREDICTION_UPDATE_INTERVAL = 62; // Update prediction every 62 frames (roughly 1 second at 60fps)
 
 	const MIN_Y = -150 + 30;
@@ -127,7 +145,7 @@ export function aiOpponent(paddle: any, frameCounter: number, ball: any, aiState
 		aiState.aiTargetY = AIBallPredictor.calculateOptimalPaddleY(
 			prediction,
 			paddle.y,
-			'medium' // Adjust difficulty as needed
+			difficulty // Use dynamic difficulty
 		);
 		aiState.lastPredictionUpdate = frameCounter;
 	}

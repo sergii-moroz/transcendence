@@ -24,13 +24,14 @@ export class Game {
 	game_mode: GAME_MODES = GAME_MODES.Multiplayer
 	gameStartTime: number = 0
 	private aiState: any = null; // Store AI state per game instance
+	private aiDifficulty: 'easy' | 'medium' | 'hard' | 'expert' = 'medium'; // Dynamic AI difficulty
 
 	constructor(tournamentId: string | null = null, game_mode: GAME_MODES = GAME_MODES.Multiplayer) {
 		this.tournamentId = tournamentId;
 		this.players = new Map();
 		this.standardBallSpeed = 4;
 		this.state = {
-			ball: { x: 0, y: 0, dx: 4, dy: 4 },
+			ball: { x: 0, y: 0, dx: this.standardBallSpeed, dy: this.standardBallSpeed },
 			paddles: {
 				player1: { y: 0 },
 				player2: { y: 0 }
@@ -64,6 +65,8 @@ export class Game {
 			if (this.game_mode === GAME_MODES.Singleplayer) {
 				this.players.set('player2', {socket: null, id: '1', username: 'AI'});
 				console.custom('INFO', `${this.gameRoomId}: AI opponent joined`);
+				// Calculate AI difficulty based on player's win rate
+				this.setAIDifficultyForPlayer(id);
 				// this.startLoop();
 				this.startCountdown();
 			}
@@ -147,7 +150,7 @@ export class Game {
 			this.state.ball.y += this.state.ball.dy;
 
 			if (this.game_mode === GAME_MODES.Singleplayer) {
-				aiOpponent(this.state.paddles.player2, frameCounter, this.state.ball, this.aiState);
+				aiOpponent(this.state.paddles.player2, frameCounter, this.state.ball, this.aiState, this.aiDifficulty);
 			}
 
 			// Ball collision with paddles (simplified)
@@ -292,6 +295,83 @@ export class Game {
 				this.state.paddles.player2.y += STEP;
 			}
 		}
+	}
+
+	/**
+	 * Set AI difficulty based on player's historical performance
+	 */
+	private async setAIDifficultyForPlayer(playerId: string) {
+		try {
+			const winRate = await getPlayerAIWinRate(playerId);
+			this.aiDifficulty = calculateAIDifficulty(winRate);
+			console.custom('INFO', `${this.gameRoomId}: AI difficulty set to ${this.aiDifficulty} for player ${playerId} (win rate: ${(winRate * 100).toFixed(1)}%)`);
+			
+			// Send difficulty info to player
+			const player = this.players.get('player1');
+			if (player?.socket) {
+				player.socket.send(JSON.stringify({
+					type: 'aiDifficulty',
+					difficulty: this.aiDifficulty,
+					winRate: Math.round(winRate * 100)
+				}));
+			}
+		} catch (error) {
+			console.error('Error setting AI difficulty:', error);
+			this.aiDifficulty = 'medium'; // Fallback to medium
+		}
+	}
+}
+
+/**
+ * Calculate player's win rate against AI to determine dynamic difficulty
+ */
+async function getPlayerAIWinRate(playerId: string): Promise<number> {
+	return new Promise((resolve, reject) => {
+		// Get games where player played against AI (player2 = 1 means AI)
+		const query = `
+			SELECT 
+				COUNT(*) as total_games,
+				SUM(CASE 
+					WHEN (player1 = ? AND score1 > score2) OR (player2 = ? AND score2 > score1) 
+					THEN 1 ELSE 0 
+				END) as wins
+			FROM games 
+			WHERE game_mode_id = ? 
+			AND (player1 = ? OR player2 = ?)
+			AND (player1 = 1 OR player2 = 1)
+		`;
+		
+		db.get(query, [playerId, playerId, GAME_MODES.Singleplayer, playerId, playerId], (err, row: any) => {
+			if (err) {
+				console.error('Error getting AI win rate:', err);
+				resolve(0.5); // Default to 50% if error
+				return;
+			}
+			
+			if (!row || row.total_games === 0) {
+				resolve(0.5); // Default to 50% for new players
+				return;
+			}
+			
+			const winRate = row.wins / row.total_games;
+			console.custom('INFO', `Player ${playerId} AI win rate: ${winRate.toFixed(2)} (${row.wins}/${row.total_games})`);
+			resolve(winRate);
+		});
+	});
+}
+
+/**
+ * Calculate dynamic AI difficulty based on player's win rate
+ */
+function calculateAIDifficulty(winRate: number): 'easy' | 'medium' | 'hard' | 'expert' {
+	if (winRate < 0.3) {
+		return 'easy';    // Player struggling - make AI easier
+	} else if (winRate < 0.5) {
+		return 'medium';  // Balanced
+	} else if (winRate < 0.7) {
+		return 'hard';    // Player doing well - increase challenge
+	} else {
+		return 'expert';  // Player dominating - maximum challenge
 	}
 }
 
